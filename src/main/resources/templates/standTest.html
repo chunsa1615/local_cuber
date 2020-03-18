@@ -1,0 +1,169 @@
+
+<!DOCTYPE html>
+<!--[if lt IE 8]> <html class="lt-ie10 lt-ie9 lt-ie8" lang="ko"> <![endif]-->
+<!--[if IE 8]>    <html class="lt-ie10 lt-ie9" lang="ko"> <![endif]-->
+<!--[if IE 9]>    <html class="lt-ie10" lang="ko"> <![endif]-->
+<!--[if gt IE 9]><!--> <html lang="ko"> <!--<![endif]-->
+<head>
+	<!-- Head -->
+	<!--  <%@ include file="../common/defaultHeaderImport.jsp" %>  -->
+	<!-- //Head -->	
+</head>
+<body>
+	<div id="wrap">
+		<!-- 헤더영역 --> 
+		<!--  <%@ include file="../common/commonHeader.jsp" %>  -->
+		<!-- //헤더영역 -->
+
+		<!-- 컨텐츠 영역 -->
+		<section id="container">		
+			<!-- lnb -->
+			<!-- <%@ include file="../common/commonLnbCompany.jsp" %>  -->
+			<!-- //lnb -->
+
+			<div id="contents">
+				<h2 id="pageTit" class="page_tit">법인정보</h2>
+				
+				<div class="cont_in">
+					<table class="table2">
+						<colgroup>
+							<col style="width:150px" />
+							
+							<col style="width:150px" />
+							
+						</colgroup>
+						<tbody>
+							<tr>
+								<th scope="row">스탠드번호</th>
+								<td>
+									<input type="text" class="input w200" id="corp_cd" />
+								</td>
+							</tr>
+
+						</tbody>
+					</table>
+					<div class="t_right mt20">
+						<p>
+							<OBJECT ID="Pay" NAME="PAY" CLASSID="CLSID:B57247C5-A1EB-4D04-9669-C1B4A8BE982C" width="200" height="20"></OBJECT>
+						</p>					
+						<input type="text" class="input w200" id="com" />
+						<button class="button btn_gray h100 w100" id="stand_Conn">연결</button>
+						<button class="button btn_gray h100 w100" id="stand_On">불켜기</button>
+						<button class="button btn_green h100 w100" id="stand_Off">불끄기</button>
+						<button class="button btn_red h100 w100" id="stand_Lock_On">락설정</button>
+						<button class="button btn_black h100 w100" id="stand_Lock_Off">락해제</button>																		
+					</div>
+					<hr/>
+					
+					<div class="grid_wrap">
+						<div class="left">
+							<!-- 테이블 -->
+							<table id="jqGrid"></table>
+							<div id="jqGridPager"></div>
+						</div>
+						<div class="right">
+						<form id="ajaxForm">
+							<table class="table tbl_left">
+								<caption>테이블 제목</caption>
+								<colgroup>
+									<col style="width:15%;" />
+									<col style="width:35%;" />
+									<col style="width:15%;" />
+									<col style="width:35%;" />
+								</colgroup>
+								<tbody>
+
+
+								</tbody>
+							</table>
+						</form>
+						</div>
+					</div>
+				</div>
+			</div>
+
+		</section>
+
+	</div>
+
+
+
+
+<script type="text/javascript">
+
+
+//불켜기
+$("#stand_Conn").on("click", function() {
+	jQuery.ajax({
+	    method : "GET",
+	    url : "/e/connStand?com=" + $('#com').val(),
+	    		//url : "/e/connStand",
+	    //contentType: "application/json; charset=UTF-8",
+        //data : JSON.stringify($("#com").val()),
+        //dataType : "JSON" ,
+	    success : function() {	           
+	    	//console.log(data);
+			alert('연결성공');
+	    	
+	    },
+	    error : function(e) {	           
+	    	alert('연결실패');
+	    }
+	});
+});
+
+
+
+
+	//불켜기
+	$("#stand_On").on("click", function() {
+		jQuery.ajax({
+		    method : "GET",
+		    url : "/e/connStand?com=" + $('#com').val(),
+		    		//url : "/e/connStand",
+		    //contentType: "application/json; charset=UTF-8",
+	        //data : JSON.stringify($("#com").val()),
+	        //dataType : "JSON" ,
+		    success : function() {	           
+		    	//console.log(data);
+				alert('연결성공');
+		    	
+		    },
+		    error : function(e) {	           
+		    	alert('연결실패');
+		    }
+		});
+	});
+	
+	
+	//불끄기
+	$("#stand_Off").on("click", function() {
+
+		
+	});	
+	
+	//락설정
+	$("#stand_Lock_On").on("click", function() {
+		var pay = document.getElementById("Pay");
+
+	});
+	
+	
+	//락해제
+	$("#stand_Lock_Off").on("click", function() {
+
+	});
+	
+
+	
+</script>
+
+
+
+
+
+
+</body>
+</html>
+
+

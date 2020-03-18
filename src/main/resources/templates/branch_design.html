@@ -1,0 +1,1755 @@
+<div class="container-fluid" id="branch-design-app">
+    <div class="row">
+        <div class="col-sm-12 col-xs-12">
+            <ul class="nav nav-tabs" role="tablist" style="margin-bottom: 1rem;">
+                <li class="nav-item">
+                    <a class="nav-link active" data-toggle="tab" href="#design" role="tab">배치도</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-toggle="tab" href="#table" role="tab">열람실/좌석</a>
+                </li>
+            </ul>
+
+            <div class="tab-content">
+                <div class="tab-pane active" id="design" role="tabpanel">
+                    <section>
+                        <div class="row">
+                            <div class="col-md-6 col-sm-12 col-xs-12">
+                                <button type="button" class="btn btn-outline-primary" id="btn-form-new-multiple-room">열람실 여러개 추가</button>
+                                <button type="button" class="btn btn-outline-primary" id="btn-form-new-multiple-desk">좌석 여러개 추가</button>
+                            </div>
+                            <div class="col-md-6 col-sm-12 col-xs-12 text-xs-right">
+                                <button type="button" class="btn btn-outline-primary" id="btn-save-branch-design">배치도 저장</button>
+                            </div>
+                        </div>
+                    </section>
+                    <section class="branch-layout" id="branch-design-list"></section>
+                </div>
+                <div class="tab-pane" id="table" role="tabpanel">
+                    <section>
+                        <div class="row">
+                            <div class="col-lg-6 col-md-12 col-sm-12 col-xs-12">
+                                <div class="row">
+                                    <div class="col-sm-12 col-xs-12">
+                                        <button type="button" class="btn btn-outline-primary" id="btn-form-new-room">열람실 추가</button>
+                                    </div>
+                                </div>
+                                <table class="table">
+                                    <colgroup>
+                                        <col width="10%" />
+                                        <col width="20%" />
+                                        <col width="25%" />
+                                        <col width="30%" />
+                                        <col width="15%" />
+                                    </colgroup>
+                                    <thead class="thead-inverse">
+                                        <tr>
+                                            <th>#</th>
+                                            <th>열람실명</th>
+                                            <th>열람실 유형</th>
+                                            <th>메모</th>
+                                            <th>-</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="branch-room-table"></tbody>                          
+                                </table>
+                            </div>
+                            <div class="col-lg-6 col-xs-12 col-sm-12 col-xs-12">
+                                <div class="row">
+                                    <div class="col-sm-12 col-xs-12">
+                                        <button type="button" class="btn btn-outline-primary" id="btn-form-new-desk">좌석 추가</button>
+                                    </div>
+                                </div>
+                                <table class="table">
+                                    <colgroup>
+                                        <col width="10%" />
+                                        <col width="20%" />                                        
+                                        <col width="20%" />
+                                        <col width="30%" />
+                                        <col width="20%" />
+                                    </colgroup>
+                                    <thead class="thead-inverse">
+                                        <tr>
+                                            <th>#</th>
+                                            <th>좌석명</th>
+                                            <th>좌석유형</th>
+                                            <th>수용인원</th>
+                                            <th>메모</th>
+                                            <th>-</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="branch-desk-table"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="modal fade" id="modal-new-room-form" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title"></h4>
+                </div>
+                <div class="modal-body">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="btn-save-new-room">추가</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modal-new-multiple-room-form" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title"></h4>
+                </div>
+                <div class="modal-body">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="btn-save-new-multiple-room">추가</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modal-room-form" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title"></h4>
+                </div>
+                <div class="modal-body">
+                </div>
+                <div class="modal-footer">
+                    <div class="pull-xs-left">
+                        <button type="button" class="btn btn-danger" id="btn-delete-room">삭제</button>
+                    </div>
+
+                    <button type="button" class="btn btn-primary" id="btn-save-room">수정</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modal-new-desk-form" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title"></h4>
+                </div>
+                <div class="modal-body">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="btn-save-new-desk">추가</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modal-new-multiple-desk-form" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title"></h4>
+                </div>
+                <div class="modal-body">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="btn-save-new-multiple-desk">추가</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modal-desk-form" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title"></h4>
+                </div>
+                <div class="modal-body">
+                </div>
+                <div class="modal-footer">
+                    <div class="pull-xs-left">
+                        <button type="button" class="btn btn-danger" id="btn-delete-desk">삭제</button>
+                    </div>
+
+                    <button type="button" class="btn btn-primary" id="btn-save-desk">수정</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<script th:inline="javascript" type="text/template" id="room-table-template">
+    <td>
+        <label class="index">{{- index + 1 }}</label>
+    </td>
+    <td>
+        <label class="view">{{- name }}</label>
+    </td>
+    <td>
+        <label class="view">{{- roomTypeText }}</label>
+    </td>
+	<td>
+		<p class ="view small">{{- roomNote}}</p>
+	</td>
+    <td>
+        <button type="button" class="btn btn-outline-primary btn-form-room">수정</button>
+    </td>
+</script>
+<script th:inline="javascript" type="text/template" id="desk-table-template">
+    <td>
+        <label class="index">{{- index + 1 }}</label>
+    </td>
+    <td>
+        <label class="view">{{- name }}</label>
+    </td>
+	<td>
+		<label class="view">{{- deskTypeText }}</label>
+	</td>
+	<td>
+		<label class="view">{{- deskMax }}</label>
+	</td>
+	<td>
+		<p class ="view small">{{- deskNote}}</p>
+	</td>
+    <td>
+        <button type="button" class="btn btn-outline-primary btn-form-desk">수정</button>
+    </td>
+</script>
+<script th:inline="javascript" type="text/template" id="room-form-template"><![CDATA[ -->
+<form>
+    <div class="form-group">
+        <label class="form-control-label">열람실명</label>
+        <input type="text" class="form-control" name="name" value="{{- name }}" />
+    </div>
+    <div class="form-group">
+        <label class="form-control-label">열람실 유형</label>
+        <select class="chosen" name="roomType" id="roomType">
+			{{ _.each(roomTypes, function(roomType){ }}<option value="{{- roomType.value }}" {{ if(roomType == roomType.value) { }}selected="selected"{{ } }}>{{- roomType.text }}</option>{{ }); }}
+   		</select>
+    </div>
+    <div class="form-group">
+    	<label class="form-control-label">메모</label>
+		<textarea class="form-control" name="roomNote">{{- roomNote }}</textarea>
+    </div>
+</form>
+<!-- ]]> --></script>
+<script th:inline="javascript" type="text/template" id="multiple-room-form-template"><![CDATA[ -->
+<form>
+    <div class="form-group">
+        <label class="form-control-label">열람실 유형</label>
+        <select class="chosen" name="roomType" id="roomType">
+			{{ _.each(roomTypes, function(roomType){ }}<option value="{{- roomType.value }}" {{ if(roomType == roomType.value) { }}selected="selected"{{ } }}>{{- roomType.text }}</option>{{ }); }}
+   		</select>
+    </div>
+    <div class="form-group">
+        <label class="form-control-label">열람실번호</label>
+        <div class="input-group">
+            <input type="number" class="form-control" name="startRoomNo" value="1" min="1" />
+            <div class="input-group-addon">부터</div>
+            <input type="number" class="form-control" name="endRoomNo" value="10" min="1" />
+            <div class="input-group-addon">까지</div>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="form-control-label">열람실명</label>
+        <input type="text" class="form-control" name="name" value="열람실" />
+    </div>
+</form>
+<!-- ]]> --></script>
+<script th:inline="javascript" type="text/template" id="desk-form-template"><![CDATA[ -->
+<form>
+    <div class="form-group">
+        <label class="form-control-label" for="roomId">열람실</label>
+        <select class="form-control chosen" id="roomId" name="roomId">
+            <option value="">선택</option>
+            {{ _.each(rooms, function(room){ }}<option value="{{- room.roomId }}" {{ if(roomId == room.roomId) { }}selected="selected"{{ } }}>{{- room.name }}</option>{{ }); }}
+        </select>
+    </div>
+    <div class="form-group">
+    	<label class="form-control-label">좌석 유형</label>
+        <select class="chosen" name="deskType" id="deskType">
+			{{ _.each(deskTypes, function(deskType){ }}<option value="{{- deskType.value }}" {{ if(deskType == deskType.value) { }}selected="selected"{{ } }}>{{- deskType.text }}</option>{{ }); }}
+   		</select>
+    </div>
+    <div class="form-group">
+        <label class="form-control-label">좌석명</label>
+        <input type="text" class="form-control" name="name" value="{{- name }}" />
+    </div>
+    <div class="form-group">
+		<label class="form-control-label" >최대 수용인원</label>	
+			<div class="input-group">
+				<input type="number" class="form-control text-xs-right" name="deskMax" value="{{- deskMax }}" min="1" step="1" />
+				<div class="input-group-addon">명</div>
+			</div>
+	</div>
+    <div class="form-group">
+		<label class="form-control-label">메모</label>
+		<textarea class="form-control" name="deskNote">{{- deskNote }}</textarea>
+	</div>
+    
+</form>
+<!-- ]]> --></script>
+<script th:inline="javascript" type="text/template" id="multiple-desk-form-template"><![CDATA[ -->
+<form>
+    <div class="form-group">
+        <label class="form-control-label" for="roomId">열람실</label>
+        <select class="form-control chosen" id="roomId" name="roomId">
+            <option value="">선택</option>
+            {{ _.each(rooms, function(room){ }}<option value="{{- room.roomId }}" {{ if(roomId == room.roomId) { }}selected="selected"{{ } }}>{{- room.name }}</option>{{ }); }}
+        </select>
+    </div>
+    <div class="form-group">
+	 	<label class="form-control-label">좌석 유형</label>
+    	<select class="chosen" name="deskType" id="deskType">
+			{{ _.each(deskTypes, function(deskType){ }}<option value="{{- deskType.value }}" {{ if(deskType == deskType.value) { }}selected="selected"{{ } }}>{{- deskType.text }}</option>{{ }); }}
+		</select>
+    </div>
+    <div class="form-group">
+        <label class="form-control-label">좌석번호</label>
+        <div class="input-group">
+            <input type="number" class="form-control" name="startDeskNo" value="1" min="1" />
+            <div class="input-group-addon">부터</div>
+            <input type="number" class="form-control" name="endDeskNo" value="10" min="1" />
+            <div class="input-group-addon">까지</div>
+    </div>
+    </div>
+    <div class="form-group">
+        <label class="form-control-label">좌석명</label>
+        <input type="text" class="form-control" name="name" value="{{- name }}" />
+    </div>
+</form>
+<!-- ]]> --></script>
+<script th:inline="javascript" type="text/template" id="room-design-template">
+    <div class="names"><span>{{- name }}</span></div>
+</script>
+
+<script th:inline="javascript" type="text/template" id="desk-design-template"><![CDATA[ -->
+    <div class="status-bar"></div>
+    <div class="names"><span>{{- name }}</span></div>
+<!-- ]]> --></script>
+
+<!--
+    http://backbonejs.org/
+    http://interactjs.io/docs
+-->
+<script th:inline="javascript">// <![CDATA[
+$(function(){
+
+    var gridSpacing = 10;
+
+    // Room
+    var RoomListCollectionForDesign = RoomListCollection.extend({
+        save: function (options) {
+            //console.info('save rooms');
+
+            _.each(this.models, function(model){
+                if(model.get('designChanged')) {
+                    model.save(null, {wait: true, success: function(model, response) {
+                        model.set('designChanged', true);
+
+                    }});
+
+                }
+
+            });
+            //this.sync('update', this, options);
+        },
+        selectedRoom: null,
+        select: function(model) {
+            this.selectedRoom = model;
+
+        },
+    });
+
+    var RoomList = new RoomListCollectionForDesign;
+    RoomList.branchId = [[${branch.branchId}]];
+
+    var deskTypes = [[${deskTypes}]];
+	var roomTypes = [[${roomTypes}]];
+    
+    var RoomDesignView = Backbone.View.extend({
+        tagName: 'div',
+        className: 'box room',
+        template: _.template($('#room-design-template').html()),
+        events: {
+            'dragend': 'dragend',
+            'resizeend': 'resizeend',
+            'drop': 'drop',
+            'mousedown' : 'mousedown',
+            'mouseup' : 'mouseup',
+        },
+        initialize: function() {
+            this.listenTo(this.model, 'change', this.change);
+            this.listenTo(this.model, 'destroy', this.remove);
+
+        },
+        change: function(e) {
+            var keys = _.keys(this.model.changedAttributes());
+            //console.info(keys);
+
+            if (_.without(keys, 'w', 'h', 't', 'l', 'designChanged').length == 0){
+                //console.info('do not render');
+                this.model.set('designChanged', true);
+
+            } else {
+                //console.info('render');
+                this.render();
+
+            }
+
+        },
+        render: function() {
+            //console.info('room designview render');
+
+            var data = this.model.toJSON();
+
+            this.el.id = data.roomId;
+
+            this.$el.html(this.template(data));
+
+            var status = 'empty';
+
+            this.$el
+            .attr('data-status', status)
+            .css({
+                top: data.t, left: data.l, height: data.h, width: data.w,
+                position: 'absolute',
+            });
+
+            interact(this.el)
+            .draggable({
+                snap: {
+                    targets: [
+                        interact.createSnapGrid({ x: gridSpacing, y: gridSpacing, })
+                    ],
+                    relativePoints: [
+                        { x: 0, y: 0, }
+                    ],
+                    offset: { x: 0, y: 0, },
+                },
+                inertia: true,
+                restrict: {
+                  restriction: '#branch-design-list',
+                  elementRect: { top: 0, left: 0, bottom: 1, right: 1 },
+                  endOnly: true
+                },
+                autoScroll: true,
+            })
+            .on('dragmove', function (event) {
+                var target = event.target,
+                    x = (parseFloat(target.getAttribute('data-x')) || 0),
+                    y = (parseFloat(target.getAttribute('data-y')) || 0);
+
+                x += event.dx;
+                y += event.dy;
+
+                target.style.webkitTransform = target.style.transform = 'translate(' + x + 'px, ' + y + 'px)';
+
+                target.setAttribute('data-x', x);
+                target.setAttribute('data-y', y);
+
+            })
+            .on('dragend', function (event) {
+                $(event.target).trigger('dragend');
+
+            })
+            .resizable({
+                edges: { left: true, right: true, bottom: true, top: true },
+                invert: 'reposition',
+                snap: {
+                    targets: [
+                        interact.createSnapGrid({ x: gridSpacing, y: gridSpacing })
+                    ],
+                    relativePoints: [
+                        { x: 0, y: 0, }
+                    ],
+                    offset: { x: 0, y: 0, },
+                },
+            })
+            .on('resizemove', function (event) {
+                var target = event.target,
+                    x = (parseFloat(target.getAttribute('data-x')) || 0),
+                    y = (parseFloat(target.getAttribute('data-y')) || 0);
+
+                target.style.width  = gridSpacing * Math.floor(event.rect.width / gridSpacing) + 'px';
+                target.style.height = gridSpacing * Math.floor(event.rect.height / gridSpacing) + 'px';
+
+                x += event.deltaRect.left;
+                y += event.deltaRect.top;
+
+                target.style.webkitTransform = target.style.transform = 'translate(' + x + 'px,' + y + 'px)';
+
+                target.setAttribute('data-x', x);
+                target.setAttribute('data-y', y);
+
+            })
+            .on('resizeend', function (event) {
+                $(event.target).trigger('resizeend');
+
+            })
+            .dropzone({
+                accept: '.desk',
+                overlap: 0.75,
+            })
+            .on('drop', function (event) {
+                $(event.target).trigger('drop', event.relatedTarget);
+
+            });
+
+
+            return this;
+
+        },
+        dragend: function(event) {            
+        	event.stopPropagation();
+
+            var target = event.target,
+                x = (parseFloat(target.getAttribute('data-x')) || 0),
+                y = (parseFloat(target.getAttribute('data-y')) || 0);
+
+            var t = parseFloat(target.style.top) + y,
+                l = parseFloat(target.style.left) + x;
+
+            this.model.set({t: t, l: l});
+
+        },
+        resizeend: function(event) {
+            event.stopPropagation();
+
+            var target = event.target;
+
+            var w = parseFloat(target.style.width),
+                h = parseFloat(target.style.height);
+
+            this.model.set({w: w, h: h});
+
+        },
+        drop: function(event, draggableElement) {       	
+        	var $draggableElement = $(draggableElement),
+                $dropzoneElement = $(event.target);
+
+            var t = $draggableElement.offset().top - $dropzoneElement.offset().top - parseFloat($dropzoneElement.css('border-top-width'));
+            var l = $draggableElement.offset().left - $dropzoneElement.offset().left - parseFloat($dropzoneElement.css('border-left-width'));
+
+            draggableElement.style.webkitTransform = draggableElement.style.transform = 'translate(0px, 0px)';
+
+            draggableElement.setAttribute('data-x', 0);
+            draggableElement.setAttribute('data-y', 0);
+
+            $draggableElement.appendTo($dropzoneElement)
+            .css({
+                top: t,
+                left: l,
+            });
+
+            $draggableElement.trigger('dropped', [this.model.get('roomId'), t, l]);
+
+        },
+        mousedown: function() {
+        	if (flagDesk == 0) {
+	        	this.$el.css({
+	            	'background-color' : '#29e'
+	            });
+        	}
+        },
+        mouseup: function() {
+            this.$el.css({
+            	'background-color' : '#282828'
+            });
+        },        
+    });
+    
+	var flagRoom;
+	
+    var RoomTableView = Backbone.View.extend({
+        tagName: 'tr',
+        className: '',
+        template: _.template($('#room-table-template').html()),
+        events: {
+            'click': 'select',
+            'dblclick' : 'formRoom',
+            'click .btn-form-room' : 'formRoom',
+        },
+        initialize: function() {
+            this.listenTo(this.model, 'change', this.change);
+            this.listenTo(this.model, 'destroy', this.remove);
+
+        },
+        select: function(e) {
+        	if(flagRoom != $(e.target).text()) {
+	            this.$el
+	                .addClass('table-active');
+	
+	            this.$el.siblings()
+	                .removeClass('table-active');
+	
+	            RoomList.select(this.model);	
+	            DeskList.filterByRoomId(this.model.get('roomId'));
+	            
+	            flagRoom = $(e.target).text();
+        	}
+        	else {
+	            this.$el
+                .removeClass('table-active');
+	            
+	            DeskList.filterByRoomId();
+	            
+	            flagRoom = "";
+        	}
+            //$('#new-desk-form').removeClass('invisible');
+            //$('#btn-form-new-desk').removeClass('invisible');
+
+        },
+        change: function(e) {
+            var keys = _.keys(this.model.changedAttributes());
+            if (_.without(keys, 'w', 'h', 't', 'l', 'designChanged').length == 0){
+
+            } else {
+                this.render();
+
+            }
+
+        },
+        render: function() {
+            //console.info('room tableview render');
+
+            var data = this.model.toJSON();
+            data['index'] = RoomList.indexOf(this.model);
+            var roomTypeText = _.findWhere(roomTypes, {value: Number(data.roomType)});
+            data['roomTypeText'] = roomTypeText ? roomTypeText.text : '';
+
+            this.$el.html(this.template(data));
+
+            return this;
+
+        },
+        formRoom: function(e) {
+            RoomList.trigger('formRoom', this.model);
+        },
+    });
+
+
+    // Desk
+
+    var DeskListCollectionForDesign = DeskListCollection.extend({
+        save: function (options) {
+            //console.info('save desks');
+
+            _.each(this.models, function(model){
+                //console.info(model.toJSON());
+
+                //if (model.hasChanged()) {
+                if (model.get('designChanged')) {
+                    model.save(null, {wait: true, success: function(model, response) {
+                        model.set('designChanged', true);
+
+                    }});
+
+                }
+
+            });
+
+            //this.sync('update', this, options);
+        },
+        filterByRoomId: function(roomId) {
+            _.each(this.models, function(model){
+                model.trigger('filterByRoomId', roomId);
+
+            });
+
+        },
+    });
+
+    var flagDesk = 0;
+    var DeskList = new DeskListCollectionForDesign;
+    DeskList.branchId = [[${branch.branchId}]];
+
+    var DeskDesignView = Backbone.View.extend({
+        tagName: 'div',
+        className: 'box desk',
+        template: _.template($('#desk-design-template').html()),
+        events: {
+            'dragend': 'dragend',
+            'resizeend': 'resizeend',
+            'dropped': 'dropped',
+            'mousedown' : 'mousedown',
+            'mouseup' : 'mouseup',
+        },
+        initialize: function() {
+            this.listenTo(this.model, 'change', this.change);
+            this.listenTo(this.model, 'destroy', this.remove);
+
+        },
+        change: function() {
+            var keys = _.keys(this.model.changedAttributes());
+            //console.info(keys);			            
+            
+            //this.set({background: 'red'});
+            if (_.without(keys, 'w', 'h', 't', 'l', 'roomId', 'designChanged').length == 0){
+                //console.info('do not render');
+                this.model.set('designChanged', true);
+
+            } else {
+                //console.info('render');
+                this.render();
+
+            }
+
+        },
+        render: function() {
+            //console.info('desk designview render');
+
+            var data = this.model.toJSON();
+
+            this.el.id = data.deskId;
+
+            this.$el.html(this.template(data));
+
+            this.$el
+            .css({
+                top: data.t, left: data.l, height: data.h, width: data.w,
+                position: 'absolute', 
+            });
+            
+            interact(this.el)
+            .draggable({
+                snap: {
+                    targets: [
+                        interact.createSnapGrid({ x: gridSpacing, y: gridSpacing, })
+                    ],
+                    relativePoints: [
+                        { x: 0, y: 0, }
+                    ],
+                    offset: { x: 0, y: 0, },
+                },
+                inertia: true,
+                restrict: {
+                  restriction: '#branch-design-list',
+                  elementRect: { top: 0, left: 0, bottom: 1, right: 1 },
+                  endOnly: true,
+                },
+                autoScroll: true,
+            })
+            .on('dragmove', function (event) {
+                var target = event.target,
+                    x = (parseFloat(target.getAttribute('data-x')) || 0),
+                    y = (parseFloat(target.getAttribute('data-y')) || 0);
+
+                x += event.dx;
+                y += event.dy;
+
+                target.style.webkitTransform = target.style.transform = 'translate(' + x + 'px, ' + y + 'px)';
+
+                target.setAttribute('data-x', x);
+                target.setAttribute('data-y', y);
+
+            })
+            .on('dragend', function (event) {
+                $(event.target).trigger('dragend');
+
+            })
+            .resizable({
+                edges: { left: true, right: true, bottom: true, top: true },
+                invert: 'reposition',
+                snap: {
+                    targets: [
+                        interact.createSnapGrid({ x: gridSpacing, y: gridSpacing, })
+                    ],
+                    relativePoints: [
+                        { x: 0, y: 0, }
+                    ],
+                    offset: { x: 0, y: 0, },
+                },
+            })
+            .on('resizemove', function (event) {
+                var target = event.target,
+                    x = (parseFloat(target.getAttribute('data-x')) || 0),
+                    y = (parseFloat(target.getAttribute('data-y')) || 0);
+
+                target.style.width  = gridSpacing * Math.floor(event.rect.width / gridSpacing) + 'px';
+                target.style.height = gridSpacing * Math.floor(event.rect.height / gridSpacing) + 'px';
+
+                x += event.deltaRect.left;
+                y += event.deltaRect.top;
+
+                target.style.webkitTransform = target.style.transform = 'translate(' + x + 'px,' + y + 'px)';
+
+                target.setAttribute('data-x', x);
+                target.setAttribute('data-y', y);
+
+            })
+            .on('resizeend', function (event) {
+                $(event.target).trigger('resizeend');
+
+            });
+
+            return this;
+
+        },     
+        dragend: function(event) {
+
+        	event.stopPropagation();
+
+            var target = event.target,
+                x = (parseFloat(target.getAttribute('data-x')) || 0),
+                y = (parseFloat(target.getAttribute('data-y')) || 0);
+
+            var t = parseFloat(target.style.top) + y,
+                l = parseFloat(target.style.left) + x;
+
+            this.model.set({t: t, l: l});
+
+            this.el.style.webkitTransform = this.el.style.transform = 'translate(0px, 0px)';
+
+            this.el.setAttribute('data-x', 0);
+            this.el.setAttribute('data-y', 0);
+
+            this.$el.css({
+                top: t,
+                left: l,
+            });
+
+        },
+        resizeend: function(event) {
+            event.stopPropagation();
+
+            var target = event.target;
+
+            var w = parseFloat(target.style.width),
+                h = parseFloat(target.style.height);
+
+            this.model.set({w: w, h: h});
+
+        },
+        dropped: function(e, roomId, top, left) {        	
+        	this.model.set({t: top, l: left, roomId: roomId});
+
+        },
+        mousedown: function(e) {
+        	flagDesk = 1;
+        	this.$el.css({
+            	'background-color' : '#29e'
+            });
+        	
+        },
+        mouseup: function() {
+        	flagDesk = 0;
+        	this.$el.css({
+        		'background-color' : '#434343'
+            });
+        },
+
+        
+    });
+
+    var DeskTableView = Backbone.View.extend({
+        tagName: 'tr',
+        className: '',
+        template: _.template($('#desk-table-template').html()),
+        events: {
+            'dblclick' : 'formDesk',
+            'click .btn-form-desk' : 'formDesk',
+
+        },
+        initialize: function() {
+            this.listenTo(this.model, 'change', this.change);
+            this.listenTo(this.model, 'destroy', this.remove);
+            this.listenTo(this.model, 'filterByRoomId', this.filterByRoomId);
+        },
+        change: function() {
+            var keys = _.keys(this.model.changedAttributes());
+            if (_.contains(keys, 'roomId')) {
+                DeskList.filterByRoomId(this.model.previous('roomId'));
+
+            } else if (_.without(keys, 'w', 'h', 't', 'l', 'designChanged').length == 0){
+
+            } else {
+                this.render();
+
+            }
+
+        },
+        render: function() {
+            //console.info('desk tableview render');
+
+            var data = this.model.toJSON();
+            data['index'] = DeskList.indexOf(this.model);            
+            var deskTypeText = _.findWhere(deskTypes, {value: Number(data.deskType)});
+            data['deskTypeText'] = deskTypeText ? deskTypeText.text : '';
+            
+            this.$el.html(this.template(data));
+
+            this.filterByRoomId(this.roomIdForFilter);
+
+            return this;
+
+        },
+        roomIdForFilter: null,
+        filterByRoomId: function(roomId) {
+            this.roomIdForFilter = roomId;
+
+
+            if (!roomId || this.model.get('roomId') == roomId) {
+                this.$el.show();
+
+            } else {
+                this.$el.hide();
+
+            }
+
+        },
+        formDesk: function(e) {
+            DeskList.trigger('formDesk', this.model);
+        },
+    });
+
+
+    // Branch Room/Desk Table/Design
+
+    var BranchDesignView = Backbone.View.extend({
+        el: $('#branch-design-app'),
+        templateForRoomForm: _.template($('#room-form-template').html()),
+        templateForMultipleRoomForm: _.template($('#multiple-room-form-template').html()),
+        templateForDeskForm: _.template($('#desk-form-template').html()),
+        templateForMultipleDeskForm: _.template($('#multiple-desk-form-template').html()),
+        currentRoomModel: null,
+        currentDeskModel: null,
+        events: {
+            'click #btn-form-new-room': 'formNewRoom',
+            'click #btn-form-new-multiple-room': 'formNewMultipleRoom',
+            'click #btn-save-new-room': 'saveNewRoom',
+            'click #btn-save-new-multiple-room': 'saveNewMultipleRoom',
+            'click #btn-save-room': 'saveRoom',
+            'click #btn-delete-room': 'deleteRoom',
+            'click #btn-form-new-desk': 'formNewDesk',
+            'click #btn-form-new-multiple-desk': 'formNewMultipleDesk',
+            'click #btn-save-new-desk': 'saveNewDesk',
+            'click #btn-save-new-multiple-desk': 'saveNewMultipleDesk',
+            'click #btn-save-desk': 'saveDesk',
+            'click #btn-delete-desk': 'deleteDesk',
+            'click #btn-save-branch-design': 'save',
+            
+        },
+        initialize: function() {
+            this.listenTo(RoomList, 'add', this.addOneRoom);
+            this.listenTo(RoomList, 'formRoom', this.formRoom);
+
+            this.listenTo(DeskList, 'add', this.addOneDesk);
+            this.listenTo(DeskList, 'formDesk', this.formDesk);
+
+            RoomList.fetch({
+                success: function () {
+                    DeskList.fetch();
+                },
+            });
+
+
+        },
+        render: function() {
+
+        },
+        addOneRoom: function(room) {
+        	// Table
+            var tableView = new RoomTableView({ model: room });
+            if(tableView) {
+            	this.$('#branch-room-table').append(tableView.render().el);
+            }
+            // Design
+            var designView = new RoomDesignView({ model: room });
+            if(designView) {
+	            this.$('#branch-design-list').append(designView.render().el);
+            }
+        },
+        addOneDesk: function(desk) {
+            // Table
+            var tableView = new DeskTableView({ model: desk });
+            if (tableView) {
+	            tableView.roomIdForFilter = desk.get('roomId')
+	            this.$('#branch-desk-table').append(tableView.render().el);
+            }
+            // Design
+            var designView = new DeskDesignView({ model: desk });
+
+            if(desk.get('roomId')){
+	            var $room = this.$('#' + desk.get('roomId') + '.room');
+	            if ($room.length == 0) {
+	                this.$('#branch-design-list').append(designView.render().el);
+	
+	            } else {
+	                $room.append(designView.render().el);
+	
+	            }
+            }
+
+
+        },
+        formNewRoom: function(e) {
+            var data = new RoomModel().toJSON();
+            
+            data['roomTypes'] = roomTypes;
+            
+            var bodyHtml = this.templateForRoomForm(data);
+            var $modal = $(this);
+            
+            $('#modal-new-room-form')
+            .one('show.bs.modal', function(e) {
+                var $modal = $(this);
+                $modal.find('.modal-title').html('새 열람실');
+                $modal.find('.modal-body').html(bodyHtml);
+
+            })
+            .one('shown.bs.modal', function(e) {
+                var $modal = $(this);
+                $modal.find('[name=name]').focus();
+
+                $modal.find('form').on('submit', function(e) {
+                    e.preventDefault();
+
+                });
+                
+                $modal.find('.chosen').chosen({width: "100%"});
+                
+                // 열람실 명 조회                
+				var roomNames = [];
+				getRoomsName([[${branch.branchId}]], function(data){                	
+					roomNames = data;
+                });
+                
+                $.validator.addMethod(
+                    	'chkDuplicationRoomName', function (value, element) {					
+    		                var temp;
+    		          		$.each(roomNames, function (index, item){
+    		                		if(value == roomNames[index]) {
+    		                			temp = roomNames[index];
+    		                			return false;
+    		                		}
+    		                		else {
+    		                			return true;
+    		                		}
+    		
+    		                	});
+    		          			return (value != temp);
+    		            		
+    		                	}, '열람실명이 이미 등록 되어있습니다'
+                );
+				
+                $modal.find('form').validate({
+            		rules: {
+            			name: {
+            				required: true,
+            				chkDuplicationRoomName: true,
+            			}
+            			
+            		},
+            		messages: {
+            			name: {
+            				required: "열람실명을 입력하세요",
+            			}
+
+            		}
+            		
+            	});
+
+            })
+            .modal();
+            
+        },
+        formNewMultipleRoom: function(e) {
+            var data = new RoomModel().toJSON();
+            data['roomTypes'] = roomTypes;
+            var bodyHtml = this.templateForMultipleRoomForm(data);
+
+            $('#modal-new-multiple-room-form')
+            .one('show.bs.modal', function(e) {
+                var $modal = $(this);
+                $modal.find('.modal-title').html('새 열람실 여러개 추가');
+                $modal.find('.modal-body').html(bodyHtml);
+
+            })
+            .one('shown.bs.modal', function(e) {
+                var $modal = $(this);
+                $modal.find('[name=name]').focus();
+
+                $modal.find('form').on('submit', function(e) {
+                    e.preventDefault();
+
+                });
+
+                $modal.find('.chosen').chosen({width: "100%"});
+            })
+            .modal();
+        },
+        saveNewRoom: function(e) {
+            var values = {};
+            var $modal = $('#modal-new-room-form');
+			var $form = $modal.find('form');
+			
+			if($form.valid()) {
+	            var $inputs = $modal.find(':input');
+	            $inputs.each(function(i, element) {
+	                var $element = $(element);
+	                if ($element.is('[type=radio]')) {
+	                    if ($element.is(':checked')) {
+	                        var name = $element.attr('name');
+	                        if (!(_.isEmpty(name))) {
+	                            values[name] = $element.val();
+	
+	                        }
+	                    }
+	
+	                } else {
+	                    var name = $element.attr('name');
+	                    if (!(_.isEmpty(name))) {
+	                        values[name] = $element.val();
+	
+	                    }
+	
+	                }
+	
+	            });
+	
+	            RoomList.create(values, {
+	                wait : true,
+	                success : function (model, response) {
+	                    model.set('roomId', response.roomId);
+	                    model.set('insertDt', response.insertDt);
+	                    model.set('updateDt', response.updateDt);
+	
+	                    $modal.modal('hide');
+	
+	                }
+	
+	            });
+	            
+			}
+
+        },
+        saveNewMultipleRoom: function(e) {
+            var values = {};
+            var $modal = $('#modal-new-multiple-room-form');
+
+            var startRoomNo = Number($modal.find('[name=startRoomNo]').val());
+            var endRoomNo = Number($modal.find('[name=endRoomNo]').val());
+            var roomName = $modal.find('[name=name]').val();
+
+            if(startRoomNo <= endRoomNo && (endRoomNo - startRoomNo) <= 10) {
+                for(var i = startRoomNo; i <= endRoomNo; i++) {
+                    var name = i + roomName;
+
+                    if(RoomList.findWhere({ name: name })) {
+                        //console.info('duplicated room name');
+
+                    } else {                    	                    	
+                        RoomList.create({
+                            name: name,
+                            t: 30 + (i*5),
+                            l: 30 + (i*5),
+                        },
+                        {
+                            wait : true,
+                            success : function (model, response) {
+                                model.set('roomId', response.roomId);
+                                model.set('insertDt', response.insertDt);
+                                model.set('updateDt', response.updateDt);
+
+                            }
+
+                        });
+
+                    }
+
+                }
+
+                $modal.modal('hide');
+
+            }
+
+
+
+        },
+        formRoom: function(model) {
+            this.currentRoomModel = model;
+
+            var data = model.toJSON();
+            data['roomTypes'] = roomTypes;
+            
+            var titleHtml = data.name;
+            var bodyHtml = this.templateForRoomForm(data);            
+
+            $('#modal-room-form')
+            .one('show.bs.modal', function(e) {
+                var $modal = $(this);
+                $modal.find('.modal-title').html(titleHtml);
+                $modal.find('.modal-body').html(bodyHtml);
+
+                $modal.find('form').on('submit', function(e) {
+                    e.preventDefault();
+
+                });
+                
+                $modal.find('.chosen').chosen({width: "100%"});
+                
+                
+                // 열람실 명 조회                
+				var roomNames = [];
+				var currentData = model.toJSON();
+				getRoomsName([[${branch.branchId}]], function(data){
+						roomNames = data;
+                });
+				
+                $.validator.addMethod(
+                    	'chkDuplicationRoomName', function (value, element) {					
+    		                var temp;
+    		          		$.each(roomNames, function (index, item){    		          			
+    		          			
+								if(data.name == item) {
+									return true;		    		          			
+								}
+								else {
+    		                		if(value == roomNames[index]) {
+    		                			temp = roomNames[index];
+    		                			return false;
+    		                		}
+    		                		else {
+    		                			return true;
+    		                		}
+    		                		
+								}
+								
+    			            });    		          			
+    		          			return (value != temp);
+    		            		
+    		                	}, '열람실명이 이미 등록 되어있습니다'
+                );
+				
+                $modal.find('form').validate({
+            		rules: {
+            			name: {
+            				required: true,
+            				chkDuplicationRoomName: true,
+            			}
+            			
+            		},
+            		messages: {
+            			name: {
+            				required: "열람실명을 입력하세요",
+            			}
+
+            		}
+            		
+            	});
+
+            })
+            .modal();
+
+        },
+        saveRoom: function(e) {
+            var values = {};
+            var $modal = $('#modal-room-form');
+			var $form = $modal.find('form');
+            
+			if($form.valid()) {            
+	            var $inputs = $modal.find(':input');
+	            $inputs.each(function(i, element) {
+	                var $element = $(element);
+	                if ($element.is('[type=radio]')) {
+	                    if ($element.is(':checked')) {
+	                        var name = $element.attr('name');
+	                        if (!(_.isEmpty(name))) {
+	                            values[name] = $element.val();
+	
+	                        }
+	                    }
+	
+	                } else {
+	                    var name = $element.attr('name');
+	                    if (!(_.isEmpty(name))) {
+	                        values[name] = $element.val();
+	
+	                    }
+	
+	                }
+	            });
+	
+	            this.currentRoomModel.save(values, {
+	                wait: true,
+	                success: function (model, response) {
+	                    $modal.modal('hide');
+	
+	                },
+	
+	            });
+            
+			}
+
+        },
+        deleteRoom: function(e) {
+			var deskList = DeskList.filter({ roomId : this.currentRoomModel.get('roomId')});
+			console.log(deskList);
+        	var $modal = $('#modal-room-form');
+
+            if(confirm('해당 알람실에 속하는 좌석도 삭제됩니다. 정말로 삭제하시겠습니까?')) {
+
+               	this.currentRoomModel.destroy({
+                    wait: true,
+                    success: function (model, response) {
+
+        				deskList.forEach(function(item) { 
+        					currentDeskModel = item;            	
+        	                this.currentDeskModel.destroy({
+        	                    wait: true,
+        	                    success: function (model, response) {
+
+        	                    },
+
+        	                });
+        				});
+                    },
+
+                });
+               	
+
+
+            }
+            $modal.modal('hide');
+
+        },
+        formNewDesk: function(e) {
+            var data = new DeskModel().toJSON();
+			var $modal = $(this);
+            data['rooms'] = RoomList.toJSON();
+            data['roomId'] = (RoomList.selectedRoom) ? RoomList.selectedRoom.get('roomId') : null;
+            data['deskTypes'] = deskTypes;
+            
+            var bodyHtml = this.templateForDeskForm(data);
+
+            $('#modal-new-desk-form')
+            .one('show.bs.modal', function(e) {
+                var $modal = $(this);
+                $modal.find('.modal-title').html('새 좌석');
+                $modal.find('.modal-body').html(bodyHtml);
+
+            })
+            .one('shown.bs.modal', function(e) {
+                var $modal = $(this);
+                $modal.find('[name=name]').focus();
+
+                $modal.find('form').on('submit', function(e) {
+                    e.preventDefault();
+
+                });
+
+                $modal.find('.chosen').chosen({width: "100%"});
+                
+                // 좌석명 조회                
+				var deskNames = [];
+				getDesksName([[${branch.branchId}]], function(data){                	
+					deskNames = data;                	
+                });
+                
+                $.validator.addMethod(
+                    	'chkDuplicationDeskName', function (value, element) {					
+    		                var temp;
+    		          		$.each(deskNames, function (index, item){
+    		                		if(value == deskNames[index]) {
+    		                			temp = deskNames[index];
+    		                			return false;
+    		                		}
+    		                		else {
+    		                			return true;
+    		                		}
+    		
+    		                	});
+    		          			return (value != temp);
+    		            		
+    		                	}, '좌석명이 이미 등록 되어있습니다'
+                );
+				
+                $modal.find('form').validate({
+                	ignore: "not:hidden",
+                	rules: {
+            			roomId: {            			
+            				required: true,
+            			},
+            			name: {
+            				required: true,
+            				//chkDuplicationDeskName: true,
+            			},
+            			deskMax: {
+            				required: true,
+            				min: 1,
+            			}
+            			
+            		},
+            		messages: {
+            			roomId: {            	
+            	    		required: "좌석을 선택하세요",
+            			},
+            			name: {
+            				required: "좌석명을 입력하세요",
+            			},
+            			deskMax: {
+            				required: "수용인원을 입력하세요",
+            				min: "수용인원을 입력하세요",
+            			}
+            		}
+            		
+            	});
+
+                
+            })
+            .modal();
+        },
+        formNewMultipleDesk: function(e) {
+            var data = new DeskModel().toJSON();
+
+            data['rooms'] = RoomList.toJSON();
+            data['deskTypes'] = deskTypes;
+
+            var bodyHtml = this.templateForMultipleDeskForm(data);
+
+            $('#modal-new-multiple-desk-form')
+            .one('show.bs.modal', function(e) {
+                var $modal = $(this);
+                $modal.find('.modal-title').html('새 좌석 여러개 추가');
+                $modal.find('.modal-body').html(bodyHtml);
+
+            })
+            .one('shown.bs.modal', function(e) {
+                var $modal = $(this);
+                $modal.find('[name=name]').focus();
+
+                $modal.find('form').on('submit', function(e) {
+                    e.preventDefault();
+
+                });
+                
+            $modal.find('.chosen').chosen({width: "100%"});
+
+            $modal.find('form').validate({
+            	ignore: "not:hidden",
+            	rules: {
+        			roomId: {            			
+        				required: true,
+        			},
+        			name: {
+        				required: true,
+        				//chkDuplicationDeskName: true,
+        			},
+        			
+        		},
+        		messages: {
+        			roomId: {            	
+        	    		required: "좌석을 선택하세요",
+        			},
+        			name: {
+        				required: "좌석명을 입력하세요",
+        			},
+
+        		}
+        		
+        	});
+            
+            })
+            .modal();
+        },
+        saveNewDesk: function(e) {
+            //var values = { roomId: RoomList.selectedRoom.get('roomId') };
+            var values = {};
+            var $modal = $('#modal-new-desk-form');
+			var $form = $modal.find('form');
+            
+			if($form.valid()) {
+	            var $inputs = $modal.find(':input');
+	            $inputs.each(function(i, element) {
+	                var $element = $(element);
+	                if ($element.is('[type=radio]')) {
+	                    if ($element.is(':checked')) {
+	                        var name = $element.attr('name');
+	                        if (!(_.isEmpty(name))) {
+	                            values[name] = $element.val();
+	
+	                        }
+	                    }
+	
+	                } else {
+	                    var name = $element.attr('name');
+	                    if (!(_.isEmpty(name))) {
+	                        values[name] = $element.val();
+	
+	                    }
+	                }
+	
+	            });
+	
+	            DeskList.create(values, {
+	                wait : true,
+	                success : function (model, response) {
+	                    model.set('deskId', response.deskId);
+	                    model.set('insertDt', response.insertDt);
+	                    model.set('updateDt', response.updateDt);
+	
+	                    $modal.modal('hide');
+	
+	                }
+	
+	            });
+			}
+
+        },
+        saveNewMultipleDesk: function(e) {
+            //var values = { roomId: RoomList.selectedRoom.get('roomId') };
+            var values = {};
+            var $modal = $('#modal-new-multiple-desk-form');
+
+            var roomId = $modal.find('[name=roomId]').val();
+
+            var startDeskNo = Number($modal.find('[name=startDeskNo]').val());
+            var endDeskNo = Number($modal.find('[name=endDeskNo]').val());
+
+            var deskName = $modal.find('[name=name]').val();
+
+            var $form = $modal.find('form');
+            if($form.valid()) {
+	            if(startDeskNo <= endDeskNo && (endDeskNo - startDeskNo) <= 100) {
+	                for(var i = startDeskNo; i <= endDeskNo; i++) {
+	
+	                    var name = i + deskName;
+	
+	                    if(DeskList.findWhere({ name: name })) {
+	                        //console.info('duplicated desk name');
+	
+	                    } else {
+	                        DeskList.create({
+	                            roomId: roomId,
+	                            name: name,
+	                        },
+	                        {
+	                            wait : true,
+	                            success : function (model, response) {
+	                                model.set('deskId', response.deskId);
+	                                model.set('insertDt', response.insertDt);
+	                                model.set('updateDt', response.updateDt);
+	
+	                            }
+	
+	                        });
+	
+	                    }
+	
+	                }
+	
+	                $modal.modal('hide');
+	
+	            }
+            }
+
+        },
+        formDesk: function(model) {
+            this.currentDeskModel = model;
+
+            var data = model.toJSON();
+
+            data['rooms'] = RoomList.toJSON();
+            data['deskTypes'] = deskTypes;
+
+            var titleHtml = data.name;
+            var bodyHtml = this.templateForDeskForm(data);
+            var $modal = $(this);
+            
+            $('#modal-desk-form')
+            .one('show.bs.modal', function(e) {
+                var $modal = $(this);
+                $modal.find('.modal-title').html(titleHtml);
+                $modal.find('.modal-body').html(bodyHtml);
+
+                $modal.find('form').on('submit', function(e) {
+                    e.preventDefault();
+
+                });
+
+            $modal.find('.chosen').chosen({width: "100%"});
+                            
+            // 좌석명 조회                
+			var deskNames = [];
+			getDesksName([[${branch.branchId}]], function(data){                	
+				deskNames = data;                	
+            });
+			
+            $.validator.addMethod(
+                	'chkDuplicationDeskName', function (value, element) {					
+		                var temp;
+		          		$.each(deskNames, function (index, item){
+							if(data.name == item) {
+								return true;		    		          			
+							}		                		
+							else {
+								if(value == deskNames[index]) {
+			                			temp = deskNames[index];
+			                			return false;
+			                		}
+			                		else {
+			                			return true;
+			                		}
+							}
+							
+		                });
+		          			return (value != temp);
+		            		
+		                	}, '좌석명이 이미 등록 되어있습니다'
+            );
+            
+           	$modal.find('form').validate({
+        		rules: {
+        			roomId: {            			
+        				required: true,
+        			},
+        			name: {
+        				required: true,
+        				//chkDuplicationDeskName: true,
+        			},
+        			deskMax: {
+        				required: true,
+        				min: 1,
+        			}
+        			
+        		},
+        		messages: {
+        			roomId: {            	
+        	    		required: "좌석을 선택하세요",
+        			},
+        			name: {
+        				required: "좌석명을 입력하세요",
+        			},
+        			deskMax: {
+        				required: "수용인원을 입력하세요",
+        				min: "수용인원을 입력하세요",
+        			}
+        		}
+        		
+        	});
+                
+            })           
+            .modal();
+
+        },
+        saveDesk: function(e) {
+            var values = {};
+            var $modal = $('#modal-desk-form');
+            var $form = $modal.find('form');
+            
+            if($form.valid()) {                        
+	            var $inputs = $modal.find(':input');
+	            $inputs.each(function(i, element) {
+	                var $element = $(element);
+	                if ($element.is('[type=radio]')) {
+	                    if ($element.is(':checked')) {
+	                        var name = $element.attr('name');
+	                        if (!(_.isEmpty(name))) {
+	                            values[name] = $element.val();
+	
+	                        }
+	                    }
+	
+	                } else {
+	                    var name = $element.attr('name');
+	                    if (!(_.isEmpty(name))) {
+	                        values[name] = $element.val();
+	
+	                    }
+	
+	                }
+	            });
+	
+	            this.currentDeskModel.save(values, {
+	                wait: true,
+	                success: function (model, response) {
+	                    $modal.modal('hide');
+	
+	                },
+	
+	            });
+            }
+
+        },
+        deleteDesk: function(e) {
+            var $modal = $('#modal-desk-form');
+
+            if(confirm('정말로 삭제하시겠습니까?')) {
+                this.currentDeskModel.destroy({
+                    wait: true,
+                    success: function (model, response) {
+                        $modal.modal('hide');
+
+                    },
+
+                });
+
+            }
+
+        },
+        save: function() {
+            RoomList.save();
+
+            DeskList.save();
+
+        },
+    });
+
+    var App = new BranchDesignView;
+
+/*
+    scalePages($('#branch-design-list'));
+
+    $(window).resize(_.debounce(function () {
+        scalePages($('#branch-design-list'));
+
+    }, 150));
+*/
+
+});
+// ]]></script>
+<script th:src='@{/common/api_branch_room.js}' ></script>
+<script th:src='@{/common/api_branch_desk.js}' ></script>
+<!-- Chosen : https://github.com/harvesthq/chosen -->
+<link rel='stylesheet' th:href='@{/lib/chosen/chosen.css}' />
+<script th:src='@{/lib/chosen/chosen.jquery.js}' ></script>
+<!-- Validation : https://jqueryvalidation.org/documentation/
+    INPUT : https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input -->
+<script th:src='@{/lib/jquery-validation/dist/jquery.validate.min.js}' ></script>
+<!-- interact.js : http://interactjs.io/ -->
+<script th:src='@{/lib/interact/dist/interact.min.js}' ></script>

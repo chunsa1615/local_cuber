@@ -1,0 +1,664 @@
+<style>
+.input-group .form-control.emailText {
+	width: 44.8%;
+	box-sizing: border-box;
+}
+.input-group .form-control.temp {
+	width: 40px;
+}
+@media screen and (max-width: 532px) {
+	.input-group .form-control.emailText {
+		width: 43%;
+	}
+}
+</style>
+
+
+<div class="container-fluid" id="free-application-app">
+    <section class="row">
+        <div class="col-md-2 col-sm-12">
+            <button type="button" class="btn btn-outline-primary" id="btn-form-new-freeApplication" data-toggle="modal" data-target="#modal-new-freeApplication-form">무료체험 추가</button>
+        </div>
+        <div class="col-md-10 col-sm-12">
+            <form id="searchFrom">            	         
+            	<input type="hidden" id="url" />                          
+                <div class="row">
+                    <div class="col-md-5">
+                        <div class="form-group">
+                            <label class="form-control-label" for="sFreeApplicationStartDt">일자</label>
+                            <div class="input-group input-daterange">
+                                <input type="text" class="form-control" id="sFreeApplicationStartDt" name="sFreeApplicationStartDt" th:value="${sFreeApplicationStartDt}" readonly="readonly" />
+                                <div class="input-group-addon">부터</div>
+                                <input type="text" class="form-control" id="sFreeApplicationEndDt" name="sFreeApplicationEndDt" th:value="${sFreeApplicationEndDt}" readonly="readonly" />
+                                <div class="input-group-addon">까지</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                        <div class="form-group">
+                            <label class="form-control-label" for="sName">이름</label>
+                                <input type="text" class="form-control" id="sName" name="sName" th:value="${sName}" />
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-5">
+                        <div class="form-group">
+                            <label class="form-control-label" for="sTel">연락처</label>
+                            <input type="text" class="form-control" id="sTel" name="sTel" th:value="${sTel}" />
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                        <div class="form-group">
+                            <label class="form-control-label" for="sRoomType">희망 좌석</label>
+                            <select class="form-control chosen" id="sRoomType" name="sRoomType">
+                                <option value="">전체</option>
+                                <option th:each="room : ${roomTypes}" th:selected="${room.value == sRoom}" th:value="${room.value}" th:text="${room.text}"></option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-control-label" for="btn-search"></label>
+                        <button type="submit" class="btn btn-outline-primary" id="btn-search">검색</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </section>
+    <section class="row">
+        <table class="table">
+            <colgroup>
+                <col width="15%" />
+                <col width="10%" />
+                <col width="10%" />
+                <col width="10%" />
+                <col width="15%" />
+				<col width="10%" />
+                <col width="20%" />
+                <col width="10%" />
+            </colgroup>
+            <thead class="thead-inverse">
+                <tr>
+                    <th>이름</th>
+                    <th>성별</th>
+                    <th>연락처</th>
+                    <th>체험희망일</th>
+                    <th>희망좌석</th>
+                    <th>학교/학년</th>
+                    <th>신청일</th>
+                    <th>수정</th>
+                </tr>
+            </thead>
+            <tbody id="freeApplication-list"></tbody>
+            
+                <tr>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                </tr>
+            <tfoot>
+            </tfoot>
+        </table>
+    </section>
+	
+	<section th:if="${pageMaker.endPage != 0}">
+		<div style="text-align: center;">
+			<nav aria-label="Page navigation">
+			  <ul class="pagination">
+		    	<li th:if="${pageMaker.prev}" class="page-item">								    
+			      <a class="page-link prev" href="#" aria-label="Previous">
+			        <span aria-hidden="true">&laquo;</span>
+			        <span class="sr-only">Previous</span>
+			      </a>				     
+		   		</li>
+			    <li th:each="page : ${#numbers.sequence(pageMaker.startPage, pageMaker.endPage)}"  class='page-item' th:value="${page}" th:classappend="${page == pageMaker.page.page ? 'active' :''}">	 			     
+			    	<a class="page-link button"  id="page-linkbutton" th:text="${page}" th:value="${page}" href="#"></a>						  
+			    </li>
+				<li th:if="${pageMaker.next}" class="page-item">
+			      <a class="page-link next" href="#" aria-label="Next">
+			        <span aria-hidden="true">&raquo;</span>
+			        <span class="sr-only">Next</span>
+			      </a>
+			    </li>
+			  </ul>
+			</nav>
+		</div>
+	</section>
+	
+	<div class="modal fade" id="modal-new-freeApplication-form" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+	  <div class="modal-dialog modal-lg" role="document">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+	          <span aria-hidden="true">&times;</span>
+	        </button>
+	        <h4 class="modal-title"></h4>
+	      </div>
+	      <div class="modal-body"></div>
+	      <div class="modal-footer">
+	        <button type="button" class="btn btn-primary" id="btn-save-new-application">저장</button>
+	        <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+	      </div>
+	    </div>
+	  </div>	  
+	</div>
+
+    <div class="modal fade" id="modal-freeApplication-form" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+	  <div class="modal-dialog modal-lg" role="document">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+	          <span aria-hidden="true">&times;</span>
+	        </button>
+	        <h4 class="modal-title"></h4>
+	      </div>
+	      <div class="modal-body"></div>
+	      <div class="modal-footer">
+			<div class="pull-xs-left">
+				<button type="button" class="btn btn-danger" id="btn-delete-freeApplication">삭제</button>
+			</div>
+	        <button type="button" class="btn btn-primary" id="btn-save-application">수정</button>
+	        <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+	      </div>
+	    </div>
+	  </div>	  
+	</div>
+	
+</div>
+
+<script th:include="tmpl_form_new_application" th:inline="javascript" type="text/template" id="new-application-form-template"></script>
+<script th:include="tmpl_tr_freeApplication" th:inline="javascript" type="text/template" id="freeApplication-template"></script>
+
+
+<script th:inline="javascript">// <![CDATA[
+$(function() {
+	
+    // Search Form
+    var $sForm = $('#searchFrom');
+    $sForm.find('.input-daterange').datepicker({
+        language: 'ko', autoclose: true, todayHighlight: true, format: 'yyyy-mm-dd',
+
+    }).on('changeDate', function(e) {
+
+    });
+	
+	// Branch
+	var BranchModel = Backbone.Model.extend({
+	    idAttribute: 'branchId',
+	    defaults: function() {
+	        return {
+	            name: '', hpUrl: '',
+	            tel: '', telEtc: '', postcode: '', address1: '', address2: '',
+	            locNote: '', locUrl: '', opNote: '',
+	        };
+	    },
+	});
+	
+	var BranchListCollection = Backbone.Collection.extend({
+	    model: BranchModel,
+	    url: [[@{/admin/api/branches}]],
+	
+	});
+	
+	var BranchList = new BranchListCollection();
+	
+		var genderTypes = [[${genderTypes}]];
+		var roomTypes = [[${roomTypes}]];
+		var cmpRouteTypes = [[${cmpRouteTypes}]];
+		
+		var FreeApplicationList = new FreeApplicationListCollection;
+		FreeApplicationList.branchId = [[${branch.branchId}]];
+		
+		FreeApplicationList.todayDt = moment().format('YYYY-MM-DD');	
+		
+		var FreeApplicationView = Backbone.View.extend({
+			tagName: 'tr',
+			className: 'freeApplication',
+			template: _.template($('#freeApplication-template').html()),
+			events:{
+				'dblclick': 'formFreeApplication',
+				'click .btn-form-freeApplication' : 'formFreeApplication',
+			},
+			initialize: function() {
+				this.listenTo(this.model, 'change', this.change);
+				this.listenTo(this.model, 'destroy', this.remove);
+			},
+			change: function() {
+				this.render();
+			},
+			render: function() {
+				var data = this.model.toJSON();
+
+				var genderTypeText = _.findWhere(genderTypes, {value: Number(data.gender)});
+				data['genderTypeText'] = genderTypeText ? genderTypeText.text : '';
+	            var roomTypeText = _.findWhere(roomTypes, {value: Number(data.roomType)});
+	            data['roomTypeText'] = roomTypeText ? roomTypeText.text : '';
+	            var cmpRouteTypeText = _.findWhere(cmpRouteTypes, {value: Number(data.cmpRoute)});
+	            data['cmpRouteTypeText'] = cmpRouteTypeText ? cmpRouteTypeText.text : '';	            	            
+	            
+				this.el.id = data.id;
+				this.$el.html(this.template(data));
+				
+				return this;
+			},
+			formFreeApplication: function() {
+				FreeApplicationList.trigger('formFreeApplication', this.model);
+			},
+			
+			
+		});
+				
+		
+		var BranchFreeApplicationView = Backbone.View.extend({
+			el: $('#free-application-app'),
+			templateForForm: _.template($('#new-application-form-template').html()),
+			currentFreeApplicationModel: null,
+			events: {
+				'click #btn-form-new-freeApplication' : 'formNewApplication',
+				'eventClick' : 'formNewApplication',
+				'click #btn-save-new-application' : 'saveNewApplication',
+				'click #btn-save-application' :  'saveApplication',
+	            'click #btn-delete-freeApplication' : 'deleteFreeApplication',
+				'click .page-link.button' : 'paging',
+	            'click .page-link.next' : 'nextPaging',
+	            'click .page-link.prev' : 'prevPaging',
+	            
+			},
+			initialize: function() {
+				this.listenTo(FreeApplicationList, 'add', this.addOneFreeApplication);
+				this.listenTo(FreeApplicationList, 'formFreeApplication', this.formFreeApplication);
+				
+				this.listenTo(FreeApplicationList, 'reset', this.reset);
+			},
+		    reset: function() {
+		    	FreeApplicationList.forEach(this.addOneFreeApplication);
+		    },  
+			chage: function() {
+				this.render();
+			},
+		    render: function() {
+				
+				
+			},		
+	        paging: function(e) {
+	        	paging(e);
+
+	        },
+	        prevPaging: function(e) {
+	        	var page = [[${pageMaker.startPage -1}]];
+	        	prevPaging(e, page);
+	  
+	        },
+	        nextPaging: function(e) {
+	        	var page = [[${pageMaker.endPage +1}]];
+	        	nextPaging(e, page);
+	      	
+	        },
+			addOneFreeApplication: function(FreeApplication) {
+		    	var view = new FreeApplicationView({ model: FreeApplication});
+		    	this.$('#freeApplication-list').append(view.render().el);
+		    	
+		    	//var branchId = [[${branch.branchId}]];
+	            
+		    	//FreeApplication.FreeApplicationList = new FreeApplicationListCollection;
+		    	//FreeApplication.url = ctxRoot + 'e/api/v1/' + branchId + '/try';
+				
+			},
+			formNewApplication: function() {
+				var data = new FreeApplicationModel().toJSON();
+				
+				var currentDate = sysDate.clone();
+				data['startDt'] = currentDate.valueOf();
+				data['roomTypes'] = roomTypes;
+				data['gender'] = 0;
+				data['cmpRouteTypes'] = cmpRouteTypes;
+	            data['branchNm'] = [[${branch.name}]];	//임시
+	            data['genderType'] = '';				
+	            data['roomType'] = '';
+	            data['tel'] = '';
+	            data['school'] = '';
+	            data['emailText'] = '';
+	            data['emailAdd'] = '';
+	            data['cmpRoute'] = '';
+	            
+	            var bodyHtml = this.templateForForm(data);
+	            var $modal = $(this);
+				
+				$('#modal-new-freeApplication-form')
+				.one('show.bs.modal', function(e) {
+					var $modal = $(this);
+					$modal.find('.modal-title').html('새 무료신청');					
+					$modal.find('.modal-body').html(bodyHtml);						
+                    
+					$modal.find('[name=emailSelect]').on('change', function() {
+						var emailAdd = $(this).val();
+						$('#modal-new-freeApplication-form').find('[name=emailAdd]').val(emailAdd);
+					});
+										
+					$modal.find('.datepicker, .input-daterange').datepicker({
+	                    language: 'ko', autoclose: true, todayHighlight: true, format: datepickerFormat,
+	                 })
+	                 .on('changeDate', function(e) {
+	                     var orgInputName = $(e.target).attr('data-org-input-name');
+	                     if (!(_.isEmpty(orgInputName))) {
+	                         var $orgInput = $('#modal-new-freeApplication-form').find('[name=' + orgInputName + ']');
+	                         //$orgInput.val(e.timeStamp / 1000);
+	                         $orgInput.val(e.date.valueOf());
+	                         //$orgInput.val($modal.find('$deskEnd'));
+	                         //$form.find('#startDt').val(moment(deskStartDt, momentDatepickerFormat));
+	                     }
+
+	                 });
+
+	                $modal.find('.chosen').chosen({width: "100%"});
+				
+			
+				//})
+				})
+			},
+			saveNewApplication: function() {
+				
+				var $modal = $('#modal-new-freeApplication-form');
+				var $form = $modal.find('form');
+				
+				var values = {};
+				
+				$form.validate({
+                	ignore: "not:hidden",
+                	rules: {
+            			roomType: {
+            				required: true,
+            			},
+                		name: {            			
+            				required: true,
+            			},
+            			tel: {
+            				required: true,
+            			},
+            			genderType: {
+            				required: true,
+            			},
+            			school: {
+            				required: true,
+            			},
+//             			emailText: {
+//             				required: true,
+//             			},
+//             			emailAdd: {
+//             				required: true,
+//             			},
+            			cmpRoute: {
+            				required: true,
+            			}
+            		},
+            		messages: {
+            			roomType: {
+            				required: "희망좌석을 선택하세요",
+            			},
+            			name: {
+            	    		required: "이름을 입력하세요",
+            			},
+            			tel: {
+            				required: "연락처를 입력하세요",
+            			},
+            			genderType: {
+            				required: "성별을 입력하세요",
+            			},
+            			school: {
+            				required: "학교/학년을 입력하세요",
+            			},
+//             			emailText: {
+//             				required: "이메일을 입력하세요",
+//             			},
+//             			emailAdd: {
+//             				required: "이메일 주소를 선택하세요",
+//             			},
+            			cmpRoute: {
+            				required: "선택해 주세요",
+            			}
+            			
+            		}	
+                });
+				
+				if ( $form.valid()) {
+		        	var $inputs = $modal.find(':input');
+		            $inputs.each(function(i, element) {
+		                var $element = $(element);
+		                if ($element.is('[type=radio]')) {
+		                    if ($element.is(':checked')) {
+		                        var name = $element.attr('name');
+		                        if (!(_.isEmpty(name))) {
+		                            values[name] = $element.val();
+	
+		                        }
+		                    }
+	
+		                } else {
+		                    var name = $element.attr('name');
+		                    if (!(_.isEmpty(name))) {
+		                        values[name] = $element.val();
+	
+		                    }
+	
+		                }
+		            });
+		            
+		            var email;
+		            if (values['emailText']) {
+		            	email = values['emailText'] + '@' + values['emailAdd'];	
+		            }
+		            FreeApplicationList.create({
+						branchId: [[${branchId}]],
+		            	startDt: values['startDt'],
+		            	roomType: values['roomType'],
+		            	name: values['name'],
+		            	gender: values['gender'],
+		            	tel: values['tel'],
+		            	school: values['school'],		            	
+		            	email: email,
+		            	cmpRoute: values['cmpRoute'],
+	
+		            }, {
+						wait : true,	            	
+		            	success : function (model, response) {
+// 		            		model.set('insertDt', response.insertDt);
+// 	                        model.set('updateDt', response.updateDt);
+		            		$modal.modal('hide');
+		            	}
+		            });
+				}
+			},
+			
+			formFreeApplication: function(model) {
+				this.currentFreeApplicationModel = model;
+				
+				var data = model.toJSON();
+				if (data['email'] == null || data['email'] == '') {
+					data['emailText'] = '';
+					data['emailAdd'] = '';
+				}
+				else {
+					var telStr = data['email'].split('@');
+					data['emailText'] = telStr[0];
+					data['emailAdd'] = telStr[1];
+				}
+				
+				data['branchNm'] = [[${branch.name}]];
+				data['roomTypes'] = roomTypes;
+				data['genderTypes'] = genderTypes;
+				data['cmpRouteTypes'] = cmpRouteTypes;
+
+				var titleHtml = '무료신청';
+				var bodyHtml = this.templateForForm(data);
+				
+				$('#modal-freeApplication-form')
+				.one('show.bs.modal', function(e) {
+					var $modal = $(this);
+					$modal.find('.modal-title').html('무료신청 수정');
+					$modal.find('.modal-body').html(bodyHtml);	
+				
+	                
+					$modal.find('[name=emailSelect]').on('change', function() {
+						var emailAdd = $(this).val();
+						$('#modal-freeApplication-form').find('[name=emailAdd]').val(emailAdd);
+					});
+										
+					$modal.find('.datepicker, .input-daterange').datepicker({
+	                    language: 'ko', autoclose: true, todayHighlight: true, format: datepickerFormat,
+	                 })
+	                 .on('changeDate', function(e) {
+	                     var orgInputName = $(e.target).attr('data-org-input-name');
+	                     if (!(_.isEmpty(orgInputName))) {
+	                         var $orgInput = $('#modal-freeApplication-form').find('[name=' + orgInputName + ']');
+	                         $orgInput.val(e.date.valueOf());
+	                     }
+
+	                 });
+
+	                $modal.find('.chosen').chosen({width: "100%"});
+				})
+				.modal();
+				
+			},
+			saveApplication: function() {
+				var $modal = $('#modal-freeApplication-form');
+				var $form = $modal.find('form');
+				
+				var values = {};
+				
+				$form.validate({
+                	ignore: "not:hidden",
+                	rules: {
+            			roomType: {
+            				required: true,
+            			},
+                		name: {            			
+            				required: true,
+            			},
+            			tel: {
+            				required: true,
+            			},
+            			genderType: {
+            				required: true,
+            			},
+            			school: {
+            				required: true,
+            			},
+//             			emailText: {
+//             				required: true,
+//             			},
+//             			emailAdd: {
+//             				required: true,
+//             			},
+            			cmpRoute: {
+            				required: true,
+            			}
+            		},
+            		messages: {
+            			roomType: {
+            				required: "희망좌석을 선택하세요",
+            			},
+            			name: {            	
+            	    		required: "이름을 입력하세요",
+            			},
+            			tel: {
+            				required: "연락처를 입력하세요",
+            			},
+            			genderType: {
+            				required: "성별을 입력하세요",
+            			},
+            			school: {
+            				required: "학교/학년을 입력하세요",
+            			},
+//             			emailText: {
+//             				required: "이메일을 입력하세요",
+//             			},
+//             			emailAdd: {
+//             				required: "이메일 주소를 선택하세요",
+//             			},
+            			cmpRoute: {
+            				required: "경로를 선택하세요",
+            			}
+            			
+            		}	
+                });
+				
+				if ( $form.valid()) {
+		        	var $inputs = $modal.find(':input');
+		            $inputs.each(function(i, element) {
+		                var $element = $(element);
+		                if ($element.is('[type=radio]')) {
+		                    if ($element.is(':checked')) {
+		                        var name = $element.attr('name');
+		                        if (!(_.isEmpty(name))) {
+		                            values[name] = $element.val();
+	
+		                        }
+		                    }
+	
+		                } else {
+		                    var name = $element.attr('name');
+		                    if (!(_.isEmpty(name))) {
+		                        values[name] = $element.val();
+	
+		                    }
+	
+		                }
+		            });
+					
+		            if(values['emailText']) {
+		            	values['email'] = values['emailText'] + '@' + values['emailAdd'];
+		            }
+		            this.currentFreeApplicationModel.save(values, {
+						wait : true,	            	
+		            	success : function (model, response) {
+		            		$modal.modal('hide');
+		            	},
+		            	
+		            });
+				}
+			},
+			deleteFreeApplication: function() {
+	            var $modal = $('#modal-freeApplication-form');
+					            
+				if(confirm('정말로 삭제하시겠습니까?')) {
+		            this.currentFreeApplicationModel.destroy({
+						wait : true,	            	
+		            	success : function (model, response) {
+		            		$modal.modal('hide');
+		            	},
+		            	
+		            });
+	            }
+				
+			},		
+		
+			
+		});
+		
+		var FreeApplicationViewApp = new BranchFreeApplicationView;
+		FreeApplicationList.reset(JSON.parse([[${FreeApplicationListJSON}]]));
+
+});
+
+	
+//]]></script>
+
+<script th:src='@{/common/api_branch_freeApplication.js}' ></script>
+
+<!-- DatePicker : https://bootstrap-datepicker.readthedocs.io/en/latest/ -->
+<script th:src='@{/lib/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js}' ></script>
+<script charset='UTF-8' th:src='@{/lib/bootstrap-datepicker/dist/locales/bootstrap-datepicker.ko.min.js}' ></script>
+<link rel='stylesheet' th:href='@{/lib/bootstrap-datepicker/dist/css/bootstrap-datepicker3.min.css}' />
+
+<!-- Chosen : https://github.com/harvesthq/chosen -->
+<link rel='stylesheet' th:href='@{/lib/chosen/chosen.css}' />
+<script th:src='@{/lib/chosen/chosen.jquery.js}' ></script>
+
+<script th:src='@{/lib/jquery-validation/dist/jquery.validate.min.js}' ></script>

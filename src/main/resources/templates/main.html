@@ -1,0 +1,37 @@
+<div class="row m-x-1">
+    <div class="card-deck-wrapper">
+        <div class="card-deck">
+            <div class="card" th:each="b,status: ${branches}" th:if="${ b.visibleYn == 1 }">
+                <!--<h3 class="card-header"></h3>-->
+                <img class="card-img-top img-fluid" th:src="@{/images/branches/} + ${b.branchId} + '.jpg'" />
+                <div class="card-block">
+                    <h4 class="card-title">
+                        <a th:href="@{/b/} + ${b.id}" th:text="${b.name}"></a>
+                    </h4>
+
+                    <p class="card-text" th:text="${b.address1 + ' ' + b.address2}"></p>
+                    <p class="card-text text-muted" th:utext="${#strings.isEmpty(b.locNote != null) ? '' : #strings.replace(#strings.escapeXml(b.locNote), T(java.lang.System).getProperty('line.separator'), '&lt;br /&gt;')}"></p>
+
+                    <p class="card-text" th:utext="${#strings.isEmpty(b.opNote) ? '' : #strings.replace(#strings.escapeXml(b.opNote), T(java.lang.System).getProperty('line.separator'), '&lt;br /&gt;')}"></p>
+
+                    <a th:href="${b.locUrl}" class="btn btn-sm btn-outline-primary">지도</a>
+                    <a th:href="${b.hpUrl}" class="btn btn-sm btn-outline-primary">홈페이지</a>
+
+                    <!--<div th:if="${b.openDt != null}" class="m-y-1">
+                        <div th:text="${#dates.format(b.openDt, 'yyyy년 MM월 dd일')} + ' 오픈'"></div>
+                        <a th:href="@{/e/pre/} + ${b.name}" class="btn btn-outline-success">사전예약 신청하기</a>
+                    </div>-->
+                </div>
+            </div>
+            <!--<div class="card card-block card-inverse card-primary text-xs-center">-->
+                <!--<blockquote class="card-blockquote">-->
+                    <!--<h1>프리미엄</h1>-->
+                    <!--<h1>독서실의</h1>-->
+                    <!--<h1>재해석</h1>-->
+                <!--</blockquote>-->
+            <!--</div>-->
+        </div>
+    </div>
+</div>
+<!-- Lazy Load Plugin for jQuery : https://github.com/tuupola/jquery_lazyload -->
+<!--<script th:src='@{/lib/jquery_lazyload/jquery.lazyload.js}' ></script>-->

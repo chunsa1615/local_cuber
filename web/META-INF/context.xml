@@ -1,0 +1,6 @@
+<Context>
+<ResourceLink name="jdbc/sccDataSource"
+              global="jdbc/sccDataSource"
+              auth="Container"
+              type="javax.sql.DataSource" />
+</Context>

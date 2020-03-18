@@ -1,0 +1,469 @@
+<div class="container-fluid" id="user-list-app">
+    <div class="row">
+        <div class="col-sm-12 col-xs-12">
+            <section>
+                <button type="button" class="btn btn-secondary" id="btn-form-new-user">사용자 추가</button>
+            </section>
+            <section class="table-responsive">
+                <table class="table">
+                    <colgroup>
+                        <col width="10%" />
+                        <col width="20%" />
+                        <col width="20%" />
+                        <col width="30%" />
+                        <col width="20%" />
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>사용자명</th>
+                            <th>권한</th>
+                            <th>관리지점</th>
+                            <th>-</th>
+                        </tr>
+                    </thead>
+                    <tbody id="user-list"></tbody>
+                </table>
+            </section>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modal-new-user-form" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title"></h4>
+                </div>
+                <div class="modal-body">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="btn-save-new-user">추가</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modal-user-form" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title"></h4>
+                </div>
+                <div class="modal-body">
+                </div>
+                <div class="modal-footer">
+                    <div class="pull-xs-left">
+                        <button type="button" class="btn btn-danger" id="btn-delete-user">삭제</button>
+                    </div>
+                    <button type="button" class="btn btn-primary" id="btn-save-user">수정</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 서버에서 view로 넘긴 값을 html의 javascript에 json형태로 넘김. -->
+<script th:inline="javascript" type="text/template" id="user-template">
+    <td>
+        <label class="index">{{- index + 1 }}</label>
+    </td>
+    <td>
+        <label class="view">{{- name }}</label>
+    </td>
+    <td>
+        <label class="view">{{ if (role == 'admin') { }}시스템관리자{{ } else if (role == 'user') { }}센터장{{ } else if (role == 'manager') { }}매니저{{ } else if (role == 'entry') { }}태블릿{{ } else { }}?{{ } }}</label>
+    </td>
+    <td>
+        <label class="view">{{- branchesNames }}</label>
+    </td>
+    <td>
+
+    </td>
+</script>
+
+<script th:inline="javascript" type="text/template" id="user-form-template"><![CDATA[ -->
+<form>
+    <div class="container-fluid">
+        <div class="col-md-12 col-xs-12">
+            <div class="form-group">
+                <label class="form-control-label">사용자명</label>
+                <input type="text" class="form-control" name="name" value="{{- name }}" />
+            </div>
+            <div class="form-group">
+                <label class="form-control-label">비밀번호</label>
+                <input type="password" class="form-control" name="encoded_password" value="{{  }}" />
+            </div>
+            <div class="form-group">
+                <label class="form-control-label">권한</label>
+                <select class="form-control" name="role">
+                    <option value="user" {{ if (role == 'user') { }}selected="selected"{{ } }}>센터장</option>
+                    <option value="manager" {{ if (role == 'manager') { }}selected="selected"{{ } }}>매니저</option>
+                    <option value="entry" {{ if (role == 'entry') { }}selected="selected"{{ } }}>태블릿</option>
+                    <option value="admin" {{ if (role == 'admin') { }}selected="selected"{{ } }}>시스템관리자</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-control-label">관리지점</label>
+                <input type="hidden" name="branches" value="{{- branches }}" />
+                <select class="form-control" name="select-branches" multiple="multiple">
+                    {{ _.each(branchList, function(b){ }}
+                    <option value="{{- b.branchId }}">{{- b.name }}</option>{{ }); }}
+                </select>
+            </div>
+
+        </div>
+    </div>
+</form>
+<!-- ]]> --></script>
+
+<script th:inline="javascript">// <![CDATA[
+
+/////////////////////////// Backbone Model ( 지점, 사용자 )구축 ///////////////////////////////////////
+	$(function(){
+
+    // Branch
+    var BranchModel = Backbone.Model.extend({
+        idAttribute: 'branchId', // 전송 branch 아이디 설정
+        defaults: function() { // 모델 객체의 기본값 설정. 현재 빈값
+            return { 
+                name: '', hpUrl: '',
+                tel: '', telEtc: '', postcode: '', address1: '', address2: '',
+                locNote: '', locUrl: '', opNote: '',
+            };
+        },
+    });
+
+    var BranchListCollection = Backbone.Collection.extend({
+        model: BranchModel,
+        url: [[@{/admin/api/branches}]],
+
+    });
+
+    var BranchList = new BranchListCollection();
+
+    // User
+    var UserModel = Backbone.Model.extend({
+        idAttribute: 'userId',
+        defaults: function() {
+            return {
+                name: '',
+                encoded_password: '',
+                tel: '', branches: '', branchesNames: '', role: '',
+            };
+        },
+    });
+
+    var UserListCollection = Backbone.Collection.extend({
+        model: UserModel,
+        url: [[@{/admin/api/users}]],
+
+    });
+
+    var UserList = new UserListCollection;
+
+    
+    /////////////////////////////// Backbone View 그리기 ////////////////////////////////////////////////
+    var UserView = Backbone.View.extend({
+        tagName: 'tr',
+        template: _.template($('#user-template').html()),
+        events: {
+            'dblclick' : 'formUser',
+        },
+        initialize: function() { 
+            this.listenTo(this.model, 'change', this.change);
+            this.listenTo(this.model, 'destroy', this.remove);
+
+        },
+        change: function() {
+            this.render(); // 호출시
+        },
+        render: function() { // User List 그리기
+            var data = this.model.toJSON();
+            data['index'] = UserList.indexOf(this.model);
+
+            this.$el.html(this.template(data));
+
+            return this;
+
+        },
+        formUser: function(e) { // View에서 더블클릭시 발생되는 이벤트 
+            UserList.trigger('formUser', this.model);
+
+        },
+        delete: function(e) {
+            if(confirm('정말로 삭제하시겠습니까?')) {
+                this.model.destroy({wait: true});
+            }
+
+        },
+    });
+
+    var UserListView = Backbone.View.extend({
+        el: $('#user-list-app'),
+        templateForForm: _.template($('#user-form-template').html()),
+        currentUserModel: null,
+       
+        events: {
+            'click #btn-form-new-user': 'formNewUser', // 사용자추가 버튼 클릭시
+            'click #btn-save-new-user': 'saveNewUser', // 추가 버튼 클릭시
+            'click #btn-save-user': 'saveUser', // 수정 버튼 클릭시
+            'click #btn-delete-user': 'deleteUser', // 삭제버튼 클릭시
+
+        },
+        initialize: function() {
+            this.listenTo(UserList, 'add', this.addOneUser); 
+            this.listenTo(UserList, 'formUser', this.formUser); // 한 사용자 삭제, 변경
+            this.listenTo(UserList, 'reset', this.reset);
+
+            //UserList.fetch();
+
+        },
+        reset: function() {
+            UserList.forEach(this.addOneUser);
+
+        },
+        render: function() {
+
+        },
+        formNewUser: function(e) { // 사용자 추가 버튼 클릭시 이벤트
+            var data = new UserModel().toJSON(); 
+            data['branchList'] = BranchList.toJSON();
+
+            var bodyHtml = this.templateForForm(data);
+            var selectedBranches = data['branches'] ? data['branches'].split(',') : [];
+
+            $('#modal-new-user-form') // 시스템 관리-사용자 추가
+            .one('show.bs.modal', function(e) {
+                var $modal = $(this);
+                $modal.find('.modal-title').html('새 사용자'); // 새로 뜬 창 제목
+                $modal.find('.modal-body').html(bodyHtml); // 새로뜬 창에 지점 목록 붙이기
+
+                var $select = $modal.find('[name=select-branches]'); // 지점 선택한 내용
+                $select.val(selectedBranches);
+
+                $select.chosen({width: '100%', disable_search: false, placeholder_text_multiple: '지점 선택'});
+
+                $modal.find('[name=role]').chosen({width: '100%', disable_search: false, placeholder_text_single: '권한 선택'});
+
+            })
+            .one('shown.bs.modal', function(e) {
+                var $modal = $(this);
+                $modal.find('[name=name]').focus();
+
+                $modal.find('form').on('submit', function(e) {
+                    e.preventDefault();
+
+                });
+                $.validator.addMethod(
+                    	'chkDuplicationName', function (value, element) {					
+                       		var name = $('input[name=name]').val();
+                       		var usr = UserList.findWhere({name: name});
+           	            			if(usr) return false;
+           	            			else {
+           	            				return true;
+           	            			} 
+    		            		
+    		                	}, '이미 등록된 이름입니다.'
+
+                    );
+                
+        	    $modal.find('form').validate({
+        			rules: {
+        				name: {
+        					required: true,
+        					chkDuplicationName : true,
+        				},
+        				
+        			},
+        			messages: {
+        				
+        				name: {
+        					required: "이름을 입력하세요",
+        				},
+        				       				
+        			}
+        	    });
+                    
+            })
+             
+            .modal();
+        },
+        saveNewUser: function(e) {
+            var values = {};
+            var $modal = $('#modal-new-user-form');
+
+            var $select = $modal.find('[name=select-branches]');
+            var selectedBranches = $select.val() ? $select.val().join(',') : "";
+            $modal.find('[name=branches]').val(selectedBranches);
+
+            values['branchesNames'] = _.map($select.find('option:selected'), function(element){
+                return $(element).text();
+            }).join(', ');
+
+            var $inputs = $modal.find(':input');
+            $inputs.each(function(i, element) {
+                var $element = $(element);
+                if ($element.is('[type=radio]')) {
+                    if ($element.is(':checked')) {
+                        values[$element.attr('name')] = $element.val();
+                        values[$element.attr('encoded_password')] = $element.val();
+                    }
+
+                } else {
+                    var name = $element.attr('name');
+                    var encoded_password = $element.attr('encoded_password');
+                    if (!(_.isEmpty(name))) {
+                        values[name] = $element.val();
+						values[encoded_password] = $element.val();
+                    }
+
+                }
+
+            });
+
+            console.log(values['branchesNames']);
+            console.log(values);
+
+            UserList.create(values, {
+                wait : true,
+                success : function (model, response) {
+                    model.set('userId', response.userId);                    
+                    model.set('insertDt', response.insertDt);
+                    model.set('updateDt', response.updateDt);
+
+                    $modal.modal('hide');
+
+                }
+
+            });
+
+
+        },
+        addOneUser: function(user) {
+            var view = new UserView({ model: user });
+
+            this.$('#user-list').append(view.render().el);
+
+        },
+        formUser: function(model) {
+            this.currentUserModel = model;
+
+            var data = model.toJSON();
+            data['branchList'] = BranchList.toJSON();
+
+            var titleHtml = data.name;
+            var bodyHtml = this.templateForForm(data);
+
+            var selectedBranches = data['branches'] ? data['branches'].split(',') : [];
+
+            $('#modal-user-form')
+            .one('show.bs.modal', function(e) {
+                var $modal = $(this);
+                $modal.find('.modal-title').html(titleHtml);
+                $modal.find('.modal-body').html(bodyHtml);
+
+                var $select = $modal.find('[name=select-branches]');
+                $select.val(selectedBranches);
+
+                $select.chosen({width: '100%', disable_search: false, placeholder_text_multiple: '지점 선택'});
+
+                $modal.find('[name=role]')
+                    .chosen({width: '100%', disable_search: false, placeholder_text_single: '권한 선택'});
+
+                $modal.find('form').on('submit', function(e) {
+                    e.preventDefault();
+
+                });
+
+            })
+            .modal();
+
+        },
+        saveUser: function(e) {
+            var values = {};
+            var $modal = $('#modal-user-form');
+
+            var $select = $modal.find('[name=select-branches]');
+            var selectedBranches = $select.val() ? $select.val().join(',') : "";
+            $modal.find('[name=branches]').val(selectedBranches);
+
+            values['branchesNames'] = _.map($select.find('option:selected'), function(element){
+                return $(element).text();
+            }).join(', ');
+
+            var $inputs = $modal.find(':input');
+            $inputs.each(function(i, element) {
+                var $element = $(element);
+                if ($element.is('[type=radio]')) {
+                    if ($element.is(':checked')) {
+                        values[$element.attr('name')] = $element.val();
+                        values[$element.attr('encoded_password')] = $element.val();
+                    }
+
+                } else {
+                    var name = $element.attr('name');
+                    var encoded_password = $element.attr('encoded_password'); 
+                    if (!(_.isEmpty(name))) {
+                        values[name] = $element.val();
+                        values[encoded_password] = $element.val();
+
+                    }
+
+                }
+            });
+
+            this.currentUserModel.save(values, {
+                wait: true,
+                success: function (model, response) {
+                    $select.chosen('destroy');
+
+                    $modal.modal('hide');
+
+                },
+
+            });
+
+        },
+        deleteUser: function(e) {
+            var $modal = $('#modal-user-form');
+
+            if(confirm('정말로 삭제하시겠습니까?')) {
+                this.currentUserModel.destroy({
+                    wait: true,
+                    success: function (model, response) {
+                        $modal.modal('hide');
+
+                    },
+
+                });
+
+            }
+
+        },
+
+    });
+
+    var UserApp = new UserListView;
+
+
+    BranchList.reset(JSON.parse([[${branchListJSON}]]));
+
+    UserList.reset(JSON.parse([[${userListJSON}]]));
+
+});
+
+// ]]></script>
+<!-- Chosen : https://github.com/harvesthq/chosen -->
+<link rel='stylesheet' th:href='@{/lib/chosen/chosen.css}' />
+<script th:src='@{/lib/chosen/chosen.jquery.js}' ></script>
+<!-- Validation : https://jqueryvalidation.org/documentation/ -->
+<script th:src='@{/lib/jquery-validation/dist/jquery.validate.min.js}' ></script>
+

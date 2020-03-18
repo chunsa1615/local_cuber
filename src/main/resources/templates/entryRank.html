@@ -1,0 +1,364 @@
+<script th:src='@{/lib/fullcalendar/dist/fullcalendar.min.js}'></script>
+<script th:src='@{/lib/fullcalendar/dist/locale/ko.js}'></script>
+<!--<link rel='stylesheet' th:href='@{/lib/jquery-ui/themes/base/jquery-ui.min.css}' />-->
+<link rel='stylesheet' th:href='@{/lib/fullcalendar/dist/fullcalendar.min.css}' />
+<link rel='stylesheet' th:href='@{/lib/fullcalendar/dist/fullcalendar.print.css}' media="print"/>
+
+
+<div class="container-fluid" id="entry-rank-app">
+<section class="row">
+  <!--
+  <div class="col-md-2 col-sm-12">
+	 <h3>학습 누적시간 랭킹</h3>
+  </div>
+    -->
+  	
+
+    <div class="col-md-10 col-sm-12">
+	    <div class="row" >
+		    <form id="searchFrom">				
+					<div class="col-md-4">
+						<div id="calendar"></div>
+					</div>
+					
+					<div class="col-md-4">
+					
+						<div class="form-group">
+							<label class="form-control-label" for="sBranch">지점 선택</label>
+							<select class="form-control chosen" id="branchId" name="branchId">
+								<option value="">-선택-</option>
+								<option th:each="branch : ${branchs}" th:selected="${branch.branchId == sBranch}" th:value="${branch.branchId}" th:text="${branch.name}"></option>
+							</select>											                       
+						<input type="hidden" name="sDate" id="sDate"  />					
+						</div>			
+					</div>
+					
+					<div class="col-md-2">
+						<label class="form-control-label" for="btn-search"></label>
+						<button type="submit" class="btn btn-outline-primary" id="btn-search">검색</button>				
+					
+						<button type="button" class="btn btn-outline-primary" id="btn-excel">Excel 출력</button>
+					</div>				
+	
+		     </form>
+    			
+   			    <div class="col-md-2">
+	                 <div class="form-group">
+	                     <label class="form-control-label" for="allTime" style="font-weight:bold">전 센터 평균 학습시간</label>
+	                     <input type="text" class="form-control" id="allTime" name="allTime" th:value="${allHour} + '시간 ' +${allMin} + '분' " readonly="readonly" />
+	                 </div>
+          		</div> 
+	     </div>
+     </div> 
+</section>
+
+    <section class="row">
+        <table class="table">
+            <!--<colgroup>-->
+                <!--<col width="10%" />-->
+                <!--<col width="30%" />-->
+                <!--<col width="30%" />-->
+                <!--<col width="30%" />-->
+            <!--</colgroup>-->
+            <thead class="thead-inverse">
+                <tr>
+                    <th class="text-xs-center">센터 내 순위</th>
+                    <th class="text-xs-center">전 센터 비교 순위</th>
+                    <th class="text-xs-center">성명</th>
+                    <th class="text-xs-center">전화번호 뒷 4자리</th>
+                    <th class="text-xs-center">소속센터</th>
+                    <th class="text-xs-center">학습시간(월 누적)</th>
+                    <th class="text-xs-center">평균 학습시간</th>
+                    <th class="text-xs-center">출석일 수</th>
+                </tr>
+            </thead>
+            <tbody id="entryRank-list"></tbody>
+
+            <tfoot>                
+            </tfoot>    
+        </table>        
+    </section>            
+	
+	
+	<section th:if="${pageMaker.endPage != 0}">
+	<div style="text-align: center;">
+		<nav aria-label="Page navigation">
+		  <ul class="pagination">
+	    	<li th:if="${pageMaker.prev}" class="page-item">								    
+		      <a class="page-link prev" href="#" aria-label="Previous">
+		        <span aria-hidden="true">&laquo;</span>
+		        <span class="sr-only">Previous</span>
+		      </a>				     
+	   		</li>
+		    <li th:each="page : ${#numbers.sequence(pageMaker.startPage, pageMaker.endPage)}"  class='page-item' th:value="${page}" th:classappend="${page == pageMaker.page.page ? 'active' :''}">	 			     
+		    	<a class="page-link button"  id="page-linkbutton" th:text="${page}" th:value="${page}" href="#"></a>						  
+		    </li>
+			<li th:if="${pageMaker.next}" class="page-item">
+		      <a class="page-link next" href="#" aria-label="Next">
+		        <span aria-hidden="true">&raquo;</span>
+		        <span class="sr-only">Next</span>
+		      </a>
+		    </li>
+		  </ul>
+		</nav>
+	</div>
+	</section>
+	
+</div>
+
+<script th:inline="javascript" type="text/template" id="entryRank-template"><![CDATA[ -->
+    <td>
+        <label class="view">{{- rank }}</label>
+    </td>
+    <td>
+        <label class="view">{{- allRank }}</label>
+    </td>    
+    <td>
+        <label class="view">{{- name }}</label>
+    </td>
+    <td>
+        <label class="view">{{- no }}</label>
+    </td>
+    <td>
+        <label class="view">{{- branchNm }}</label>
+    </td>    
+    <td>
+        <label class="view">{{- hour }}시간 {{- min}}분</label>
+    </td>
+    <td>
+        <label class="view">{{- avgHour }}시간 {{- avgMin}}분</label>
+    </td>
+    <td>
+        <label class="view">{{- cnt }}</label>
+    </td>      
+<!-- ]]> --></script>
+
+<script th:include="event_tmpl_form_new_application" th:inline="javascript" type="text/template" id="new-application-form-template"></script>
+
+<script th:inline="javascript">// <![CDATA[
+//$(document).ready(function() {
+$(function() {
+	var sDate = null;	
+	if ([[${sDate}]] != null) {
+		sDate = [[${sDate}]];
+	}
+	initCalendar(sDate);
+	var branchId = null;
+	if ([[${sBranch}]] != null) {
+		branchId = [[${sBranch}]];
+	}
+	
+	
+	
+	var $sForm = $('#searchFrom');
+	
+	$('#calendar').fullCalendar('removeEventSources');
+	initCalendar(sDate);
+
+	moment.updateLocale('en', null);
+
+	// Branch
+	var BranchModel = Backbone.Model.extend({
+	    idAttribute: 'branchId',
+	    defaults: function() {
+	        return {
+	            name: '', hpUrl: '',
+	            tel: '', telEtc: '', postcode: '', address1: '', address2: '',
+	            locNote: '', locUrl: '', opNote: '',
+	        };
+	    },
+	});
+	
+	var BranchListCollection = Backbone.Collection.extend({
+	    model: BranchModel,
+	    url: [[@{/admin/api/branches}]],
+	
+	});
+	
+	var BranchList = new BranchListCollection();
+	
+	var EntryRankList = new EntryRankListCollection;
+	EntryRankList.branchId = branchId;
+	EntryRankList.sDate = sDate;
+	
+	var EntranRankListAll = [[${entryRankListAll}]];
+	/////////////////////////////////////////////////////////////////////////////////////////
+
+		//var branchId = $(this).val();
+		//var branchNm = $("#sBranch option:selected").text();
+		
+		//initCalendar(map);
+		//methodCalendar(map, branchId);		
+		
+		var genderTypes = [[${genderTypes}]];
+		var roomTypes = [[${roomTypes}]];
+		var cmpRouteTypes = [[${cmpRouteTypes}]];
+		
+	    var EntryRankView = Backbone.View.extend({
+	        tagName: 'tr',
+	        className: 'entryRank',
+	        template: _.template($('#entryRank-template').html()),
+	        events: {
+	        },
+	        initialize: function() {
+	            this.listenTo(this.model, 'change', this.change);
+	            this.listenTo(this.model, 'destroy', this.remove);
+
+	        },
+	        change: function() {
+	            this.render();
+
+	        },
+	        render: function() {
+	            var data = this.model.toJSON();
+	            var allData = EntranRankListAll;
+
+	            allData.forEach(function(allItem) {
+		            if (allItem.memberId == data.memberId) {
+		            	data.allRank = allItem.rank;
+		            }
+	            	
+	        	}); 
+	            
+	            this.$el.html(this.template(data));
+	            return this;
+
+	        },
+	    });
+				
+	    var BranchEntryRankView = Backbone.View.extend({
+	        el: $('#entry-rank-app'),
+	        events: {
+	        	'click .page-link.button' : 'paging',
+				'click .page-link.prev'  : 'prevPaging',
+				'click .page-link.next'  : 'nextPaging',
+				'click #btn-excel'  : 'btnExcel',				
+
+	        },
+
+	        initialize: function() {
+	            this.listenTo(EntryRankList, 'add', this.addOneEntryRankList);
+	            this.listenTo(EntryRankList, 'reset', this.reset);
+
+	        },
+	        reset: function() {
+	        	EntryRankList.forEach(this.addOneEntryRankList);
+	        	
+	            //var stats = EntryList.getStats();
+
+	            //$('#totalUsage').text(stats['totalUsageHour'] + ' 시간 ' + stats['totalUsageMinute'] + ' 분');
+
+	        },
+	        render: function() {
+
+	        },
+	        addOneEntryRankList: function(entryRank) {
+	        	var view = new EntryRankView({ model: entryRank });
+	            this.$('#entryRank-list').append(view.render().el);
+
+	        },
+	        paging: function(e) {
+	        	paging(e);
+
+	        	
+	        },
+	        prevPaging: function(e) {
+        		var page = [[${pageMaker.startPage -1}]];
+	        	prevPaging(e, page);
+
+	        		   
+	        },
+	        nextPaging: function(e) {
+	        	var page = [[${pageMaker.endPage +1}]];
+	        	nextPaging(e, page);
+	        	
+	        },
+	        btnExcel: function(e) {
+	        	if (branchId == null) {
+	        		alert('센터를 선택하세요.');
+	        	} else {
+	        		$sForm.attr("action", "/e/" + branchId + "/entryRank/excelExtract");
+			    	$sForm.submit();
+			    	$sForm.attr("action", "");	
+	        	}
+	        	
+	        }
+
+	    });
+	    
+		var BranchEntryRankViewApp = new BranchEntryRankView;
+		EntryRankList.reset(JSON.parse([[${branchEntryRankJSON}]]));
+		
+		$('#calendar .fc-prev-button').click(function(){
+			$('#sDate').val($('#calendarDate').text());
+		});
+		
+		$('#calendar .fc-today-button').click(function(){						
+			$('#sDate').val($('#calendarDate').text());
+		});
+		
+		$('#calendar .fc-next-button').click(function(){						
+			$('#sDate').val($('#calendarDate').text());
+		});
+
+		$('#entryRank-list .entryRank').attr('align', 'center');
+
+});
+
+function initCalendar(sDate) {
+
+	if ($('#calendar').length > 0) {
+     	var renderedYearMonth;
+		var todayDt;
+		var endDt;	  
+	    
+		$('#calendar').fullCalendar({
+
+		      option : {
+		        contentHeight: 600
+		      },
+		      header : {
+		        left : 'prev, today, next ',
+		        center : 'title',
+		        right : ''
+		      },
+		      views: {
+		    	    month: { // name of view
+		    	      titleFormat: 'YYYY-MM'
+		    	      // other view-specific options here
+		    	    }
+		      },
+		      //defaultDate: sDate,
+		      editable : false,
+		      eventLimit : false,
+		      eventClick : function(event, jsEvent, view) {
+		   
+		      }
+		 });			
+		
+
+	    
+
+	}
+	$('#calendar .fc-view-container').hide();
+	$('#calendar .fc-center').attr('id', 'calendarDate');	
+	$('#sDate').val($('#calendarDate').text());
+}
+
+
+
+	
+//]]></script>
+
+<script th:src='@{/common/api_branch_entryRank.js}' ></script>
+
+<!-- DatePicker : https://bootstrap-datepicker.readthedocs.io/en/latest/ -->
+<script th:src='@{/lib/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js}' ></script>
+<script charset='UTF-8' th:src='@{/lib/bootstrap-datepicker/dist/locales/bootstrap-datepicker.ko.min.js}' ></script>
+<link rel='stylesheet' th:href='@{/lib/bootstrap-datepicker/dist/css/bootstrap-datepicker3.min.css}' />
+
+<!-- Chosen : https://github.com/harvesthq/chosen -->
+<link rel='stylesheet' th:href='@{/lib/chosen/chosen.css}' />
+<script th:src='@{/lib/chosen/chosen.jquery.js}' ></script>
+
+<script th:src='@{/lib/jquery-validation/dist/jquery.validate.min.js}' ></script>

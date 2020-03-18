@@ -1,0 +1,328 @@
+
+<!DOCTYPE html>
+<!--[if lt IE 8]> <html class="lt-ie10 lt-ie9 lt-ie8" lang="ko"> <![endif]-->
+<!--[if IE 8]>    <html class="lt-ie10 lt-ie9" lang="ko"> <![endif]-->
+<!--[if IE 9]>    <html class="lt-ie10" lang="ko"> <![endif]-->
+<!--[if gt IE 9]><!--> <html lang="ko"> <!--<![endif]-->
+<head>
+	<!-- Head -->
+	<!--  <%@ include file="../common/defaultHeaderImport.jsp" %>  -->
+	<!-- //Head -->	
+</head>
+<body>
+	<div id="wrap">
+		<!-- 헤더영역 --> 
+		<!--  <%@ include file="../common/commonHeader.jsp" %>  -->
+		<!-- //헤더영역 -->
+
+		<!-- 컨텐츠 영역 -->
+		<section id="container">		
+			<!-- lnb -->
+			<!-- <%@ include file="../common/commonLnbCompany.jsp" %>  -->
+			<!-- //lnb -->
+
+			<div id="contents">
+				<h2 id="pageTit" class="page_tit">법인정보</h2>
+				
+				<div class="cont_in">
+					<table class="table2">
+						<colgroup>
+							<col style="width:150px" />
+							
+							<col style="width:150px" />
+							
+						</colgroup>
+						<tbody>
+							<tr>
+								<th scope="row">법인</th>
+								<td>
+									<input type="text" class="input w200" id="corp_cd" />
+								</td>
+								<th scope="row">사업자번호</th>
+								<td>
+									<input type="text" class="input w200" id="corp_reg_num" />
+								</td>
+							</tr>
+							<tr>
+								<th scope="row">사용여부</th>
+								<td colspan="3">
+									<select class="select w200" id="use_yn">
+										<option value="">전체</option>
+										<option value="Y">사용</option>
+										<option value="N">비사용</option>
+									</select>
+								</td>
+							</tr>
+						</tbody>
+					</table>
+					<div class="t_right mt20">
+						<p>
+							<OBJECT ID="Pay" NAME="PAY" CLASSID="CLSID:B57247C5-A1EB-4D04-9669-C1B4A8BE982C" width="200" height="20"></OBJECT>
+						</p>					
+						<button class="button btn_gray h100 w100" id="select_btn">결제요청</button>
+						<button class="button btn_green h100 w100" id="add_btn">취소요청</button>
+						<button class="button btn_red h100 w100" id="delete_btn">프린트</button>
+						<button class="button btn_black h100 w100" id="cancel_btn">현금영수증 요청</button>
+						<button class="button btn_blue h40 w100" id="save_btn">저장</button>
+					</div>
+					<hr/>
+					
+					<div class="grid_wrap">
+						<div class="left">
+							<!-- 테이블 -->
+							<table id="jqGrid"></table>
+							<div id="jqGridPager"></div>
+						</div>
+						<div class="right">
+						<form id="ajaxForm">
+							<table class="table tbl_left">
+								<caption>테이블 제목</caption>
+								<colgroup>
+									<col style="width:15%;" />
+									<col style="width:35%;" />
+									<col style="width:15%;" />
+									<col style="width:35%;" />
+								</colgroup>
+								<tbody>
+									<tr>
+										<th scope="row">법인코드</th>
+										<td colspan="3"><input data-valid-message="법인코드" data-valid-required="true" data-valid-maxlength="10" type="text" class="input readonly w200" name="corpCd" readonly="readonly" /></td>
+									</tr>
+									<tr>
+										<th scope="row">법인</th>
+										<td colspan="3"><input type="text" data-valid-message="법인명" data-valid-required="true" data-valid-maxlength="10" class="input w200" name="compNm" /></td>
+									</tr>
+									<tr>
+										<th scope="row">사업자번호</th>
+										<td><input type="text" class="input w200" data-valid-message="사업자번호" data-valid-required="true" data-valid-maxlength="10" name="corpRegNum" /></td>
+										<th scope="row">대표자</th>
+										<td><input type="text" class="input w200" data-valid-message="대표자명" data-valid-required="true" name="represNm" /></td>
+									</tr>
+									<tr>
+										<th scope="row">주소</th>
+										<td colspan="3">
+											<span class="inp_search">
+												<input type="text" name="zipNum" data-valid-message="우편번호" data-valid-required="true" data-valid-maxlength="7" id="postcode" class="input readonly" placeholder="우편번호" readonly="readonly" /><a class="button btn_fa" href="javascript:daumPostcode()" ><i class="fa fa-search" aria-hidden="true" ></i></a>
+											</span>
+											<p class="mt10"><input name="addr1" type="text" data-valid-message="우편주소" data-valid-required="true" id="address" class="input readonly w400" readonly="readonly"  placeholder="우편주소" /></p>
+											<p class="mt10"><input name="addr2" type="text" data-valid-message="상세주소" data-valid-required="true" id="address2" class="input w400" placeholder="상세주소" /></p>
+										</td>
+									</tr>
+									<tr>
+										<th scope="row">업태</th>
+										<td><input type="text" data-valid-message="업태명" data-valid-required="true" class="input w200" name="businCondNm" /></td>
+										<th scope="row">업종</th>
+										<td><input type="text" data-valid-message="업종명" data-valid-required="true" class="input w200" name="businTypeNm" /></td>
+									</tr>
+									<tr>
+										<th scope="row">회계년도개시월</th>
+										<td colspan="3"><input type="text" data-valid-message="회계년도개시월" data-valid-required="true" data-valid-regex="true" data-valid-maxlength="2" class="input w200" name="FINAN_O_MM" /></td>
+									</tr>
+									<tr>
+										<th scope="row" rowspan="3">마감년월</th>
+										<td>
+											<strong class="subth">수불</strong><span class="datepicker_wrap">
+											<input class="input datepicker_month" data-valid-message="수불" data-valid-required="true" data-valid-maxlength="7" type="text" name="closeYm1" title="날짜입력" /></span>
+										</td>
+										<td colspan="2">
+											<strong class="subth">미수</strong>
+											<span class="datepicker_wrap">
+											<input class="input datepicker_month" data-valid-message="미수" data-valid-required="true" data-valid-maxlength="7"  type="text" name="closeYm2" title="날짜입력" /></span>
+										</td>
+									</tr>
+									<tr>
+										<td>
+											<strong class="subth">판매</strong><span class="datepicker_wrap">
+											<input class="input datepicker_month" data-valid-message="판매" data-valid-required="true" data-valid-maxlength="7"  type="text" name="closeYm3" title="날짜입력" /></span>
+										</td>
+										<td colspan="2">
+											<strong class="subth">마일리지</strong><span class="datepicker_wrap">
+											<input class="input datepicker_month" data-valid-message="마일리지" data-valid-required="true" data-valid-maxlength="7"  type="text" name="closeYm4" title="날짜입력" /></span>
+										</td>
+									</tr>
+									<tr>
+										<td colspan="3">
+											<strong class="subth">SMS</strong><span class="datepicker_wrap">
+											<input class="input datepicker_month" data-valid-message="SMS" data-valid-required="true" data-valid-maxlength="7"  type="text" name="closeYm5" title="날짜입력" /></span>
+										</td>
+									</tr>
+									<tr>
+										<th scope="row" rowspan="2">모바일버전</th>
+										<td>
+											<strong class="subth">웹</strong>
+											<input class="input w100" data-valid-message="웹모바일버전" data-valid-required="true" data-valid-maxlength="4"  name="mobVerWeb" type="text" />
+										</td>
+										<td colspan="2">
+											<strong class="subth">메뉴</strong>
+											<input class="input w100" name="mobVerMenu" type="text" data-valid-message="메뉴모바일버전" data-valid-required="true" data-valid-maxlength="4" />
+										</td>
+									</tr>
+									<tr>
+										<td colspan="3">
+											<strong class="subth">이미지</strong>
+											<input class="input w100" name="mobVerImg" data-valid-message="이미지모바일버전" data-valid-required="true" data-valid-maxlength="4" type="text" />
+										</td>
+									</tr>
+									<tr>
+										<th scope="row">라이센스기간</th>
+										<td colspan="3">
+											<span class="datepicker_wrap">
+											<input class="input datepicker" data-valid-message="라이센스시작일자" data-valid-required="true" data-valid-maxlength="8" name="LICENSE_S_DT" type="text" title="날짜입력" /></span>
+											~
+											<span class="datepicker_wrap">
+											<input class="input datepicker" data-valid-message="라이센스종료일자" data-valid-required="true" data-valid-maxlength="8" name="LICENSE_E_DT" type="text" title="날짜입력" /></span>
+										</td>
+									</tr>
+									<tr>
+										<th scope="row">사용여부</th>
+										<td colspan="3">
+											<select class="select w200" name="useYn">
+												<option value="Y">사용</option>
+												<option value="N">비사용</option>
+											</select>
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</form>
+						</div>
+					</div>
+				</div>
+			</div>
+
+		</section>
+		<!-- //컨텐츠 영역 -->
+
+		<!-- 푸터영역 -->
+		<!--  <%@ include file="../common/commonFooter.jsp" %>  -->
+		<!-- 푸터영역 -->
+	</div>
+
+
+<!-- <OBJECT ID="Pay" NAME="PAY" CLASSID="CLSID:C7483456-A289-439D-8115-601632D005A0" width="200" height="20"></OBJECT>  -->
+
+<!-- <OBJECT ID="Pay" NAME="PAY" CLASSID="CLSID:7B296FB0-376B-497e-B012-9C450E1B7327" width="200" height="20"></OBJECT>  -->
+
+
+
+
+<script type="text/javascript">
+var approvalNo;
+var approvalDate;
+
+
+	//결제요청
+	$("#select_btn").on("click", function() {
+		var pay = document.getElementById("Pay");
+		//var pay = new ActiveXObject("SMTPayAx.Pay.1");		
+		
+		
+		pay.CMDMakePair("승인금액","1004");
+		pay.CMDMakePair("거래구분코드", "01");		
+		pay.CMDReqSend("0101");
+		pay.CMDMakePair("할부개월 및 사용구분","00");
+				
+		
+	});
+	
+	
+	//취소요청
+	$("#add_btn").on("click", function() {
+		var pay = document.getElementById("Pay");
+		//var pay = new ActiveXObject("SMTPayAx.Pay.1");
+		
+		
+		pay.CMDMakePair("승인금액","1004");
+		pay.CMDMakePair("거래구분코드", "01");
+		pay.CMDMakePair("승인번호", approvalNo);
+		pay.CMDMakePair("원거래일자", approvalDate);
+		pay.CMDReqSend("2101");
+		
+		//pay.OnCompleteJob(1, "test");
+		//pay.addEventListener("")
+		//pay.CMDMakePair("할부개월 및 사용구분","00");	
+				
+		
+	});	
+	
+	//현금영수증 요청
+	$("#cancel_btn").on("click", function() {
+		var pay = document.getElementById("Pay");
+		//var pay = new ActiveXObject("SMTPayAx.Pay.1");		
+		
+		
+		pay.CMDMakePair("승인금액","1004");
+		pay.CMDMakePair("거래구분코드", "02");		
+		pay.CMDReqSend("0101");
+		//pay.CMDMakePair("할부개월 및 사용구분","00");
+				
+		
+	});
+	
+	//프린트
+	$("#delete_btn").on("click", function() {
+		var pay = new ActiveXObject("SMTPayAx.Pay.1");
+		
+		var szBuffer = "";
+		szBuffer += "  화면메세지 : " + Pay.GetResultByName("화면메세지");
+		szBuffer += "\r\r  응답코드 : " + Pay.GetResultByName("응답코드");
+		szBuffer += "\r\r  카드번호 : " + Pay.GetResultByName("카드번호");
+		szBuffer += "\r\r  승인번호 : " + Pay.GetResultByName("승인번호");
+		szBuffer += "\r\r  거래번호 : " + Pay.GetResultByName("거래번호");
+		szBuffer += "\r\r  전문추적번호 : " + Pay.GetResultByName("전문추적번호");
+		pay.CMDPrint("szBuffer");
+	});
+	
+			
+</script>
+
+						 
+<script for="Pay" event="OnCompletedJob(nResultCode, strMSG)" language="JavaScript" type="text/javascript">
+alert("OnCompleteJob");
+
+	if ( 1 == nResultCode ) {
+		var szBuffer = "";
+		szBuffer += "  화면메세지 : " + Pay.GetResultByName("화면메세지");
+		szBuffer += "\r\r  응답코드 : " + Pay.GetResultByName("응답코드");
+		szBuffer += "\r\r  카드번호 : " + Pay.GetResultByName("카드번호");
+		szBuffer += "\r\r  승인번호 : " + Pay.GetResultByName("승인번호");
+		szBuffer += "\r\r  거래번호 : " + Pay.GetResultByName("거래번호");
+		szBuffer += "\r\r  전문추적번호 : " + Pay.GetResultByName("전문추적번호");
+		
+		alert(szBuffer);
+		
+		//document.frm.AppNo.value = Pay.GetResultByName("승인번호");
+		//document.frm.AppDate.value = Pay.GetResultByName("매출일자");
+		
+		approvalNo = Pay.GetResultByName("승인번호");
+		approvalDate = Pay.GetResultByName("매출일자");
+		
+		//var pay = document.getElementById("Pay");
+		var pay = new ActiveXObject("SMTPayAx.Pay.1");
+		pay.CMDPrint(szBuffer);
+		
+	} else {
+		alert(strMSG);
+	}
+
+</script>
+
+<script for="Pay" event="OnCompletedPrint(nPrintedCount)" language="JavaScript" type="text/javascript">
+	alert("OnCompletedPrint");
+	
+	if (0 == nPrintedCount) {
+		alert("프린트가 정상적으로 처리됐습니다.");
+	} else {
+		alert(nPrintedCount + "장이 미 프린팅 됐습니다.");
+	}
+
+</script>
+
+
+
+
+
+</body>
+</html>
+
+

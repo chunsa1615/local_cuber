@@ -1,0 +1,38 @@
+{
+  "name": "scc-web",
+  "homepage": "http://cntt.co.kr/",
+  "authors": [
+    "CNTT"
+  ],
+  "description": "CNT Study Cafe/Center Web Application",
+  "main": "",
+  "license": "-",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery": "1.12.4",
+    "bootstrap": "v4.0.0-alpha.3",
+    "tether": "^1.3.2",
+    "jquery-ui": "^1.11.4",
+    "font-awesome": "^4.6.3",
+    "chosen": "^1.5.1",
+    "backbone": "^1.3.3",
+    "bootstrap-datepicker": "^1.6.1",
+    "moment": "^2.13.0",
+    "jquery-validation": "^1.15.0",
+    "animejs": "*",
+    "holderjs": "^2.9.3",
+    "intl-tel-input": "^9.0.2",
+    "d3": "^4.2.1",
+    "interact": "^1.2.6",
+    "typeahead.js": "^0.11.1",
+    "backbone.paginator": "^2.0.5",
+    "fullcalendar": "^3.0.1"
+  }
+}

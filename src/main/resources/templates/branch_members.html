@@ -1,0 +1,983 @@
+<style>
+.input-group .form-control.emailText {
+	width: 44.8%;
+	box-sizing: border-box;
+}
+.input-group .form-control.temp {
+	width: 40px;
+}
+@media screen and (max-width: 532px) {
+	.input-group .form-control.emailText {
+		width: 43%;
+	}
+}
+</style>
+
+<div class="container-fluid" id="member-list-app">
+    <section class="row">
+        <div class="col-md-2 col-sm-12">
+            <button type="button" class="btn btn-outline-primary" id="btn-form-new-member">회원 추가</button>
+        </div>
+        <div class="col-md-10 col-sm-12">
+            <form id="searchFrom">
+                <div class="row">
+                    <div class="col-md-5">
+                        <div class="form-group">
+                            <label class="form-control-label" for="sMember">성명</label>
+                            <select class="form-control chosen" id="sMember" name="sMember">
+                                <option value="">전체</option>
+                                <option th:each="member : ${members}" th:selected="${member.memberId == sMember}" th:value="${member.memberId}" th:text="${member.no + ' ' + member.name}"></option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-control-label" for="btn-search"></label>
+                        <button type="submit" class="btn btn-outline-primary" id="btn-search">검색</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </section>
+    <section class="row">
+        <table class="table">
+            <!--<colgroup>-->
+                <!--<col width="10%" />-->
+                <!--<col width="30%" />-->
+                <!--<col width="30%" />-->
+                <!--<col width="30%" />-->
+            <!--</colgroup>-->
+            <thead class="thead-inverse">
+                <tr>
+                    <th>회원번호</th>
+                    <th>성명</th>
+                    <th>성별</th>
+                    <th>직업</th>
+                    <!--/*<th>전화</th>*/-->
+                    <th>등록내역</th>
+                    <th>출입내역</th>
+                    <th class="p-l-3">-</th>
+                </tr>
+            </thead>
+            <tbody id="member-list"></tbody>
+				<tr>
+					<th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+					<th class="text-xs-left">                        
+                        <label class="view">총 <span id="total"></span> 명</label><br></br>
+                    </th>
+                </tr>
+        </table>
+    </section>
+
+    <div class="modal fade" id="modal-new-member-form" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title"></h4>
+                </div>
+                <div class="modal-body">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="btn-save-new-member">등록</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modal-member-form" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title"></h4>
+                </div>
+                <div class="modal-body">
+                </div>
+                <div class="modal-footer">
+                    <div class="pull-xs-left">
+                        <button type="button" class="btn btn-danger" id="btn-delete-member">삭제</button>
+                    </div>
+                    <button type="button" class="btn btn-primary" id="btn-save-member">수정</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+                </div>
+            </div>
+        </div>
+    </div>
+ 	<section th:if="${pageMaker.endPage != 0}">
+		<div style="text-align: center;">
+			<nav aria-label="Page navigation">
+			  <ul class="pagination">
+		    	<li th:if="${pageMaker.prev}" class="page-item">								    
+			      <a class="page-link prev" href="#" aria-label="Previous">
+			        <span aria-hidden="true">&laquo;</span>
+			        <span class="sr-only">Previous</span>
+			      </a>				     
+		   		</li>
+			    <li th:each="page : ${#numbers.sequence(pageMaker.startPage, pageMaker.endPage)}"  class='page-item' th:value="${page}" th:classappend="${page == pageMaker.page.page ? 'active' :''}">	 			     
+			    	<a class="page-link button"  id="page-linkbutton" th:text="${page}" th:value="${page}" href="#"></a>						  
+			    </li>
+				<li th:if="${pageMaker.next}" class="page-item">
+			      <a class="page-link next" href="#" aria-label="Next">
+			        <span aria-hidden="true">&raquo;</span>
+			        <span class="sr-only">Next</span>
+			      </a>
+			    </li>
+			  </ul>
+			</nav>
+		</div>
+	</section>   
+    
+</div>
+
+<script th:inline="javascript" type="text/template" id="member-template"><![CDATA[ -->
+    <td>
+        <label class="index" data-index="{{- index + 1 }}"><span class="tag tag-primary">{{- no}}</span></label>
+    </td>
+    <td>
+        <label class="view">{{- name }}</label>
+    </td>
+    <td>
+        <label class="view">
+        
+        {{ if(gender == 10) { }}남자{{ } else if(gender == 20) { }}여자{{ } }}
+        </label>
+    </td>
+        <td>				
+		<label class="view">
+			{{ _.each(schoolGrades, function(sg){ }} {{ if(schoolGrade == sg.code) { }}{{- sg.codeNm }}{{ } }} {{ }); }}
+		</label>  
+    	</td>    
+    <td>
+        {{ _.each(pays, function(pay){ }}
+        <div id="{{- pay.payId }}">
+            <span>결제일시 : {{- moment(pay.payDt).format('LL HH:mm') }}</span> <button type="button" class="btn btn-sm btn-outline-secondary btn-view-pay">상세보기</button><br/>
+            <span>{{- _.chain(_.where(desks, {deskId: pay.deskId})).map(function(desk){ return _.findWhere(rooms, {roomId: desk.roomId}).name + ' / ' + desk.name }).first().value() }}</span><br/>
+            <span>{{- moment(pay.deskStartDt).format('LL HH:mm') }}부터 {{- moment(pay.deskEndDt).format('LL HH:mm') }}까지</span>
+        </div>
+        {{ }); }}
+    </td>
+    <td>
+        {{ _.each(entries, function(entry){ }}
+        <div>
+            <div>{{- moment(entry.entryDt).format('LL HH시 mm분') }}에 {{ if(entry.entryType == 1) { }}입실{{ } else if(entry.entryType == 2) { }}퇴실{{ }  else if(entry.entryType == 3) { }}외출{{ }  else if(entry.entryType == 4) { }}복귀{{ } }}</div>
+        </div>
+        {{ }); }}
+    </td>
+    <td>
+        <button type="button" class="btn btn-outline-primary btn-form-member">수정</button>
+        <button type="button" class="btn btn-outline-primary btn-form-new-reservation">등록 추가</button>
+    </td>
+<!-- ]]> --></script>
+
+<script th:include="tmpl_form_member" th:inline="javascript" type="text/template" id="member-form-template"></script>
+<script th:include="modalTest" th:inline="javascript" type="text/template" id="test"></script>
+
+<script th:inline="javascript">// <![CDATA[
+                                     
+$(function(){   
+
+	var pageMaker = [[${pageMaker}]];
+	
+    // Search Form
+    var $sForm = $('#searchFrom');
+    $sForm.find('.chosen').chosen({width: "100%"});
+
+
+    // Room
+    var RoomList = new RoomListCollection;
+    RoomList.branchId = [[${branch.branchId}]];
+
+    // Desk
+    var DeskList = new DeskListCollection;
+    DeskList.branchId = [[${branch.branchId}]];
+
+    // Pay
+    var PayList = new PayListCollection;
+    PayList.branchId = [[${branch.branchId}]];
+
+    // Entry
+    var EntryList = new EntryListCollection();
+    EntryList.branchId = [[${branch.branchId}]];
+
+    // Member
+    var MemberList = new MemberListCollection();
+    MemberList.branchId = [[${branch.branchId}]];
+    
+    // MembershipCard
+    var MembershipCardList = new MembershipCardListCollection();    							 
+    
+    var examTypes = [[${examTypes}]];
+    var jobTypes = [[${jobTypes}]];
+    var interestTypes = [[${interestTypes}]];
+    
+    var schoolGrades = [[${schoolGrades}]];
+
+    
+    
+//     // Reservation
+//     var ReservationList = new ReservationListCollection;
+//     ReservationList.branchId = [[${branch.branchId}]];
+
+//     // Order
+//     var OrderList = new OrderListCollection();
+//     OrderList.branchId = [[${branch.branchId}]];
+
+    
+    var MemberView = Backbone.View.extend({
+        tagName: 'tr',
+        className: 'member',
+        template: _.template($('#member-template').html()),
+        events: {
+            'dblclick' : 'formMember',
+            'click .btn-form-member' : 'formMember',
+            'click .btn-form-new-reservation' : 'goNewReservationPage',
+            'click .btn-view-reservation' : 'goViewReservationPage',
+
+        },
+        initialize: function() {
+            this.listenTo(this.model, 'change', this.render);
+            this.listenTo(this.model, 'destroy', this.remove);
+
+        },
+        render: function() {
+            var data = this.model.toJSON();
+            data['index'] = MemberList.indexOf(this.model);
+
+            data['pays'] = _.map(this.modelsPay, function(model){
+                return model.toJSON();
+            });
+
+            data['entries'] = _.map(this.modelsEntry, function(model){
+                return model.toJSON();
+            });
+
+            data['rooms'] = RoomList.toJSON();
+            data['desks'] = DeskList.toJSON();
+            data['jobTypes'] = jobTypes;
+            data['schoolGrades'] = schoolGrades;
+            //var examTypeText = _.findWhere(examTypes, {value: Number(data.examType)});
+            //data['examTypeText'] = examTypeText ? examTypeText.text : '';
+
+            this.$el.html(this.template(data));
+
+            return this;
+
+        },
+        goNewReservationPage: function(e) {
+            var memberId = this.model.get('memberId');
+            location.assign(ctxRoot + 'branch/' + [[${branch.branchId}]] + '/reservations?action=newReservation&memberId=' + memberId);
+
+        },
+        goViewReservationPage: function(e) {
+//             var payId = $(e.target).parent().attr('id');
+//             var pay = PayList.findWhere({payId: payId });
+//             var payDt = pay.get('reservationDt');
+
+//             var payStartDt = moment(payDt).format('YYYY-MM-DD');
+//             var payEndDt = payStartDt;
+
+//             var memberId = this.model.get('memberId');
+//             location.assign(ctxRoot + 'branch/' + [[${branch.branchId}]] + '/pays?sPayStartDt=' + payStartDt +  '&sPayEndDt=' + payEndDt + '&sMember=' + memberId);
+
+        },
+        formMember: function(e) {
+            MemberList.trigger('formMember', this.model);
+
+        },
+    });
+
+    var MemberListView = Backbone.View.extend({
+        el: $('#member-list-app'),
+        templateForForm: _.template($('#member-form-template').html()),
+        currentMemberModel: null,
+        events: {
+            'click #btn-form-new-member': 'formNewMember',
+            'click #btn-save-new-member': 'saveNewMember',
+            'click #btn-save-member': 'saveMember',
+            'click #btn-delete-member': 'deleteMember',
+            'click .page-link.button' : 'paging',
+			'click .page-link.prev'  : 'prevPaging',
+			'click .page-link.next'  : 'nextPaging',
+            
+        },
+        initialize: function() {
+            this.listenTo(MemberList, 'add', this.addOneMember);
+            this.listenTo(MemberList, 'formMember', this.formMember);
+            this.listenTo(MemberList, 'reset', this.reset);
+
+        },
+        reset: function() {
+            MemberList.forEach(this.addOneMember);
+
+            $('#total').text(pageMaker.totalCount);
+            
+            $(document).trigger('appLoaded');
+
+        },
+        render: function() {
+
+        },
+        formNewMember: function(e) {
+            var data = new MemberModel().toJSON();
+            
+            data['flag'] = true;
+            data['examType'] = -1;
+            data['examTypes'] = examTypes;
+            
+            data['jobType'] = 0;            
+            data['jobTypes'] = jobTypes;
+            
+            data['interestType'] = 0;
+            data['interestTypes'] = interestTypes;
+            data['emailText'] = '';
+            data['emailAdd'] = '';
+            data['emailAddText'] = '';
+            
+            data['schoolGrades'] = schoolGrades;
+            data['appMemberFlag'] = false;
+            data['remainTime'] = 0; 
+            //data['promotionYes'] = 0;
+            
+            var bodyHtml = this.templateForForm(data);
+            var $modal = $(this);
+            
+            var schools = new Bloodhound({
+                datumTokenizer: Bloodhound.tokenizers.whitespace,
+                queryTokenizer: Bloodhound.tokenizers.whitespace,
+                prefetch: ctxRoot + 'api/v1/branch/' + [[${branch.branchId}]] + '/schools',
+
+            });
+
+            
+            
+            
+            $('#modal-new-member-form')
+            .one('show.bs.modal', function(e) {
+                var $modal = $(this);
+                $modal.find('.modal-title').html('새 회원');
+                $modal.find('.modal-body').html(bodyHtml);
+
+                /*
+                // 다음 회원번호
+                getMembersNextNo([[${branch.branchId}]], function(data){
+                    $modal.find('[name=no]').val(data);
+
+                });
+                */
+
+                $modal.find('[name=emailSelect]').on('change', function() {
+					var emailAdd = $(this).val();
+					$('#modal-new-freeApplication-form').find('[name=emailAdd]').val(emailAdd);
+				});
+                
+                $modal.find('.datepicker').datepicker({ language: 'ko', autoclose: true, startView: 'years', });
+
+                $modal.find('.typeahead').typeahead(null, {
+                    name: 'school',
+                    source: schools,
+                    classNames: {
+                        input: 'form-control',
+                    },
+                });
+
+                $modal.find('[name=tel]').on('change', function() {
+                    var no = $(this).val().replace(/-/g, '').substr(-4, 4);
+                    $('#modal-new-member-form').find('[name=no]').val(no);
+
+
+                });
+                
+                $modal.find('.chosen').chosen({width: "100%"});
+            })
+            .one('shown.bs.modal', function(e) {
+                var $modal = $(this);
+                $modal.find('[name=name]').focus();
+
+                $modal.find('form').on('submit', function(e) {
+                    e.preventDefault();
+
+                });
+                
+
+           	 	// 회원번호 조회
+				var memberNo = [];
+                getMembersNo([[${branch.branchId}]], function(data){                	
+                	memberNo = data;                	
+                });
+                
+                $.validator.addMethod(
+                	'chkDuplicationMemberNo', function (value, element) {					
+		                var temp;
+		          		$.each(memberNo, function (index, item){
+		                	
+		          			if(data.no == item) {
+		                		return true;
+		                	}
+		                	else {
+		          				if(value == memberNo[index]) {
+		                			temp = memberNo[index];
+		                			return false;
+		                		}
+		                		else {
+		                			return true;
+		                		}
+		                	}
+		                	
+		                	
+		                	});
+		          			return (value != temp);
+		            		
+		                	}, '회원번호가 이미 등록되어 있습니다'
+                );
+                
+                $.validator.addMethod(
+                    	'chkDuplicationForMembershipNo', function (value, element) {					
+                    		//var no = $('input[name=membershipNo]').val();
+                    		var member = MemberList.findWhere({membershipNo: value});
+        	            			if(member && member != '') return false;
+        	            			else {
+        	            				return true;
+        	            			}
+        		                	}, '멤버십 번호가 다른 회원에 이미 등록되어 있습니다'
+        	                	
+             	);
+                
+                $.validator.addMethod(
+                    	'chkRegistrationForMembershipNo', function (value, element) {					
+                    		var membershipno = $('input[name=membershipNo]').val();
+                    		if (membershipno == null || membershipno == '') return true;
+                    		var membershipCard = MembershipCardList.findWhere({membershipId: membershipno});                    		
+                   				if(membershipCard ) return true;        	            			        	            	        	            			
+       	            			else {
+       	            				return false;
+       	            			}
+
+       		                	}, '멤버십 번호가 등록되어 있지 않습니다'
+
+             	);
+                
+                $.validator.addMethod(
+                    	'chkNumeric', function (value, element) {					
+    		                return this.optional(element) || /^[0-9]+$/.test(value);
+    		                
+    		                	}, '숫자만 사용 가능합니다'
+    		                	
+                );  
+                
+                $.validator.addMethod(
+                    	'chkTel', function (value, element) {					
+                    		if (value == null || value == '') return true;
+                    		
+                    		if (value.match('-')) {
+                    			if (/^(?:(010-\d{4})|(01[1|6|7|8|9]-\d{3,4}))-(\d{4})$/.test(value)) {
+                    				return true;
+                    			} else {
+                    				return false;	
+                    			}
+                    		} else {
+                    			if (/^(?:(010\d{4})|(01[1|6|7|8|9]\d{3,4}))(\d{4})$/.test(value)) {
+                    				return true;
+                    			} else {
+                    				return false;
+                    			}
+                    		}
+
+
+       		                }, '휴대폰 번호의 형식이 올바르지 않습니다.'
+
+             	);
+                
+                $.validator.addMethod(
+                    	'chkSelect', function (value, element) {					
+                    		var grade = $("#schoolGrade option:selected").val();
+                    		if (grade == '' || grade == null) {
+                    			return false;
+                    		} else {
+                    			true;
+                    		}
+
+
+       		                }, '학년을 선택하세요.'
+
+             	);                
+                
+                
+        	    $modal.find('form').validate({
+        			rules: {
+        				no: {
+        					required: true,
+        					minlength: 4,
+        					chkDuplicationMemberNo: true,
+        					chkNumeric: true,
+        				},
+        				membershipNo: {
+        					chkDuplicationForMembershipNo: true,
+        					chkRegistrationForMembershipNo: true,
+        				},	
+        				name: {
+        					required: true,
+        				},
+        				tel:{
+        					required: true,
+        					chkTel: true,
+        				},
+        				telParent:{
+        					chkTel: true,
+        				},
+        				gender:{
+        					required: true,
+        				},
+        				schoolGrade:{
+        					required: true,
+        				},
+        				
+        			},
+        			messages: {
+        				no: {            	
+        					required: "회원번호를 입력하세요",
+        					minlength: "최소 4자리를 입력하세요",
+        				},
+        				name: {
+        					required: "이름을 입력하세요",
+        				},
+        				tel:{
+        					required: "전화번호를 입력하세요",
+        				},
+        				gender:{
+        					required: "성별을 선택하세요",
+        				},
+        				schoolGrade:{
+        					required: "학년을 선택하세요",
+        				},
+        				
+        				
+        			}
+        	    });
+                
+            })
+            .modal();
+
+        },
+        saveNewMember: function(e) {
+            var values = {};
+            var $modal = $('#modal-new-member-form');
+
+            var $inputs = $modal.find(':input');
+			var $form = $modal.find('form');
+            
+			if($form.valid()) {
+	            $inputs.each(function(i, element) {
+	                var $element = $(element);
+	                if ($element.is('[type=radio]')) {
+	                    if ($element.is(':checked')) {
+	                        values[$element.attr('name')] = $element.val();
+	                    }
+	
+	                }
+					else if( $element.is('[type=checkbox]')){
+	                	
+	                	var chk = $(this).is(":checked");//.attr('checked');
+	                   
+	                	if(chk){ 
+	                
+	                    	values[$element.attr('name')] = "1";
+	                       
+	                    }
+	                }
+					 else {
+		                    var name = $element.attr('name');
+		                    if (!(_.isEmpty(name))) {
+		                        values[name] = $element.val();
+                   			}
+					}
+	
+	            });
+	            
+	            var email;
+	            if (values['emailAdd'] == "") {
+	            	values['emailAdd'] = values['emailAddText'];
+	            }
+	            if (values['emailText']) {
+	            	email = values['emailText'] + '@' + values['emailAdd'];	
+	            	values['email'] = email; 
+	            }
+	            
+				if (values['membershipNo'] == '') values['membershipNo'] = null; 
+	            
+				MemberList.create(values, {
+	                wait : true,
+	                success : function (model, response) {
+	                    model.set('memberId', response.memberId);
+	                    model.set('insertDt', response.insertDt);
+	                    model.set('updateDt', response.updateDt);
+	
+	                    $modal.modal('hide');
+						location.reload();
+	                    
+	                }
+	
+	            });
+			}
+			
+        },
+        addOneMember: function(member) {
+            //debugger;
+            //member[jobTypes] = jobTypes;
+        	var view = new MemberView({ model: member });
+
+            view.modelsPay = PayList.where({memberId: member.get('memberId') });
+
+            view.modelsEntry = EntryList.where({memberId: member.get('memberId') });
+
+            this.$('#member-list').append(view.render().el);
+
+        },
+        formMember: function(model) {
+        	var appMemberFlag = false
+        
+        	this.currentMemberModel = model;
+
+            var data = model.toJSON();
+
+            var titleHtml = '회원번호 : ' + data.no;
+
+			if (data['email'] == null || data['email'] == '') {
+				data['emailText'] = '';
+				data['emailAdd'] = '';
+			}
+			else {
+				var telStr = data['email'].split('@');
+				data['emailText'] = telStr[0];
+				data['emailAdd'] = telStr[1];
+			}
+			
+            data['flag'] = true;
+            data['examTypes'] = examTypes;
+            data['jobTypes'] = jobTypes;
+            data['interestTypes'] = interestTypes;
+            data['schoolGrades'] = schoolGrades;
+            if (data.no.indexOf("C") != -1) {
+            	appMemberFlag = true;
+            	
+            }
+            data['appMemberFlag'] = appMemberFlag;           
+            
+            var bodyHtml = this.templateForForm(data);
+
+            var schools = new Bloodhound({
+                datumTokenizer: Bloodhound.tokenizers.whitespace,
+                queryTokenizer: Bloodhound.tokenizers.whitespace,
+                prefetch: ctxRoot + 'api/v1/branch/' + [[${branch.branchId}]] + '/schools',
+
+            });
+            
+            
+            $('#modal-member-form')
+            .one('show.bs.modal', function(e) {
+                var $modal = $(this);
+                
+                $modal.find('.modal-title').html(titleHtml);
+                $modal.find('.modal-body').html(bodyHtml);
+                
+				$modal.find('[name=emailSelect]').on('change', function() {
+					var emailAdd = $(this).val();
+					$('#modal-freeApplication-form').find('[name=emailAdd]').val(emailAdd);
+				});
+
+                $modal.find('.datepicker').datepicker({ language: 'ko', autoclose: true, startView: 'years', });
+                $modal.find('.chosen').chosen({width: "100%"});
+
+                if (appMemberFlag == true) {
+                	$("#examType").attr('disabled', true).trigger("chosen:updated");
+                }                               
+                
+                $modal.find('.typeahead').typeahead(null, {
+                    name: 'school',
+                    source: schools,
+                    classNames: {
+                        input: 'form-control',
+                    },
+                });
+
+                $modal.find('[name=tel]').on('change', function() {
+                    var no = $(this).val().replace(/-/g, '').substr(-4, 4);
+                    $('#modal-member-form').find('[name=no]').val(no);
+
+
+                });
+
+                $modal.find('form').on('submit', function(e) {
+                    e.preventDefault();
+
+                });
+                
+           	 	// 회원번호 조회
+				var memberNo = [];
+                getMembersNo([[${branch.branchId}]], function(data){                	
+                	memberNo = data;                	
+                });
+                
+                $.validator.addMethod(
+                	'chkDuplicationMemberNo', function (value, element) {
+		                var temp;
+		          		$.each(memberNo, function (index, item){
+		                	if(data.no == item) {
+		                		return true;
+		                	}
+		                	else {
+		          				if(value == memberNo[index]) {
+		                			temp = memberNo[index];
+		                			return false;
+		                		}
+		                		else {
+		                			return true;
+		                		}
+		                	}
+		                	
+		                	});
+		          			return (value != temp);
+		            		
+		                	}, '회원번호가 이미 등록되어 있습니다'
+                );
+                
+                var originNo = $('input[name=membershipNo]').val();
+                $.validator.addMethod(
+                    	'chkDuplicationForMembershipNo', function (value, element) {					
+                    		var no = $('input[name=membershipNo]').val();
+                    		if(originNo != no) { 
+	                    		var member = MemberList.findWhere({membershipNo: no});
+	        	            			if(member && member != '') return false;
+	        	            			else {
+	        	            				return true;
+	        	            			}
+                    		}
+                    		else return true;
+	        		                	}, '멤버십 번호가 다른 회원에 이미 등록되어 있습니다'
+                    		
+        	                	
+             	);
+                
+                $.validator.addMethod(
+                    	'chkRegistrationForMembershipNo', function (value, element) {					
+                    		var membershipno = $('input[name=membershipNo]').val();
+                    		if (membershipno == null || membershipno == '') return true;
+                    		var membershipCard = MembershipCardList.findWhere({membershipId: membershipno});                    		
+                   				if(membershipCard ) return true;        	            			        	            	        	            			
+       	            			else {
+       	            				return false;
+       	            			}
+
+       		                	}, '멤버십 번호가 등록 되어있지 않습니다'
+
+             	);
+                
+                $.validator.addMethod(
+                    	'chkNumeric', function (value, element) {					
+    		                return this.optional(element) || /^[0-9]+$/.test(value);
+    		                
+    		                	}, '숫자만 사용 가능합니다'
+    		                	
+                    );  
+                
+        	    $modal.find('form').validate({
+        			rules: {
+        				no: {
+        					required: true,
+        					minlength: 4,
+        					chkDuplicationMemberNo: true,
+        					chkNumeric: true,
+        				},
+        				membershipNo: {
+        					chkDuplicationForMembershipNo: true,
+        					chkRegistrationForMembershipNo: true,
+        				},
+        				name: {
+        					required: true,
+        				},
+        				tel:{
+        					required: true,
+        				},
+        				
+        			},
+        			messages: {
+        				no: {            	
+        					required: "회원번호를 입력하세요",
+        					minlength: "최소 4자리를 입력하세요",
+        				},
+        				name: {
+        					required: "이름을 입력하세요",
+        				},
+        				tel:{
+        					required: "전화번호를 입력하세요",
+        				},
+        				
+        			}
+        	    });                
+                
+
+            })
+            .modal();
+            
+            $('#no').prop('disabled', true);
+            $('#personalYn').prop('disabled', true);
+            $('#utilYn').prop('disabled', true);
+
+        },
+        saveMember: function(e) {
+            var values = {};
+            var $modal = $('#modal-member-form');
+
+			var $form = $modal.find('form');
+            
+			if($form.valid()) {
+	            var $inputs = $modal.find(':input');
+	            $inputs.each(function(i, element) {
+	                var $element = $(element);
+	                if ($element.is('[type=radio]')) {
+	                    if ($element.is(':checked')) {
+	                        values[$element.attr('name')] = $element.val();
+	                        console.log($element.attr('type') + " : " +$element.val());
+	                    }
+	                   	                }
+	                else if( $element.is('[type=checkbox]')){
+	                	
+	                	var chk = $(this).is(":checked");//.attr('checked');
+	                    if(chk){ 
+	                    	
+	                    	values[$element.attr('name')] = "1";
+	                        //console.log("?????"+$element.attr('type') + " : " +$element.val());
+	                        //console.log(values);
+	                    }
+	                   else{  
+	                	  
+	                	   values[$element.attr('name')] = "0";
+	                	   //console.log("?????"+$element.attr('type') + " : " +$element.val());
+	                   }
+						/*
+	                	var is_enterCheck = $("input:checkbox[name='enterexitYes']").is(":checked") == true : false 
+						var is_smsCheck = $("input:checkbox[name='smsYes']").is(":checked") == true : false 
+						
+						// 체크되었다면,
+						if(is_enterCheck){
+							values[$element.attr('name')] = $element.val();
+	                        console.log($element.attr('type') + " : " +$element.val());
+	                        
+						}
+						if(is_smsCheck){
+							values[$element.attr('name')] = $element.val();
+	                        console.log($element.attr('type') + " : " +$element.val());
+						}
+	                	*/
+	                }
+	                else {
+	                    var name = $element.attr('name');
+	                  
+	                    if (!(_.isEmpty(name))) {
+	                        values[name] = $element.val();
+	                    }
+	
+	                }
+	            });
+	           
+	            if (values['membershipNo'] == '') values['membershipNo'] = null; 
+	            console.log(values);
+	            if (values['emailAdd'] == "") {
+	            	values['emailAdd'] = values['emailAddText'];
+	            }
+	            if(values['emailText']) {
+	            	values['email'] = values['emailText'] + '@' + values['emailAdd'];
+	            }
+	            values['remainTime'] = parseInt(values['remainTime']) + parseInt(values['remainTimeAdd']);
+	            
+	            this.currentMemberModel.save(values, {
+	                wait: true,
+	                success: function (model, response) {
+	                    $modal.modal('hide');
+	
+	                },
+	
+	            });
+			}
+
+        },
+        deleteMember: function(e) {
+            var $modal = $('#modal-member-form');
+
+            if(confirm('정말로 삭제하시겠습니까?')) {
+                this.currentMemberModel.destroy({
+                    wait: true,
+                    success: function (model, response) {
+                        $modal.modal('hide');
+
+                    },
+
+                });
+
+            }
+
+        },
+        paging: function(e) {
+			paging(e);
+        	
+        },
+        prevPaging: function(e) {
+        	var page = [[${pageMaker.startPage -1}]];
+        	prevPaging(e, page);
+   
+        },
+        nextPaging: function(e) {
+        	var page = [[${pageMaker.endPage +1}]];
+        	nextPaging(e, page);
+       	
+        },
+        
+    });
+
+    var App = new MemberListView;
+
+    RoomList.reset(JSON.parse([[${roomListJSON}]]));
+    DeskList.reset(JSON.parse([[${deskListJSON}]]));
+    PayList.reset(JSON.parse([[${payListJSON}]]));
+    EntryList.reset(JSON.parse([[${entryListJSON}]]));
+
+    MemberList.reset(JSON.parse([[${memberListJSON}]]));
+    MembershipCardList.reset(JSON.parse([[${membershipNoListJSON}]]));
+});
+
+// ]]></script>
+<script th:inline="javascript" th:if="${!#strings.isEmpty(param.action) and param.action[0] == 'newMember'}">// <![CDATA[
+$(document).one('appLoaded', function(e) {
+    $('#btn-form-new-member').trigger('click');
+
+});
+// ]]></script>
+<script th:src='@{/common/api_branch_room.js}' ></script>
+<script th:src='@{/common/api_branch_desk.js}' ></script>
+<script th:src='@{/common/api_branch_member.js}' ></script>
+<script th:src='@{/common/api_branch_pay.js}' ></script>
+<script th:src='@{/common/api_branch_entry.js}' ></script>
+<script th:src='@{/common/api_branch_membership_card.js}' ></script>
+<!-- DatePicker : https://bootstrap-datepicker.readthedocs.io/en/latest/ -->
+<script th:src='@{/lib/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js}' ></script>
+<script charset='UTF-8' th:src='@{/lib/bootstrap-datepicker/dist/locales/bootstrap-datepicker.ko.min.js}' ></script>
+<link rel='stylesheet' th:href='@{/lib/bootstrap-datepicker/dist/css/bootstrap-datepicker3.min.css}' />
+<!-- Chosen : https://github.com/harvesthq/chosen -->
+<link rel='stylesheet' th:href='@{/lib/chosen/chosen.css}' />
+<script th:src='@{/lib/chosen/chosen.jquery.js}' ></script>
+<!-- Validation : https://jqueryvalidation.org/documentation/
+    INPUT : https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input -->
+<script th:src='@{/lib/jquery-validation/dist/jquery.validate.min.js}' ></script>
+<!-- typeahead.js : https://github.com/twitter/typeahead.js -->
+<script th:src='@{/lib/typeahead.js/dist/typeahead.bundle.min.js}' ></script>

@@ -1,0 +1,79 @@
+<![CDATA[ -->
+<form>
+	<input type="hidden" name="parentsAppId" value="{{- parentsAppId}}" />
+	<input type="hidden" name="parentsNo" value="{{- parentsNo}}" />
+	<input type="hidden" name="parentsId" value="{{- parentsId}}" />
+	<input type="hidden" name="studentAppId" value="{{- studentAppId}}" />
+	<input type="hidden" name="studentNo" value="{{- studentNo}}" />
+	<input type="hidden" name="studentId" value="{{- studentId}}" />
+	<input type="hidden" name="branchId" value="{{- branchId}}" />
+	<div class="container-fluid">
+      	<div class="col-lg-6 col-md-12 col-xs-12">
+      		<div class="form-group">      			
+      			<label class="form-control-label">희망날짜일</label>
+      			<input type="hidden" name="startDt" value="{{- startDt }}" />
+      			<div class="input-group input-daterange">
+	                <span class="input-group-btn">
+	                    <button class="btn btn-secondary" type="button"><i class="fa fa-calendar" aria-hidden="true"></i></button>
+	                </span>
+	                <input type="text" class="form-control datepicker" data-org-input-name="startDt" id="startDt" value="{{- momentDateFormat(startDt) }}" readonly="readonly"  />
+                </div>
+      		</div>
+
+      		<div class="form-group">      			
+      			<label class="form-control-label">인증번호</label>
+      			<input type="text" name="authNum" value="{{- authNum}}" /> 
+      			<button type="button" class="btn btn-sm btn-primary" id="btn-authNum" style="width:50px">확인</button>
+      			<br>
+      			<button type="button" class="btn btn-sm btn-primary" id="btn-send-authNum" style="width:100px">인증번호 요청</button>
+      			<br> <label class="view" style="font-size:9pt"> (인증번호 요청 시, 학생의 연락처로 전송됩니다. 
+      			     <br>단, 3분 이내에 인증번호 확인하셔야 합니다.) </label>
+      			
+      			
+      			
+      		</div>  	    
+  	    
+  	    
+      	    <div class="form-group">
+                <label class="form-control-label">상태</label>
+                <div class="input-group">
+                    <label class="form-check-inline">
+                        <input class="form-check-input" type="radio" name="status" value="10" disabled="disabled" {{ if(status == 10){ }}checked="checked"{{ } else { }}checked="checked"{{ } }}  /> 대기
+                    </label>
+                    <label class="form-check-inline">
+                        <input class="form-check-input" type="radio" name="status" value="20" disabled="disabled" {{ if(status == 20){ }}checked="checked"{{ } }}  /> 완료
+                    </label>
+					<label class="form-check-inline">
+                        <input class="form-check-input" type="radio" name="status" value="30" disabled="disabled" {{ if(status == 90){ }}checked="checked"{{ } }}  /> 취소
+                    </label>
+                    <label class="form-check-inline">
+                        <input class="form-check-input" type="radio" name="status" value="30" disabled="disabled" {{ if(status == 100){ }}checked="checked"{{ } }}  /> 자동취소
+                    </label>
+                </div>
+            </div>  
+      	</div>            
+      
+		<div class="col-lg-6 col-md-12 col-xs-12">	
+  		   <div class="form-group">  		   	
+      			<i class="fa fa-check" style="color:green" aria-hidden="true"></i> <label class="form-control-label">학부모이름</label>
+      			<input type="text" class="form-control" name="parentsName" value="{{- parentsName }}" readonly="readonly" />
+      	   </div>
+           <div class="form-group">
+      			<i class="fa fa-check" style="color:green" aria-hidden="true"></i> <label class="form-control-label">학부모연락처 ( '-' 없이 입력해 주세요.)</label>
+      			<input type="text" class="form-control" name="parentsTel" value="{{- parentsTel }}" readonly="readonly" />
+      	   </div>  
+      	   
+  		   <div class="form-group">
+      			<i class="fa fa-check" style="color:green" aria-hidden="true"></i> <label class="form-control-label">학생이름</label>
+      			<input type="text" class="form-control" name="studentName" value="{{- studentName }}" readonly="readonly" />
+      	   </div>           
+           <div class="form-group">
+      			<i class="fa fa-check" style="color:green" aria-hidden="true"></i> <label class="form-control-label">학생연락처 ( '-' 없이 입력해 주세요.)</label>
+      			<input type="text" class="form-control" id="studentTel" name="studentTel" value="{{- studentTel }}" readonly="readonly" />
+      	   </div> 	
+		</div>
+		
+	</div>
+</form>
+<!-- ]]> -->
+ 

@@ -1,0 +1,11 @@
+<![CDATA[ -->
+<td><span>{{- momentDateFormat(reservationDt) }} {{- momentTimeFormat(reservationTm) }}<span></td>
+<td class="text-xs-center"><span class="tag tag-primary">{{- member.no }}</span> {{- member.name }}</td>
+<td><span>{{ if(room != "" && room != null ) { }} {{- room.name }} / {{- desk.name }} {{  } else{  }}지정안함{{ } }}<span></td>
+<td class="p-l-1"><span>{{- reservationNum}}</span></td>
+<td><span>{{- momentDateFormat(deskStartDt) }} {{- deskStartTm.substring(0, 5) }}부터<br/> {{- momentDateFormat(deskEndDt) }} {{- deskEndTm.substring(0, 5) }}까지</span></td>
+<td><span>{{- reservationStatusTypeMap[reservationStatus] }}</span></td>
+<td><span><p class ="view small">{{- reservationNote }}</p></span></td>
+<td><span>{{ if(reservationStatus == 20) { }}<button type="button" class="btn btn-outline-primary btn-form-reservation">보기</button>{{ } }}</span></td>
+<! -- <td><span><button type="button" class="btn btn-danger" id="btn-delete-reservation">삭제</button></span></td> -->
+<!-- ]]> -->

@@ -1,0 +1,14 @@
+<![CDATA[ -->
+<td>{{- momentDateFormat(reservationDt) }} {{- momentTimeFormat(reservationTm) }}</td>
+<td class="text-xs-center"><span class="tag tag-primary">{{- member.no }}</span> {{- member.name }}</td>
+<td>
+<select class="form-control chosen" id="deskId" name="deskId">
+                                <option value="">자유석</option>
+                                {{ _.each(desks, function(desk){ }}<option value="{{- desk.deskId }}" {{ if(deskId == desk.deskId) { }}selected="selected"{{ } }}>{{- desk.name }}</option>{{ }); }}
+                            </select></td>
+<td class="p-l-1">{{- reservationNum}}</td>
+<td>{{- momentDateFormat(deskStartDt) }} {{- deskStartTm.substring(0, 5) }}부터<br/> {{- momentDateFormat(deskEndDt) }} {{- deskEndTm.substring(0, 5) }}까지</td>
+<td>{{- reservationStatusTypeMap[reservationStatus] }}</td>
+<td><p class ="view small">{{- reservationNote }}</p></td>
+<td>{{ if(reservationStatus == 20) { }}<button type="button" class="btn btn-outline-primary btn-form-freeSeat">수정</button>{{ } }}</td>
+<!-- ]]> -->

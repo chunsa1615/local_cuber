@@ -1,0 +1,875 @@
+<div class="container-fluid" id="pay-list-app">
+    <section class="row">
+        <div class="col-md-2 col-sm-12">
+            <button type="button" class="btn btn-outline-primary" id="btn-form-new-pay" style="display:none">결제 추가</button>
+            <button type="button" class="btn btn-outline-primary" id="btn-alimTalk" style="display:none">알림톡 전송</button>
+        </div>
+        <div class="col-md-10 col-sm-12">
+            <form id="searchFrom" name="searchFrom" >
+            <input type="hidden" name="branchId" id="branchId" th:value="${branch.branchId}" />
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-control-label" for="sPayStartDt">결제일자</label>
+                            <div class="input-group input-daterange">
+                                <input type="text" class="form-control" id="sPayStartDt" name="sPayStartDt" th:value="${sPayStartDt}" readonly="readonly" />
+                                <div class="input-group-addon">부터</div>
+                                <input type="text" class="form-control" id="sPayEndDt" name="sPayEndDt" th:value="${sPayEndDt}" readonly="readonly" />
+                                <div class="input-group-addon">까지</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label class="form-control-label" for="sPayType">결제구분</label>
+                            <select class="form-control chosen" id="sPayType" name="sPayType">
+                                <option value="">전체</option>
+                                <option th:each="payType : ${payTypes}" th:value="${payType.value}" th:text="${payType.text}" ></option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label class="form-control-label" for="sMember">회원</label>
+                            <select class="form-control chosen" id="sMember" name="sMember">
+                                <option value="">전체</option>
+                                <option th:each="member : ${members}" th:selected="${member.memberId == sMember}" th:value="${member.memberId}" th:text="${member.no + ' ' + member.name}"></option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-control-label" for="btn-search"></label>
+                        <button type="submit" class="btn btn-outline-primary" id="btn-search">검색</button>
+                        <button type="button" class="btn btn-outline-primary" id="btn-excel">Excel 출력</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </section>
+    <section class="row">
+        <table class="table">
+<!--             <colgroup> -->
+<!--                 <col width="30%" /> -->
+<!--                 <col width="20%" /> -->
+<!--                 <col width="20%" /> -->
+<!--                 <col width="15%" /> -->
+<!--                 <col width="15%" /> -->
+<!--             </colgroup> -->
+            <thead class="thead-inverse">
+                <tr>
+                    <th class="p-l-3">결제일시</th>
+					<th>유형</th>
+                    <th>결제구분</th>
+					<th class="text-xs-center">회원</th>
+					<th>결제상태</th>
+					<th>메모</th>
+                    <th class="text-xs-right p-r-3">결제금액</th>
+                    <th>-</th>
+                </tr>
+            </thead>
+            <tbody id="pay-list"></tbody>
+            
+                <tr>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th class="text-xs-left">                        
+                        <label class="view">현금 <span id="cash"></span> 원</label><br></br>
+                        <label class="view">계좌이체 <span id="accountTransfer"></span> 원</label><br></br>
+                        <label class="view">카드 <span id="card"></span> 원</label><br></br>
+                        <label class="view">미수금 <span id="debt"></span> 원</label><br></br>
+                        <label class="view">결제취소 <span id="cancel"></span> 원</label><br></br>
+                        <label class="view">총 <span id="total"></span> 원</label>
+                    </th>                    
+                </tr>
+            <tfoot>
+            </tfoot>
+        </table>
+    </section>
+
+	<section th:if="${pageMaker.endPage != 0}">
+		<div style="text-align: center;">
+			<nav aria-label="Page navigation">
+			  <ul class="pagination">
+		    	<li th:if="${pageMaker.prev}" class="page-item">								    
+			      <a class="page-link prev" href="#" aria-label="Previous">
+			        <span aria-hidden="true">&laquo;</span>
+			        <span class="sr-only">Previous</span>
+			      </a>				     
+		   		</li>
+			    <li th:each="page : ${#numbers.sequence(pageMaker.startPage, pageMaker.endPage)}"  class='page-item' th:value="${page}" th:classappend="${page == pageMaker.page.page ? 'active' :''}">	 			     
+			    	<a class="page-link button"  id="page-linkbutton" th:text="${page}" th:value="${page}" href="#"></a>		  
+			    </li>
+				<li th:if="${pageMaker.next}" class="page-item">
+			      <a class="page-link next" href="#" aria-label="Next">
+			        <span aria-hidden="true">&raquo;</span>
+			        <span class="sr-only">Next</span>
+			      </a>
+			    </li>
+			  </ul>
+			</nav>
+		</div>
+	</section>	
+
+    <div class="modal fade" id="modal-new-pay-form" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title"></h4>
+                </div>
+                <div class="modal-body">
+                </div>
+                <div class="modal-footer">
+                    <div class="pull-xs-left">
+                        <!--<button type="button" class="btn btn-outline-primary" data-dismiss="modal" id="btn-new-member">회원 추가</button>-->
+                    </div>
+                    <button type="button" class="btn btn-primary" id="btn-save-new-pay">추가</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modal-pay-form" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title"></h4>
+                </div>
+                <div class="modal-body">
+                </div>
+                <div class="modal-footer">
+                    <div class="pull-xs-left">
+                        <button type="button" class="btn btn-danger" id="btn-delete-pay">삭제</button>
+                    </div>
+                    <button type="button" class="btn btn-danger btn-refund" id="btn-refund">환불</button>
+                    <button type="button" class="btn btn-primary" id="btn-save-pay">수정</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:include="tmpl_tr_pay" th:inline="javascript" type="text/template" id="pay-template"></script>
+
+<script th:inline="javascript" type="text/template" id="pay-form-template"><![CDATA[ -->
+    <form >
+        <div class="container-fluid">
+            <div class="col-lg-6 col-md-12 col-xs-12">
+                <div class="form-group">
+                    <label class="form-control-label">결제일자</label>
+                    <input type="hidden" name="payDt" value="{{- payDt }}" />
+					<input type="hidden" name="orderId" value="{{- orderId }}" />
+                    <input type="hidden" name="reservationId" value="{{- reservationId }}" />
+                    <div class="input-group">
+                        <span class="input-group-btn">
+                            <button class="btn btn-secondary" type="button"><i class="fa fa-calendar" aria-hidden="true"></i></button>
+                        </span>
+                        <input type="text" class="form-control datepicker" data-org-input-name="payDt" value="{{- momentDateFormat(payDt) }}" readonly="readonly" />
+                    </div>
+                </div>
+                <div class="form-group">
+                <label class="form-control-label">결제구분</label>
+					<div class="form-group">
+						<label class="form-check-inline">
+							<input class="form-check-input" style="display: none;" type="radio" name="payType" value="no" {{ if((payType != 1) && (payType != 2) && (payType != 3)){ }}checked="checked"{{ } }} />
+						</label>
+						<label class="form-check-inline">
+	                        <input class="form-check-input" type="radio" name="payType" value="1" {{ if(payType == 1){ }}checked="checked"{{ } }} />현금 
+	                    </label>
+	                    <label class="form-check-inline">
+	                        <input class="form-check-input" type="radio" name="payType" value="5" {{ if(payType == 5){ }}checked="checked"{{ } }} />계좌이체 
+	                    </label>
+						<label class="form-check-inline">
+	                        <input class="form-check-input" type="radio" name="payType" value="2" {{ if(payType == 2){ }}checked="checked"{{ } }} />신용카드 
+	                    </label>
+						<label class="form-check-inline">
+	                        <input class="form-check-input" type="radio" name="payType" value="3" {{ if(payType == 3){ }}checked="checked"{{ } }} />미수금 
+	                    </label>	                    
+						<label class="form-check-inline">
+	                        <input class="form-check-input" type="radio" name="payType" value="no" {{ if((payType != 1) && (payType != 2) && (payType != 3) && (payType != 5) ){ }}checked="checked"{{ } }} />미입력 
+	                    </label>	                    					
+					</div>
+            </div>
+                <div class="form-group">
+                    <label class="form-control-label">결제금액</label>
+                    <div class="input-group">
+                        <input id="payAmount" type="text" class="form-control text-xs-right" name="payAmount" value="{{- payAmount }}" />
+                        <div class="input-group-addon">원</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 col-md-12 col-xs-12">
+                <div class="form-group">
+                    <label class="form-control-label">회원</label>
+                    <select class="chosen" name="memberId" id="memberId">
+                        <option value="">미입력</option>
+                        {{ _.each(members, function(member){ }}<option value="{{- member.memberId }}" {{ if(memberId == member.memberId) { }}selected="selected"{{ } }}>{{- member.no }} {{- member.name }}</option>{{ }); }}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label">결제메모</label>
+                    <textarea class="form-control" name="payNote">{{- payNote }}</textarea>
+                </div>
+            </div>
+        </div>
+    </form>
+<!-- ]]> --></script>
+<script th:inline="javascript">// <![CDATA[
+//var payTypeMap = JSON.parse([[${payListJSON}]]);
+var PayStateTypeMap = JSON.parse([[${PayStateTypeMapJSON}]]);
+
+$(function(){
+	
+	//알림톡 전송	
+	$(function(){
+		$('#btn-alimTalk').click(function(){
+			jQuery.ajax({
+	            method : "POST",
+	            url : "/api/v1/branch/" + [[${branch.branchId}]] + "/alimTalk",
+	            contentType: "application/json; charset=UTF-8",
+	            //data : ,
+	            dataType : "JSON" ,
+	            success : function() {
+	               //alert("Suceeded!");         
+	            },
+	            error : function() {
+	               //alert("Failed!");
+	            }
+	        });
+		});
+	});
+	
+	// Search Form
+    var $sForm = $('#searchFrom');
+
+    $sForm.find('.input-daterange').datepicker({
+        language: 'ko', autoclose: true, todayHighlight: true, format: 'yyyy-mm-dd',
+
+    }).on('changeDate', function(e) {
+
+    });
+
+    $sForm.find('.chosen').chosen({width: "100%"});
+
+
+    var payTypes = [[${payTypes}]];
+	var payInOutTypes = [[${payInOutTypes}]];
+    
+    // Member
+    var MemberList = new MemberListCollection();
+    MemberList.branchId = [[${branch.branchId}]];
+    MemberList.reset(JSON.parse([[${memberListJSON}]]));
+
+    // Pay
+    var PayList = new PayListCollection;
+    PayList.branchId = [[${branch.branchId}]];
+	PayList.reset(JSON.parse([[${payListJSON}]]));
+	
+    // Reservation
+    var ReservationList = new ReservationListCollection;
+    ReservationList.branchId = [[${branch.branchId}]];
+    
+    var PayView = Backbone.View.extend({
+        tagName: 'tr',
+        className: 'pay',
+        template: _.template($('#pay-template').html()),
+        events: {
+            'dblclick': 'formPay',
+            'click .btn-form-pay': 'formPay',
+
+        },
+        initialize: function() {
+            this.listenTo(this.model, 'change', this.change);
+            this.listenTo(this.model, 'destroy', this.remove);
+
+        },
+        change: function() {
+            this.render();
+
+        },
+        render: function() {
+            var data = this.model.toJSON();
+
+            if (MemberList.get(this.model.get('memberId'))) {
+	            data['member'] = MemberList.get(this.model.get('memberId')).toJSON();
+	
+	            var payInOutTypeText = _.findWhere(payInOutTypes, {value: Number(data.payInOutType)});
+	            data['payInOutTypeText'] = payInOutTypeText ? payInOutTypeText.text : '';
+	            
+	            var payTypeText = _.findWhere(payTypes, {value: Number(data.payType)});
+	            data['payTypeText'] = payTypeText ? payTypeText.text : '';
+	            
+	            data['payAmount'] = AddComma(data['payAmount']);
+	            
+	            this.el.id = data.payId;
+	
+	            this.$el.html(this.template(data));
+            }
+            return this;
+
+        },
+        formPay: function() {
+            PayList.trigger('formPay', this.model);
+
+        },
+    });
+
+    var BranchPayView = Backbone.View.extend({
+        el: $('#pay-list-app'),
+        templateForForm: _.template($('#pay-form-template').html()),
+        currentPayModel: null,
+        events: {
+            'click #btn-new-member' : 'goMemberPage',
+            'click #btn-form-new-pay': 'formNewPay',
+            'click #btn-save-new-pay': 'saveNewPay',
+            'click #btn-save-pay': 'savePay',
+            'click #btn-delete-pay': 'deletePay',
+            'click #btn-refund' : 'refundPay',
+            'click .page-link.button' : 'paging',
+			'click .page-link.prev'  : 'prevPaging',
+			'click .page-link.next'  : 'nextPaging',
+			'keyup #payAmount' : 'keyup',
+
+        },
+        initialize: function() {
+            this.listenTo(PayList, 'add', this.addOnePay);
+            this.listenTo(PayList, 'formPay', this.formPay);
+            this.listenTo(PayList, 'reset', this.reset);
+
+        },
+        reset: function() {
+            PayList.forEach(this.addOnePay);
+            var payTotalPay = [[${payTotalPay}]];
+			
+            var totalPay = 0;
+			var totalCash = 0;
+			var totalCard = 0;
+			var totalDebt = 0;
+			var totalAccountTransfer = 0;
+			var totalCancel = 0;
+            
+			payTotalPay.forEach(function (item){
+
+				var payStateType = item.payStateType;
+				var payType = item.payType; 
+				
+				
+				if(payStateType != 0) {
+					//totalPay = totalPay + item.payAmount;
+				
+							if(payType == 1) { //현금
+								totalCash = totalCash + item.payAmount;
+								totalPay = totalPay + item.payAmount;
+							}
+							else if(payType == 2) { //카드
+								totalCard = totalCard + item.payAmount;
+								totalPay = totalPay + item.payAmount;
+							}
+							
+							else if(payType == 3) { //미수금
+								totalDebt = totalDebt + item.payAmount;
+							} 
+							else if(payType == 5) {
+								totalAccountTransfer = totalAccountTransfer + item.payAmount;
+								totalPay = totalPay + item.payAmount;
+							}
+				
+					} else  if(payStateType == 0) { //결제취소
+						totalCancel = totalCancel + item.payAmount;
+					}				
+
+			});
+            
+			totalPay = AddComma(totalPay);
+			totalCash = AddComma(totalCash);
+			totalAccountTransfer = AddComma(totalAccountTransfer);
+			totalCard = AddComma(totalCard);
+			totalDebt = AddComma(totalDebt);
+			totalCancel = AddComma(totalCancel);
+			
+             $('#total').text(totalPay);
+             $('#cash').text(totalCash);
+             $('#accountTransfer').text(totalAccountTransfer);             
+             $('#card').text(totalCard);
+             $('#debt').text(totalDebt);
+             $('#cancel').text(totalCancel);
+            
+            //var stats = PayList.getStats();
+            //$('#total').text(stats['total']);
+			
+            $(document).trigger('appLoaded');
+
+        },
+        render: function() {
+
+        },
+        goMemberPage: function(e) {
+            location.assign(ctxRoot + 'branch/' + [[${branch.branchId}]] + '/members?action=newMember');
+        },
+        formNewPay: function(e, memberId) {
+            var data = new PayModel().toJSON();
+
+            data['orderId'] = '';
+            data['reservationId'] = '';
+            
+            data['memberId'] = memberId;
+
+            data['members'] = MemberList.toJSON();
+
+            data['payInOutTypes'] = payInOutTypes;
+            data['payTypes'] = payTypes;
+
+            // TODO : 시간단위까지 조정
+            var currentDate = sysDate.clone();
+            data['payDt'] = currentDate.valueOf();
+            data['payTm'] = currentDate.valueOf();
+	
+            var bodyHtml = this.templateForForm(data);
+
+            $('#modal-new-pay-form')
+            .one('show.bs.modal', function(e) {
+                var $modal = $(this);
+                $modal.find('.modal-title').html('새 결제');
+                $modal.find('.modal-body').html(bodyHtml);
+
+                $modal.find('.datepicker, .input-daterange').datepicker({
+                    language: 'ko', autoclose: true, todayHighlight: true, format: datepickerFormat,
+
+                }).on('changeDate', function(e) {
+                    var orgInputName = $(e.target).attr('data-org-input-name');
+                    if (!(_.isEmpty(orgInputName))) {
+                        var $orgInput = $('#modal-new-pay-form').find('[name=' + orgInputName + ']');
+                        $orgInput.val(e.date.valueOf());
+
+                    }
+
+                });
+
+                $modal.find('.chosen').chosen({width: "100%"});
+                
+                $.validator.addMethod(
+                		'chkNumeric', function (value, element) {
+                			value = value.replace(/,/g, '');
+    		                return this.optional(element) || /^[0-9-]+$/.test(value);
+    		                
+    		                	}, '숫자만 사용 가능합니다'
+                );
+                
+                
+                $modal.find('form').validate({
+                	ignore: "not:hidden",
+                	rules: {
+            			memberId: {            			
+            				required: true,
+            			},
+            			payType: {
+            				required: true,
+            				number: true,
+            			},
+            			payAmount: {
+            				//min: 1000,
+            				chkNumeric: true,
+            			}
+            			
+            		},
+            		messages: {
+            			memberId: {            	
+            	    		required: "회원을 선택하세요",
+            			},
+            			payType: {
+            				required: "결제유형을 선택하세요",
+            				number : "결제유형을 선택하세요",
+            			},
+            			payAmount: {
+            				//min: "금액을 입력하세요",
+            			}
+            		}	
+                });
+                
+
+            })
+            .one('shown.bs.modal', function(e) {
+                var $modal = $(this);
+                $modal.find('[name=name]').focus();
+
+                $modal.find('form').on('submit', function(e) {
+                    e.preventDefault();
+
+                });
+
+
+            })
+            .modal();
+            
+
+            
+            
+        },
+        saveNewPay: function(e) {
+            var values = {};
+            var $modal = $('#modal-new-pay-form');
+            var $inputs = $modal.find(':input');			
+            var $form = $modal.find('form');
+            
+            if($form.valid()) {
+		            $inputs.each(function(i, element) {
+		                var $element = $(element);
+		                if ($element.is('[type=radio]')) {
+		                    if ($element.is(':checked')) {
+		                        var name = $element.attr('name');
+		                        if (!(_.isEmpty(name))) {
+		                            values[name] = $element.val();
+		
+		                        }
+		                    }
+		
+		                } else {
+		                    var name = $element.attr('name');
+		                    if (!(_.isEmpty(name))) {
+		                        values[name] = $element.val();
+		
+		                    }
+		
+		                }
+		
+		            });
+					
+		            if(values['memberId'] == "") {
+		            	alert("memberId null!");
+		            }
+	                else if (values['payType'] == "") {
+	                	alert("payType null!");
+	                }
+	                else {	                		               	                	
+	                	values['payInOutType'] = '20'; //임시
+	                	values['payAmount'] = values['payAmount'].replace(/,/g, '');
+	                	PayList.create(values, {
+			                wait : true,
+			                success : function (model, response) {
+			                    model.set('payId', response.payId);
+			                    model.set('insertDt', response.insertDt);
+			                    model.set('updateDt', response.updateDt);
+								
+			                    
+			                    $modal.modal('hide');
+								location.reload();
+			                }
+			
+			            });
+	                }
+            	
+
+            
+            };
+            
+
+        },
+        addOnePay: function(pay) {
+            var view = new PayView({ model: pay });
+
+            this.$('#pay-list').append(view.render().el);
+
+        },
+        formPay: function(model) {
+            this.currentPayModel = model;
+
+            var data = model.toJSON();            
+            
+            data['orderId'] = model.attributes.reservationId;
+            data['reservationId'] = model.attributes.reservationId;
+            data['members'] = MemberList.toJSON();
+            data['payInOutTypes'] = payInOutTypes;
+            data['payTypes'] = payTypes;
+
+            var titleHtml = '결제';
+            var bodyHtml = this.templateForForm(data);
+
+            $('#modal-pay-form')
+            .one('show.bs.modal', function(e) {
+                var $modal = $(this);
+                $modal.find('.modal-title').html(titleHtml);
+                $modal.find('.modal-body').html(bodyHtml);
+
+                $modal.find('.datepicker, .input-daterange').datepicker({
+                    language: 'ko', autoclose: true, todayHighlight: true, format: datepickerFormat,
+                }).on('changeDate', function(e) {
+                    var orgInputName = $(e.target).attr('data-org-input-name');
+                    if (!(_.isEmpty(orgInputName))) {
+                        var $orgInput = $('#modal-pay-form').find('[name=' + orgInputName + ']');
+                        $orgInput.val(e.date.valueOf());
+                    }
+
+                });
+
+                $modal.find('.chosen').chosen({width: "100%"});
+
+                $modal.find('form').on('submit', function(e) {
+                    e.preventDefault();
+
+                });
+                
+                $.validator.addMethod(
+                		'chkNumeric', function (value, element) {
+                			value = value.replace(/,/g, '');
+    		                return this.optional(element) || /^[0-9-]+$/.test(value);
+    		                
+    		                	}, '숫자만 사용 가능합니다'
+                );
+                
+                $modal.find('form').validate({
+                	ignore: "not:hidden",
+                	rules: {
+            			memberId: {            			
+            				required: true,
+            			},
+            			payType: {
+            				required: true,
+            				number: true,
+            			},
+            			payAmount: {
+            				//min: 1000,
+            				chkNumeric: true,
+            			}
+            			
+            		},
+            		messages: {
+            			memberId: {            	
+            	    		required: "회원을 선택하세요",
+            			},
+            			payType: {
+            				required: "결제유형을 선택하세요",
+            				number: "결제유형을 선택하세요",
+            			},
+            			payAmount: {
+            				//min: "금액을 입력하세요",            				
+            			}
+            		}	
+                });
+
+            })
+            .modal();
+
+        },
+        savePay: function(e) {
+        	debugger;
+            var values = {};
+            var $modal = $('#modal-pay-form');
+            var $form = $modal.find('form');
+            
+            if($form.valid()) {
+	            var $inputs = $modal.find(':input');
+	            $inputs.each(function(i, element) {
+	                var $element = $(element);
+	                if ($element.is('[type=radio]')) {
+	                    if ($element.is(':checked')) {
+	                        var name = $element.attr('name');
+	                        if (!(_.isEmpty(name))) {
+	                            values[name] = $element.val();
+	
+	                        }
+	                    }
+	
+	                } else {
+	                    var name = $element.attr('name');
+	                    if (!(_.isEmpty(name))) {
+	                        values[name] = $element.val();
+	
+	                    }
+	
+	                }
+	            });
+				
+	            values['payAmount'] = values['payAmount'].replace(/,/g, '');
+	            
+	            this.currentPayModel.save(values, {
+	                wait: true,
+	                success: function (model, response) {
+	                    $modal.modal('hide');
+	
+	                },
+	
+	            });
+            }
+
+        },
+        refundPay: function(e) {
+        	var values = {};
+        	var $modal = $('#modal-pay-form');
+            var $form = $modal.find('form');
+			//$form.validate();
+            
+			
+			if($form.valid()) {
+                //var $inputs = $modal.find(':input');
+				var $inputs = $form.find(':input');
+                $inputs.each(function(i, element) {
+                    var $element = $(element);
+                    if ($element.is('[type=radio]')) {
+                        if ($element.is(':checked')) {
+                            var name = $element.attr('name');
+                            if (!(_.isEmpty(name))) {
+                                values[name] = $element.val();
+
+                            }
+                        }
+
+                    } else {
+                        var name = $element.attr('name');
+                        if (!(_.isEmpty(name))) {
+                        	values[name] = $element.val();
+//                            if(!(_.isEmpty(values[name]))) { //임시 적용 -> 등록이 없는 상태를 지금의 시간 기준으로 정하여서 과거의 데이터가 비어있는 데이터로 들어감.
+//                        		
+//    						}
+//                            else if (_.isEmpty(values[name])) {	//비어있을 경우 (임시 적용)
+//                            	values[name] = $element.val();
+//                            	
+//                            }
+                        }
+
+                    }
+                });
+                
+                
+                values['payInOutType'] = '20'; //임시
+                var currentDate = sysDate.clone();                
+                values['payDt'] = currentDate.valueOf();
+               
+                values['payAmount'] = '-' + values['payAmount'].replace(/,/g, '');
+                
+              	//알림톡 정보
+ 	            var roomName;
+ 	            var deskName;
+ 	            var memberName;
+ 	            var phone_number;
+ 	            var school;
+ 	            var registration;
+ 	            var amount;
+ 	             	           
+ 	           	amount = values['payAmount'];
+ 	           	var reservationList = ReservationList.filter({ reservationId: values['reservationId'] });
+ 	           	
+
+ 	            
+                if (values['memberId'] == "") {
+                	alert("memberId null!");
+                }
+                
+                else if (values['payType'] == "") {
+                	alert("payType null!");
+                }
+                else {                	                	
+
+                	PayList.create(values, {
+                		
+                        wait : true,
+                        success : function (model, response) {           	
+                        	$modal.modal('hide');                     	
+                        	model.collection.fetch();
+                        }
+
+                    });
+                }
+			}
+        },
+        deletePay: function(e) {
+            var $modal = $('#modal-pay-form');
+
+            if(confirm('정말로 삭제하시겠습니까?')) {
+                this.currentPayModel.destroy({
+                    wait: true,
+                    success: function (model, response) {
+                        $modal.modal('hide');
+
+                    },
+
+                });
+
+            }
+
+        },
+        paging: function(e) {
+        	paging(e);
+        	
+        },
+        prevPaging: function(e) {
+        	var page = [[${pageMaker.startPage -1}]];
+        	prevPaging(e, page);
+        
+        },
+        nextPaging: function(e) {
+        	var page = [[${pageMaker.endPage +1}]];
+        	nextPaging(e, page);      	
+         
+        },
+        keyup : function(e) {
+        	//console.log(e.keyCode);
+        	if ( (e.keyCode >= 96 && e.keyCode <= 105) || (e.keyCode >= 48 && e.keyCode <= 57) ) {
+	        	var num = $('#payAmount').val();
+	        	//num = num.replace(/[^0-9]/g,'');	        	
+	        	num = num.replace(/[^a-zA-Z0-9]/g,''); 
+	        	
+	        	num = AddComma(num);
+	        	$('#payAmount').val(num);
+        	}
+        	//else {
+        		
+        	//}
+
+        },
+        
+    });
+    
+    $('#btn-excel').click(function(){
+    		
+    	    var $sForm = $('#searchFrom');
+
+    	    $sForm.find('.input-daterange').datepicker({
+    	        language: 'ko', autoclose: true, todayHighlight: true, format: 'yyyy-mm-dd',
+
+    	    }).on('changeDate', function(e) {
+
+    	    });
+    	    
+    	    $sForm.attr("action", "/admin/excelExtract");
+	    	$sForm.submit();
+	    	$sForm.attr("action", "");
+    });
+    
+    var App = new BranchPayView;
+
+    PayList.reset(JSON.parse([[${payListJSON}]]));
+ 
+});
+
+// ]]></script>
+<script th:inline="javascript" th:if="${!#strings.isEmpty(param.action) and param.action[0] == 'newPay'}">// <![CDATA[
+$(document).one('appLoaded', function(e) {
+    $('#btn-form-new-pay').trigger('click', [ [[${!#strings.isEmpty(param.memberId) ? param.memberId[0] : null}]] ]);
+ 
+});
+// ]]></script>
+<script th:src='@{/common/api_branch_member.js}' ></script>
+<script th:src='@{/common/api_branch_pay.js}' ></script>
+<script th:src='@{/common/api_branch_reservation.js}' ></script>
+<!-- DatePicker : https://bootstrap-datepicker.readthedocs.io/en/latest/ -->
+<script th:src='@{/lib/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js}' ></script>
+<script charset='UTF-8' th:src='@{/lib/bootstrap-datepicker/dist/locales/bootstrap-datepicker.ko.min.js}' ></script>
+<link rel='stylesheet' th:href='@{/lib/bootstrap-datepicker/dist/css/bootstrap-datepicker3.min.css}' />
+<!-- Chosen : https://github.com/harvesthq/chosen -->
+<link rel='stylesheet' th:href='@{/lib/chosen/chosen.css}' />
+<script th:src='@{/lib/chosen/chosen.jquery.js}' ></script>
+<!-- Validation : https://jqueryvalidation.org/documentation/
+    INPUT : https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input -->
+<script th:src='@{/lib/jquery-validation/dist/jquery.validate.min.js}' ></script>

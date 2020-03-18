@@ -1,0 +1,35 @@
+<![CDATA[ -->
+<div class="row">
+    <input type="hidden" name="reservationId" value="{{- reservationId}}" />
+    <div class="col-xs-7">
+        <span class="tag tag-primary">{{- member.no }}</span> <span>{{- member.name }}
+        {{ if(reservationNum > 1) { }}
+	    	외 {{- reservationNum-1}} 명 
+	    {{ } }} </span><br/>
+        <span>{{ if(room != "" && room != null ) { }} {{- room.name }} / {{- desk.name }} {{  } else{  }}지정안함{{ } }}</span><br/>        
+    </div>
+    <div class="col-xs-5">
+        <span class="small pull-xs-right">{{- momentDateFormat(reservationDt) }} {{- momentTimeFormat(reservationTm) }}</span> <br/>
+        <span class="small pull-xs-right">{{- reservationStatusTypeMap[reservationStatus] }}</span>
+    </div>
+</div>
+<div class="row">
+    <div class="col-xs-12">
+        <span>{{- momentDateFormat(deskStartDt) }} {{- deskStartTm.substring(0, 5) }}부터
+        {{- momentDateFormat(deskEndDt) }} {{- deskEndTm.substring(0, 5) }}까지</span><br/>
+        <span class="small">{{- reservationNote }}</span>
+    </div>
+    {{ if(reservationStatus == 20 ) { }}
+    <div class="col-xs-12">
+        {{ if(pastData == 1 && branchType == 20) { }}        
+	        <button type="button" class="btn btn-sm btn-danger btn-add-cost pull-xs-left">추가 요금</button>
+	        <span style="color:red">{{- excessTime }} => {{- addCost }}  원</span>
+        {{ } }} 
+        <button type="button" class="btn btn-sm btn-danger btn-deleteTest-reservation pull-xs-left">등록 삭제</button>
+        <button type="button" class="btn btn-sm btn-outline-primary btn-form-change-reservation pull-xs-right" id="btn-form-edit-reg">등록 수정</button>                
+        <button type="button" class="btn btn-sm btn-outline-primary btn-form-add-pay pull-xs-right" id="btn-form-add-pay">결제 추가</button>        
+        <!-- <button type="button" class="btn btn-sm btn-outline-danger btn-form-cancel-reservation pull-xs-right">등록 취소</button>-->
+    </div>
+    {{ } }}
+</div>
+<!-- ]]> -->

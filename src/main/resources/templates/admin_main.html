@@ -1,0 +1,734 @@
+<script th:src='@{/lib/fullcalendar/dist/fullcalendar.min.js}'></script>
+<script th:src='@{/lib/fullcalendar/dist/locale/ko.js}'></script>
+<!--<link rel='stylesheet' th:href='@{/lib/jquery-ui/themes/base/jquery-ui.min.css}' />-->
+<link rel='stylesheet' th:href='@{/lib/fullcalendar/dist/fullcalendar.min.css}' />
+<link rel='stylesheet' th:href='@{/lib/fullcalendar/dist/fullcalendar.print.css}' media="print"/>
+
+
+<div class="row m-x-1" id="admin_main">
+    <div class="card-deck-wrapper">
+        <div class="card-deck">            
+			
+			<button type="button" class="btn btn-outline-primary" id="btn-alimTalk" style="display:none;">알림톡 전송</button>
+			
+			<ul class="nav nav-tabs" role="tablist" style="margin-bottom: 1rem;">
+                <li class="nav-item">
+                    <a class="nav-link active" data-toggle="tab" href="#desk" role="tab">좌석현황</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-toggle="tab" href="#desk_table" role="tab">좌석현황(표1)</a>
+                </li>
+				<li class="nav-item">
+                    <a class="nav-link" data-toggle="tab" href="#desk_table2" role="tab">좌석현황(표2)</a>
+                </li>
+				<li class="nav-item" id="aaaaa">
+                    <a class="nav-link" data-toggle="tab" href="#desk_table3" role="tab">좌석현황(표3)</a>
+                </li>                
+            </ul>
+
+            <div class="tab-content">
+            	<div class="tab-pane active" id="desk" role="tabpanel">
+		            <div class="card" th:each="b,status: ${branches}" th:if="${ b.visibleYn == 1 }">
+		                <!--<h3 class="card-header"></h3>-->                
+		                <div class="card-block">
+		                    <h4 class="card-title">
+		                        <a th:href="@{/b/} + ${b.id}" th:text="${b.name}"></a>
+		                    </h4>
+							 <br />					 
+							<section class="row">
+							 	<table>
+								 	<tr>
+										<th>&nbsp; &nbsp; 좌석수 :								 
+										<label th:text="${ b.curDesk }" ></label> /  <label th:text="${ b.totalDesk }" ></label>
+										</th>
+									</tr>
+									<tr >
+										<th>&nbsp; &nbsp;-Multi :&nbsp;<label th:text="${ b.multi_sum }" ></label>
+										&nbsp; -Single :&nbsp;<label th:text="${ b.single_sum }" ></label>
+									    &nbsp; -Private :&nbsp;<label th:text="${ b.private_sum }" ></label></th>   
+									</tr>
+									<tr>
+										<th>&nbsp; &nbsp; 입실율 : <label th:text="${ b.enterRatio } + ' %' " ></label>
+										</th>								
+									</tr>
+									<tr>
+										<th>&nbsp; &nbsp; 전일변동 : <label th:text="${ b.dayRatio } + ' %' " th:if="${ b.dayRatio == 0 }" ></label> 
+																	 <label style="color : #0100FF" th:text="${ b.dayRatio } + ' %▲' " th:if="${ b.dayRatio > 0 }" ></label>
+																	 <label style="color : #FF0000" th:text="${ b.dayRatio } + ' %▼' " th:if="${ 0 > b.dayRatio }" ></label>
+										</th>
+									</tr>
+									<tr>
+										<th>&nbsp; &nbsp; 매출액 : <label th:text="${ b.pay } + '원(월)'" ></label><br />								
+											&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+											&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+											<label th:text="${ b.yesterdayPay } + '원(일)'"  th:if="${ b.branchType == 20 }"></label>								
+										</th>
+									</tr>
+								</table>
+							</section>                   
+		                </div>
+		                
+		            </div>
+            	</div>
+            	
+            	<div class="tab-pane" id="desk_table" role="tabpanel">
+	            	<section class="row">
+	        			<table class="table">		
+			        		
+			        		<colgroup>
+				                <col width="10%" />
+				                <col width="10%" />
+				                <col width="10%" />
+				                <col width="10%" />
+				                <col width="10%" />
+				                <col width="10%" />
+				                <col width="20%" />
+				                <col width="20%" />
+				            </colgroup>
+				            
+		        			<thead class="thead-inverse">	        			
+			        			<tr>
+			        				<th style="text-align:center; vertical-align:middle"  >센터명</th>
+			        				<th style="text-align:center; vertical-align:middle" >오픈일</th>
+			        				<th style="text-align:center; vertical-align:middle">총 좌석수</th>
+			        				<th style="text-align:center">입실좌석</th>
+			        				
+			        				<th style="text-align:center">비율</th>
+			        				<th style="text-align:center">전일 대비 변동현황</th>
+			        				
+			        				<th style="text-align:center">전일 등록자 현황</th>	
+			        				<th style="text-align:center">비고(매출금액)</th>		        				
+			        			</tr>			        			
+			        			<!-- 
+			        			<tr>
+			        				<th colspan="2" style="text-align:center" >월등록</th>
+			        				<th colspan="2" style="text-align:center" >일등록</th>
+			        				<th colspan="2" style="text-align:center" >합계</th>
+			        			</tr>
+			        			<tr>
+			        				<th style="text-align:center" >직전일</th>
+			        				<th style="text-align:center" >전일</th>
+			        				<th style="text-align:center" >직전일</th>
+			        				<th style="text-align:center" >전일</th>
+			        				<th style="text-align:center" >직전일</th>
+			        				<th style="text-align:center" >전일</th>
+			        			</tr>
+ 								-->
+		        			</thead>
+        				</table>
+        			</section>
+		            	
+	            	<div th:each="b,status: ${branches}" th:if="${ b.visibleYn == 1 }">
+		            	<section class="row">
+		        			<table class="table">			        																	
+							<colgroup>
+				                <col width="10%" />
+				                <col width="10%" />
+				                <col width="10%" />
+				                <col width="10%" />
+				                <col width="10%" />
+				                <col width="10%" />
+				                <col width="20%" />
+				                <col width="20%" />
+				            </colgroup>				            
+		        			<tr>
+		        				<th style="text-align:center" ><label th:text="${ b.name }" ></label></th>
+		        				<!-- <th><label th:text="${ #dates.createNow() }" ></label></th>  -->
+		        				<th style="text-align:center" ><label th:text="${ b.openDt_S} " ></label></th>
+		        				<th style="text-align:center"><label th:text="${ b.totalDesk }" ></label></th>
+		        				
+		        				<th style="text-align:center"><label th:text="${ b.curDesk }" ></label></th>
+		        						        				
+		        				<th style="text-align:center"><label th:text="${ b.enterRatio } + ' %' " ></label></th>		        				
+		        				<th style="text-align:center"> <label th:text="${ b.dayRatio } + ' %' " th:if="${ b.dayRatio == 0 }" ></label> 
+																	 <label style="color : #0100FF" th:text="${ b.dayRatio } + ' %▲' " th:if="${ b.dayRatio > 0 }" ></label>
+																	 <label style="color : #FF0000" th:text="${ b.dayRatio } + ' %▼' " th:if="${ 0 > b.dayRatio }" ></label>
+								</th>
+								
+		        				<!-- 
+		        				<th width="10%" style="text-align:center"><label th:text="0" ></label></th>
+		        				<th width="10%" style="text-align:center"><label th:text="0" ></label></th>
+		        				<th width="10%" style="text-align:center"><label th:text="0" ></label></th>
+		        				<th width="10%" style="text-align:center"><label th:text="0" ></label></th>
+		        				<th width="10%" style="text-align:center"><label th:text="0" ></label></th>		        			
+		        				 -->
+		        				<th style="text-align:center"><label th:text="'월(' + ${ b.monthReservation } + ')'" th:if="${ b.monthReservation > 0 }" ></label>
+		        											  <label th:text="'/'"  th:if="${ b.monthReservation > 0 and b.dayReservation > 0 }" ></label>
+		        											  <label th:text="'일(' + ${ b.dayReservation } + ')'" th:if="${ b.dayReservation > 0 }" ></label>
+		        				</th>
+		        				<th style="text-align:center"><label th:text="${ b.yesterdayPay } + '원(일)'"  th:if="${ b.branchType == 20 }"></label></th>
+		        			</tr>		        			
+		        			</table>
+		        		</section>
+	        			        		
+	        		</div>	        			        						
+            	</div>	
+            	
+ 					<div class="tab-pane" id="desk_table2" role="tabpanel">
+
+		            	
+		            	<section class="row">
+		        			<table class="table">		
+				        		
+				        		<colgroup>					                
+					                <!-- 
+					                <col width="9%" />
+					                <col width="9%" />
+					                <col width="8%" />
+					                
+					                <col width="6%" />
+					                <col width="6%" />
+					                <col width="6%" />
+					                <col width="6%" />
+					                <col width="6%" />
+					                <col width="6%" />
+					                <col width="6%" />
+					                <col width="6%" />
+					                <col width="6%" />
+					                <col width="6%" />
+					                <col width="6%" />
+					                <col width="6%" />
+					                 -->			       
+					                <col width="8%" />
+					                <col width="8%" />
+					                <col width="6%" />
+					                <col width="6%" />
+					                <col width="6%" />
+					                <col width="6%" />
+					                <col width="6%" />
+					                <col width="6%" />
+					                <col width="6%" />
+					                <col width="6%" />
+					                <col width="6%" />
+					                <col width="6%" />
+					                <col width="6%" />
+					                <col width="6%" />
+					                <col width="6%" />
+					                <col width="6%" />         
+					            </colgroup>
+					            
+			        			<thead class="thead-inverse">	        			
+				        			<!-- 
+				        			<tr>
+				        				<th rowspan="3" style="text-align:center; vertical-align:middle"  >센터명</th>
+				        				<th rowspan="3" style="text-align:center; vertical-align:middle" >오픈일</th>
+				        				<th rowspan="3" style="text-align:center; vertical-align:middle">총 좌석수</th>
+				        				
+				        				<th colspan="6" style="text-align:center; vertical-align:middle" >등록현황</th>				        				
+				        				<th colspan="6" style="text-align:center; vertical-align:middle" >입실률</th>				        							
+				        			</tr>			        			
+				        			 
+				        			<tr>
+				        				<th colspan="2" style="text-align:center; vertical-align:middle" >월등록</th>
+				        				<th colspan="2" style="text-align:center; vertical-align:middle" >일등록</th>
+				        				<th colspan="2" style="text-align:center; vertical-align:middle" >합계</th>
+				        				
+				        				<th colspan="2" style="text-align:center; vertical-align:middle" >월등록</th>
+				        				<th colspan="2" style="text-align:center; vertical-align:middle" >일등록</th>
+				        				<th colspan="2" style="text-align:center; vertical-align:middle" >합계</th>
+				        			</tr>
+				        			<tr>
+				        				<th style="text-align:center; vertical-align:middle" >전전일</th>
+				        				<th style="text-align:center; vertical-align:middle" >전일</th>
+				        				<th style="text-align:center; vertical-align:middle" >전전일</th>
+				        				<th style="text-align:center; vertical-align:middle" >전일</th>
+				        				<th style="text-align:center; vertical-align:middle" >전전일</th>
+				        				<th style="text-align:center; vertical-align:middle" >전일</th>
+				        				
+				        				<th style="text-align:center; vertical-align:middle" >전전일</th>
+				        				<th style="text-align:center; vertical-align:middle" >전일</th>
+				        				<th style="text-align:center; vertical-align:middle" >전전일</th>
+				        				<th style="text-align:center; vertical-align:middle" >전일</th>
+				        				<th style="text-align:center; vertical-align:middle" >전전일</th>
+				        				<th style="text-align:center; vertical-align:middle" >전일</th>				        								        								        			
+				        			</tr>
+	 								 -->
+	 								<tr>
+				        				<th rowspan="3" style="text-align:center; vertical-align:middle"  >센터명</th>
+				        				<th rowspan="3" style="text-align:center; vertical-align:middle" >오픈일</th>
+				        				<th rowspan="3" style="text-align:center; vertical-align:middle">총 좌석수</th>
+				        				
+				        				<th colspan="3" style="text-align:center; vertical-align:middle" >전전일 마감</th>				        				
+				        				<th colspan="6" style="text-align:center; vertical-align:middle" >전일 변동</th>
+				        				<th colspan="3" style="text-align:center; vertical-align:middle" >전일 마감</th>
+				        				
+				        				<th rowspan="3" style="text-align:center; vertical-align:middle" >입실률 증감</th>			
+				        			</tr>			        			
+				        			 
+				        			<tr>
+				        				<th rowspan="2" style="text-align:center; vertical-align:middle" >월등록</th>
+				        				<th rowspan="2" style="text-align:center; vertical-align:middle" >일등록</th>
+				        				<th rowspan="2" style="text-align:center; vertical-align:middle" >합계</th>
+				        				
+				        				<th colspan="3" style="text-align:center; vertical-align:middle" >월등록</th>
+				        				<th style="text-align:center" >일등록</th>
+				        				<th colspan="2" style="text-align:center; vertical-align:middle" >합계</th>
+				        				
+				        				<th rowspan="2" style="text-align:center; vertical-align:middle" >월등록</th>
+				        				<th rowspan="2" style="text-align:center; vertical-align:middle" >일등록</th>
+				        				<th rowspan="2" style="text-align:center; vertical-align:middle" >합계</th>
+				        				
+				        			</tr>
+				        			<tr>
+				        				<th style="text-align:center" >종료</th>
+				        				<th style="text-align:center" >연장</th>
+				        				<th style="text-align:center" >신규</th>
+				        				<th style="text-align:center" >신규</th>
+				        				<th style="text-align:center" >종료</th>
+				        				<th style="text-align:center" >신규</th>				        								        								        			
+				        			</tr>
+	 								
+			        			</thead>
+	        				</table>
+	        			</section>
+			            	
+		            	<div th:each="b,status: ${branches}" th:if="${ b.visibleYn == 1 }">
+			            	<section class="row">
+			        			<table class="table">			        																	
+								<colgroup>
+
+					            </colgroup>				            
+			        			<tr>
+			        				<!-- 
+			        				<th width="9%" style="text-align:center" ><label th:text="${ b.name }" ></label></th>  
+			        				<th width="9%" style="text-align:center"><label th:text="${ b.openDt_S} " ></label></th>
+			        				<th width="8%" style="text-align:center" ><label th:text="${ b.totalDesk }" ></label></th>
+			        				
+			        						        							        				 
+			        				<th width="6%" style="text-align:center" ><label th:text="${ b.twodaysAgoMonthReservation }" ></label></th>
+									<th width="6%" style="text-align:center" ><label th:text="${ b.yesterdayMonthReservation }" ></label></th>
+																											
+																		
+									<th width="6%" style="text-align:center" ><label th:text="${ b.twodaysAgoDayReservation }" ></label></th>												        							        			
+			        				<th width="6%" style="text-align:center" ><label th:text="${ b.yesterdayDayReservation }" ></label></th>
+			        				
+			        				
+			        				<th width="6%" style="text-align:center" ><label th:text="${ b.twodaysAgoMonthReservation + b.twodaysAgoDayReservation}" ></label></th>			        						        		
+			        				<th width="6%" style="text-align:center" ><label th:text="${ b.yesterdayMonthReservation + b.yesterdayDayReservation }" ></label></th>
+			        				
+			        							        				
+								
+									<th width="6%" style="text-align:center" ><label th:text="${ b.twodaysAgoMonthReservationRatio } + ' %' " ></label></th>
+									<th width="6%" style="text-align:center" ><label th:text="${ b.twodaysAgoDayReservationRatio } + ' %' " ></label></th>
+									 
+			        				
+			        				
+			        				<th width="6%" style="text-align:center" ><label th:text="${ b.yesterdayMonthReservationRatio } + ' %' " ></label></th>			        							        							        			
+			        				<th width="6%" style="text-align:center" ><label th:text="${ b.yesterdayDayReservationRatio } + ' %' " ></label></th>
+			        				
+			        				<th width="6%" style="text-align:center" ><label th:text="${ b.twodaysAgoMonthReservationRatio + b.twodaysAgoDayReservationRatio } + ' %' " ></label></th>
+			        				<th width="6%" style="text-align:center" ><label th:text="${ b.yesterdayMonthReservationRatio + b.yesterdayDayReservationRatio } + ' %' " ></label></th>
+ 									 -->
+			        				<th width="8%" style="text-align:center" ><label th:text="${ b.name }" ></label></th>  
+			        				<th width="8%" style="text-align:center"><label th:text="${ b.openDt_S} " ></label></th>
+			        				<th width="6%" style="text-align:center" ><label th:text="${ b.totalDesk }" ></label></th>
+			        				
+			        				<!-- 전전일 마감 -->			        							        				 
+			        				<th width="6%" style="text-align:center" ><label th:text="${ b.twodaysAgoMonthReservation }" ></label></th>
+									<th width="6%" style="text-align:center" ><label th:text="${ b.twodaysAgoDayReservation }" ></label></th>
+									<th width="6%" style="text-align:center" ><label th:text="${ b.twodaysAgoMonthReservation + b.twodaysAgoDayReservation}" ></label></th>
+									
+									<th width="6%" style="text-align:center" ><label th:text="${ b.yesterdayMonthReservationEnd }" ></label></th>
+									<th width="6%" style="text-align:center" ><label th:text="${ b.yesterdayMonthReservationExtension }" ></label></th>
+									<th width="6%" style="text-align:center" ><label th:text="${ b.yesterdayMonthReservationExtensionNew }" ></label></th>
+									<th width="6%" style="text-align:center" ><label th:text="${ b.yesterdayDayReservationExtensionNew }" ></label></th>
+									<th width="6%" style="text-align:center" ><label th:text="${ b.yesterdayMonthReservationEnd }" ></label></th>
+									<th width="6%" style="text-align:center" ><label th:text="${ b.yesterdayMonthReservationExtension + b.yesterdayMonthReservationExtensionNew + b.yesterdayDayReservationExtensionNew }" ></label></th>
+									
+									<!-- 전일 마감 -->
+									<th width="6%" style="text-align:center" ><label th:text="${ b.yesterdayMonthReservation }" ></label></th>												        							        			
+			        				<th width="6%" style="text-align:center" ><label th:text="${ b.yesterdayDayReservation }" ></label></th>			        						        		
+			        				<th width="6%" style="text-align:center" ><label th:text="${ b.yesterdayMonthReservation + b.yesterdayDayReservation }" ></label></th>
+			        				
+			        				<th width="6%" style="text-align:center"> <label th:text="${ b.dayRatio } + ' %' " th:if="${ b.dayRatio == 0 }" ></label> 
+																	 <label style="color : #0100FF" th:text="${ b.dayRatio } + ' %▲' " th:if="${ b.dayRatio > 0 }" ></label>
+																	 <label style="color : #FF0000" th:text="${ b.dayRatio } + ' %▼' " th:if="${ 0 > b.dayRatio }" ></label>
+									</th>
+								
+			        			</tr>		        			
+			        			</table>
+			        		</section>
+		        		</div>
+	            	</div>    
+	            	
+					
+
+
+ 					<div class="tab-pane" id="desk_table3" role="tabpanel">
+		            	
+		            	
+		            	
+		            	<section class="row">
+		            	
+		            	<div>
+		            		&nbsp;&nbsp;
+			            	<button type="button" class="btn btn-outline-primary" id="prev" > 이전 </button>
+			            	<button type="button" class="btn btn-outline-primary" id="today"> 오늘 </button>
+			            	<button type="button" class="btn btn-outline-primary" id="next" > 이후 </button>
+			            	<form id="searchFrom">
+			            	<h2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<label id="calendarDate" th:text="${ sDate }" ></label></h2>
+			            	
+			            	</form>
+		            	</div>
+		            		
+		        			<table class="table">		
+				        		<colgroup>
+				        			<col width="9%" />
+					                <col width="7%" />
+					                
+					                <col width="7%" />
+					                <col width="7%" />
+					                <col width="7%" />
+					                <col width="7%" />
+					                <col width="7%" />
+					                <col width="7%" />
+					                <col width="7%" />
+					                <col width="7%" />
+					                <col width="7%" />
+					                <col width="7%" />
+					                <col width="7%" />
+					                <col width="7%" />         
+					            </colgroup>
+					            
+			        			<thead class="thead-inverse">	        							        			
+	 								<tr>
+				        				<th style="text-align:center; vertical-align:middle">센터명</th>
+				        				<th style="text-align:center; vertical-align:middle">총 좌석수</th>
+				        				
+				        				<th style="text-align:center">1월</th>			        				
+				        				<th style="text-align:center">2월</th>
+				        				<th style="text-align:center">3월</th>
+				        				<th style="text-align:center">4월</th>
+				        				<th style="text-align:center">5월</th>
+				        				<th style="text-align:center">6월</th>
+				        				<th style="text-align:center">7월</th>
+				        				<th style="text-align:center">8월</th>
+				        				<th style="text-align:center">9월</th>
+				        				<th style="text-align:center">10월</th>
+				        				<th style="text-align:center">11월</th>
+				        				<th style="text-align:center">12월</th>					        						
+				        			</tr>			        			
+				        		
+			        			</thead>
+	        				</table>
+	        			</section>
+			            	
+			            <section class="row">
+				        	<table class="table" id="static_table">	
+			            		<div th:each="b,status: ${branches}" th:if="${ b.visibleYn == 1 }">
+				            			        																	
+												            
+				        			<tr >
+					        			<th width="9%" style="text-align:center" ><label th:text="${ b.name }" ></label></th>		        				
+				        				<th width="7%" style="text-align:center"><label th:text="${ b.totalDesk }" ></label></th>
+				        				
+				        				<th width="7%" style="text-align:center">
+				        														 <label th:text=" '남:' "></label>
+				        														 <label style="color : #0100FF" th:text="${ b.man_cnt_01 }" ></label>
+				        														 <label th:text=" ' / 여:' "></label>
+	 																			 <label style="color : #FF0000" th:text="${ b.woman_cnt_01}"></label>
+	 																			 <br></br>
+	 																			 <label th:text="${ b.stu_cnt_01 + ' / ' + b.adult_cnt_01  }"></label>
+	 																			 
+				        				</th>
+				        				
+				        				<th width="7%" style="text-align:center">
+				        														 <label th:text=" '남:' "></label>
+				        														 <label style="color : #0100FF" th:text="${ b.man_cnt_02 }" ></label>
+				        														 <label th:text=" ' / 여:' "></label>
+	 																			 <label style="color : #FF0000" th:text="${ b.woman_cnt_02}"></label>
+				        													 	 <br></br>
+	 																			 <label th:text="${ b.stu_cnt_02 + ' / ' + b.adult_cnt_02  }"></label>
+				        				</th>
+				        				
+				        				
+				        				<th width="7%" style="text-align:center">
+				        														 <label th:text=" '남:' "></label>
+				        														 <label style="color : #0100FF" th:text="${ b.man_cnt_03 }" ></label>
+				        														 <label th:text=" ' / 여:' "></label>
+	 																			 <label style="color : #FF0000" th:text="${ b.woman_cnt_03}"></label>			        				
+				        														 <br></br>
+	 																			 <label th:text="${ b.stu_cnt_03 + ' / ' + b.adult_cnt_03  }"></label>
+				        				</th>									
+				        				
+				        				<th width="7%" style="text-align:center">
+				        														 <label th:text=" '남:' "></label>
+				        														 <label style="color : #0100FF" th:text="${ b.man_cnt_04 }" ></label>
+				        														 <label th:text=" ' / 여:' "></label>
+	 																			 <label style="color : #FF0000" th:text="${ b.woman_cnt_04}"></label>			        				
+				        														 <br></br>
+	 																			 <label th:text="${ b.stu_cnt_04 + ' / ' + b.adult_cnt_04  }"></label>
+				        				</th>
+				        				
+				        				<th width="7%" style="text-align:center">
+														        				 <label th:text=" '남:' "></label>
+														        				 <label style="color : #0100FF" th:text="${ b.man_cnt_05 }" ></label>
+				        														 <label th:text=" ' / 여:' "></label>
+	 																			 <label style="color : #FF0000" th:text="${ b.woman_cnt_05}"></label>			        				
+				        														 <br></br>
+	 																			 <label th:text="${ b.stu_cnt_05 + ' / ' + b.adult_cnt_05  }"></label>
+				        				</th>
+				        				
+				        				<th width="7%" style="text-align:center">
+														        				 <label th:text=" '남:' "></label>
+														        				 <label style="color : #0100FF" th:text="${ b.man_cnt_06 }" ></label>
+				        														 <label th:text=" ' / 여:' "></label>
+	 																			 <label style="color : #FF0000" th:text="${ b.woman_cnt_06}"></label>			        				
+				        														 <br></br>
+	 																			 <label th:text="${ b.stu_cnt_06 + ' / ' + b.adult_cnt_06  }"></label>
+				        				</th>
+				        				
+				        				<th width="7%" style="text-align:center">
+														        				 <label th:text=" '남:' "></label>
+														        				 <label style="color : #0100FF" th:text="${ b.man_cnt_07 }" ></label>
+				        														 <label th:text=" ' / 여:' "></label>
+	 																			 <label style="color : #FF0000" th:text="${ b.woman_cnt_07}"></label>			        				
+				        														 <br></br>
+	 																			 <label th:text="${ b.stu_cnt_07 + ' / ' + b.adult_cnt_07  }"></label>
+				        				</th>
+				        				
+				        				<th width="7%" style="text-align:center">
+														        				 <label th:text=" '남:' "></label>
+														        				 <label style="color : #0100FF" th:text="${ b.man_cnt_08 }" ></label>
+				        														 <label th:text=" ' / 여:' "></label>
+	 																			 <label style="color : #FF0000" th:text="${ b.woman_cnt_08}"></label>			        				
+				        														 <br></br>
+	 																			 <label th:text="${ b.stu_cnt_08 + ' / ' + b.adult_cnt_08  }"></label>
+				        				</th>
+				        				
+				        				<th width="7%" style="text-align:center">
+														        				 <label th:text=" '남:' "></label>
+														        				 <label style="color : #0100FF" th:text="${ b.man_cnt_09 }" ></label>
+				        														 <label th:text=" ' / 여:' "></label>
+	 																			 <label style="color : #FF0000" th:text="${ b.woman_cnt_09}"></label>			        				
+				        														 <br></br>
+	 																			 <label th:text="${ b.stu_cnt_09 + ' / ' + b.adult_cnt_09  }"></label>
+				        				</th>
+				        				
+				        				<th width="7%" style="text-align:center">
+														        				 <label th:text=" '남:' "></label>
+														        				 <label style="color : #0100FF" th:text="${ b.man_cnt_10 }" ></label>
+				        														 <label th:text=" ' / 여:' "></label>
+	 																			 <label style="color : #FF0000" th:text="${ b.woman_cnt_10}"></label>			        				
+				        														 <br></br>
+	 																			 <label th:text="${ b.stu_cnt_10 + ' / ' + b.adult_cnt_10  }"></label>
+				        				</th>
+				        				
+				        				<th width="7%" style="text-align:center">
+														        				 <label th:text=" '남:' "></label>
+														        				 <label style="color : #0100FF" th:text="${ b.man_cnt_11 }" ></label>
+				        														 <label th:text=" ' / 여:' "></label>
+	 																			 <label style="color : #FF0000" th:text="${ b.woman_cnt_11}"></label>			        				
+				        														 <br></br>
+	 																			 <label th:text="${ b.stu_cnt_11 + ' / ' + b.adult_cnt_11  }"></label>
+				        				</th>
+				        				
+				        				<th width="7%" style="text-align:center">
+														        				 <label th:text=" '남:' "></label>
+														        				 <label style="color : #0100FF" th:text="${ b.man_cnt_12 }" ></label>
+				        														 <label th:text=" ' / 여:' "></label>
+	 																			 <label style="color : #FF0000" th:text="${ b.woman_cnt_12}"></label>			        				
+				        														 <br></br>
+	 																			 <label th:text="${ b.stu_cnt_12 + ' / ' + b.adult_cnt_12  }"></label>
+				        				</th>
+	
+				        			</tr>		        			
+				        			
+			        			</div>
+			        		</table>
+			        	</section>
+		        		
+		        		
+	            	</div> 	            	 
+	            	
+	            	       	         	
+            </div>
+           
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript">// <![CDATA[
+
+var sDate = null;	
+if ([[${sDate}]] != null) {
+	sDate = [[${sDate}]];
+}                                       
+moment.updateLocale('en', null);
+                
+
+$('#prev').click(function(){
+	var date = $('#calendarDate').text();
+	$('#calendarDate').text(parseInt(date) - 1);
+	//$('#sDate').val($('#calendarDate').text());
+	
+	statistics();
+	
+});
+
+$('#today').click(function(){
+	var date = new Date().getFullYear();
+	$('#calendarDate').text(date);
+	//$('#sDate').val($('#calendarDate').text());
+	
+	statistics();
+	
+	
+});
+
+$('#next').click(function(){
+	var date = $('#calendarDate').text();
+	$('#calendarDate').text(parseInt(date) + 1);
+	//$('#sDate').val($('#calendarDate').text());
+	
+	statistics();
+});
+
+
+
+function statistics() {
+	jQuery.ajax({
+        method : "GET",
+        url : "/e/api/adminStatistics",
+        data : { "sDate" : $('#calendarDate').text() },
+        
+        success : function(data) {
+			$('#static_table').empty();
+			
+			var html;
+			//Object.keys(data).forEach(function(item){
+			for (var item =0; data.length > item; item++) {	
+			html += '<tr >';
+			html += '<th width="9%" style="text-align:center" ><label> ' + data[item].name + '</label></th>';
+			
+			html += '<th width="7%" style="text-align:center"><label> ' + data[item].totalDesk + '</label></th>';
+			
+			html += '<th width="7%" style="text-align:center">';
+			html += '<label>남:&nbsp</label>';
+			html += '<label style="color : #0100FF"> ' + data[item].man_cnt_01 + '</label>';
+			html += '<label>&nbsp/ 여:&nbsp</label>';
+			html += '<label style="color : #FF0000">' + data[item].woman_cnt_01 + '</label>';				
+			html += '<label>' + data[item].stu_cnt_01 + " / " + data[item].adult_cnt_01 + '</label>';
+														 
+			html += '</th>';
+			
+			html += '<th width="7%" style="text-align:center">';
+			html += '<label>남:&nbsp</label>';
+			html += '<label style="color : #0100FF"> ' + data[item].man_cnt_02 + '</label>';
+			html += '<label>&nbsp/ 여:&nbsp</label>';
+			html += '<label style="color : #FF0000">' + data[item].woman_cnt_02 + '</label>';
+			html += '<label>' + data[item].stu_cnt_02 + " / " + data[item].adult_cnt_02 + '</label>';
+			html += '</th>';
+			
+			html += '<th width="7%" style="text-align:center">';
+			html += '<label>남:&nbsp</label>';
+			html += '<label style="color : #0100FF"> ' + data[item].man_cnt_03 + '</label>';
+			html += '<label>&nbsp/ 여:&nbsp</label>';
+			html += '<label style="color : #FF0000">' + data[item].woman_cnt_03 + '</label>';
+			html += '<label>' + data[item].stu_cnt_03 + " / " + data[item].adult_cnt_03 + '</label>';
+			html += '</th>';
+			
+			html += '<th width="7%" style="text-align:center">';
+			html += '<label>남:&nbsp</label>';
+			html += '<label style="color : #0100FF"> ' + data[item].man_cnt_04 + '</label>';
+			html += '<label>&nbsp/ 여:&nbsp</label>';
+			html += '<label style="color : #FF0000">' + data[item].woman_cnt_04 + '</label>';
+			html += '<label>' + data[item].stu_cnt_04 + " / " + data[item].adult_cnt_04 + '</label>';
+			html += '</th>';
+			
+			html += '<th width="7%" style="text-align:center">';
+			html += '<label>남:&nbsp</label>';
+			html += '<label style="color : #0100FF"> ' + data[item].man_cnt_05 + '</label>';
+			html += '<label>&nbsp/ 여:&nbsp</label>';
+			html += '<label style="color : #FF0000">' + data[item].woman_cnt_05 + '</label>';
+			html += '<label>' + data[item].stu_cnt_05 + " / " + data[item].adult_cnt_05 + '</label>';
+			html += '</th>';
+
+			html += '<th width="7%" style="text-align:center">';
+			html += '<label>남:&nbsp</label>';
+			html += '<label style="color : #0100FF" >' + data[item].man_cnt_06 + '</label>';
+			html += '<label>&nbsp/ 여:&nbsp</label>';
+			html += '<label style="color : #FF0000" >' + data[item].woman_cnt_06 + '</label>';
+			html += '<label>' + data[item].stu_cnt_06 + " / " +  data[item].adult_cnt_06 + '</label>';
+			html += '</th>';
+			
+			
+			html += '<th width="7%" style="text-align:center">';
+			html += '<label>남:&nbsp</label>';
+			html += '<label style="color : #0100FF">' + data[item].man_cnt_07 + '</label>';
+			html += '<label>&nbsp/ 여:&nbsp</label>';
+			html += '<label style="color : #FF0000">'+ data[item].woman_cnt_07 + '</label>'
+			html += '<label>' + data[item].stu_cnt_07 + " / " +  data[item].adult_cnt_07 + '</label>';
+			html += '</th>';
+			
+			html += '<th width="7%" style="text-align:center">';
+			html += '<label>남:&nbsp</label>';
+			html += '<label style="color : #0100FF"> ' + data[item].man_cnt_08 + '</label>';
+			html += '<label>&nbsp/ 여:&nbsp</label>';
+			html += '<label style="color : #FF0000">' + data[item].woman_cnt_08 + '</label>';
+			html += '<label>' + data[item].stu_cnt_08 + " / " +  data[item].adult_cnt_08 + '</label>';
+			html += '</th>';
+			
+			html += '<th width="7%" style="text-align:center">';
+			html += '<label>남:&nbsp</label>';
+			html += '<label style="color : #0100FF"> ' + data[item].man_cnt_09 + '</label>';
+			html += '<label>&nbsp/ 여:&nbsp</label>';
+			html += '<label style="color : #FF0000">' + data[item].woman_cnt_09 + '</label>';
+			html += '<label>' + data[item].stu_cnt_09 + " / " +  data[item].adult_cnt_09 + '</label>';
+			html += '</th>';
+			
+			html += '<th width="7%" style="text-align:center">';
+			html += '<label>남:&nbsp</label>';
+			html += '<label style="color : #0100FF"> ' + data[item].man_cnt_10 + '</label>';
+			html += '<label>&nbsp/ 여:&nbsp</label>';
+			html += '<label style="color : #FF0000">' + data[item].woman_cnt_10 + '</label>';
+			html += '<label>' + data[item].stu_cnt_10 + " / " +  data[item].adult_cnt_10 + '</label>';
+			html += '</th>';
+			
+			html += '<th width="7%" style="text-align:center">';
+			html += '<label>남:&nbsp</label>';
+			html += '<label style="color : #0100FF"> ' + data[item].man_cnt_11 + '</label>';
+			html += '<label>&nbsp/ 여:&nbsp</label>';
+			html += '<label style="color : #FF0000">' + data[item].woman_cnt_11 + '</label>';
+			html += '<label>' + data[item].stu_cnt_11 + " / " +  data[item].adult_cnt_11 + '</label>';
+			html += '</th>';
+			
+			html += '<th width="7%" style="text-align:center">';
+			html += '<label>남:&nbsp</label>';
+			html += '<label style="color : #0100FF"> ' + data[item].man_cnt_12 + '</label>';
+			html += '<label>&nbsp/ 여:&nbsp</label>';
+			html += '<label style="color : #FF0000">' + data[item].woman_cnt_12 + '</label>';
+			html += '<label>' + data[item].stu_cnt_12 + " / " +  data[item].adult_cnt_12 + '</label>';
+			html += '</th>';
+			
+			html += '</tr>';
+			}
+			
+			
+			$('#static_table').append(html);
+
+        	
+        },
+        error : function(e) {	           
+        	alert("오류!");
+        }
+    
+
+});            	
+
+
+}
+
+// ]]></script>
+
+<!-- DatePicker : https://bootstrap-datepicker.readthedocs.io/en/latest/ -->
+<script th:src='@{/lib/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js}' ></script>
+<script charset='UTF-8' th:src='@{/lib/bootstrap-datepicker/dist/locales/bootstrap-datepicker.ko.min.js}' ></script>
+<link rel='stylesheet' th:href='@{/lib/bootstrap-datepicker/dist/css/bootstrap-datepicker3.min.css}' />
+
+
+<link rel="stylesheet" href="http://code.jquery.com/ui/1.8.18/themes/base/jquery-ui.css" type="text/css" />
+
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+<script src="http://code.jquery.com/ui/1.8.18/jquery-ui.min.js"></script>
+

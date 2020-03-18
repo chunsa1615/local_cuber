@@ -1,0 +1,10 @@
+<![CDATA[ -->
+<td><label class="view">{{ if(status == 10){ }}<strong style="color:blue">대기</strong>{{ } else if(status == 20){ }}완료{{ } else if(status == 90){ }}<strong style="color:red">취소</strong>{{ } else if(status == 100){ }}<strong style="color:red">자동취소</strong>{{ } }}</label></td>
+<td><label class="view">{{- parentsName }}</label></td>
+<td><label class="view">{{- parentsTel }}</label></td>
+<td><label class="view">{{- studentName }}</label></td>
+<td><label class="view">{{- studentTel }}</label></td>
+<td><label class="view">{{- momentDateFormat(startDt) }}</label></td>
+<td><label class="view">{{- momentDateFormat(insertDt) }}</label></td>
+<td><button type="button" class="btn btn-outline-primary btn-form-safeService" >보기</button></td>
+<!-- ]]>-->

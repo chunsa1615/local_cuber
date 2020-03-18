@@ -1,0 +1,504 @@
+<div class="container-fluid" id="branch-list-app">
+    <div class="row">
+        <div class="col-sm-12 col-xs-12">
+            <section>
+                <button type="button" class="btn btn-secondary" id="btn-form-new-branch">지점 추가</button>
+            </section>
+            <section class="table-responsive">
+                <table class="table">
+                    <colgroup>
+                        <col width="5%" />
+                        <col width="10%" />
+                        <col width="5%" />
+                        <col width="10%" />
+                        <col width="20%" />
+                        <col width="5%" />
+                        <col width="35%" />
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>유형</th>
+                            <th>지점명</th>
+                            <th>홈페이지</th>
+                            <th>전화번호</th>
+                            <th>주소</th>
+                            <th>약도</th>
+                            <th>위치안내<br/>운영안내</th>
+                        </tr>
+                    </thead>
+                    <tbody id="branch-list"></tbody>
+                </table>
+            </section>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modal-new-branch-form" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title"></h4>
+                </div>
+                <div class="modal-body">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="btn-save-new-branch">추가</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modal-branch-form" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title"></h4>
+                </div>
+                <div class="modal-body">
+                </div>
+                <div class="modal-footer">
+                    <div class="pull-xs-left">
+                        <button type="button" class="btn btn-danger" id="btn-delete-branch">삭제</button>
+                    </div>
+                    <button type="button" class="btn btn-primary" id="btn-save-branch">수정</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript" type="text/template" id="branch-template">
+    <td>
+        <label class="index">{{- index + 1 }}</label>
+    </td>
+	<td>
+		<label class="view">{{- branchTypeMap[branchType] }}</label>
+	</td>
+    <td>
+        <label class="view">{{- name }}</label>
+    </td>
+    <td>
+        <a href="{{- hpUrl }}" target="_blank"><i class="fa fa-external-link" aria-hidden="true"></i></a>
+    </td>
+    <td>
+        <label class="view">{{- tel }}</label><br/>
+        <label class="view">{{- telEtc }}</label>
+    </td>
+    <td>
+        <label class="view">{{- address1 }}</label><br/>
+        <label class="view">{{- address2 }}</label>
+    </td>
+    <td>
+        <a href="{{- locUrl }}" target="_blank"><i class="fa fa-external-link" aria-hidden="true"></i></a>
+    </td>
+    <td>
+        <p class="view small">{{- locNote }}</p>
+        <p class="view small">{{- opNote }}</p>
+    </td>
+</script>
+
+<script th:inline="javascript" type="text/template" id="branch-form-template"><![CDATA[ -->
+<form id="branch-form">
+    <input type="hidden" name="postcode" value="{{- postcode }}" />
+
+    <div class="container-fluid">
+        <div class="col-lg-6 col-md-12 col-xs-12">
+        	<div class="form-group">
+        		<label class="form-control-label">지점유형</label>
+        		<select class="chosen" name="branchType">
+        			<option value="">미입력</option>
+        			{{ _.each(branchTypes, function(t){ }}<option value="{{- t.value }}" {{ if(branchType == t.value) { }}selected="selected"{{ } }}>{{- t.text }}</option>{{ }); }}
+        		</select>
+        	</div>
+	        <div class="form-group">
+	          <label class="form-control-label" for="openDt">오픈일자</label>
+	          <div>
+	            <div class="form-group">
+	            	<input type="hidden" name="openDt" value="" />
+	            	<input type="text" class="form-control datePicker" data-org-input-name="openDt" value="{{- momentDateFormat(openDt)}}" readonly="readonly" />
+	            </div>
+	          </div>
+	        </div>
+            <div class="form-group">
+                <label class="form-control-label">지점명</label>
+                <input type="text" class="form-control" name="name" value="{{- name }}" />
+            </div>
+            <div class="form-group">
+                <label class="form-control-label">홈페이지URL</label>
+                <input type="text" class="form-control" name="hpUrl" value="{{- hpUrl }}" />
+            </div>
+            <div class="form-group">
+                <label class="form-control-label">전화번호</label>
+                <input type="text" class="form-control" name="tel" value="{{- tel }}" />
+            </div>
+            <div class="form-group">
+                <label class="form-control-label">전화번호(기타)</label>
+                <input type="text" class="form-control" name="telEtc" value="{{- telEtc }}" />
+            </div>
+            <div class="form-group">
+                <label class="form-control-label">운영안내</label>
+                <textarea class="form-control" name="opNote" rows="4">{{- opNote }}</textarea>
+            </div>
+        </div>
+        <div class="col-lg-6 col-md-12 col-xs-12">
+            <div class="form-group">
+                <label class="form-control-label">주소1</label>
+                <input type="text" class="form-control" name="address1" value="{{- address1 }}" />
+            </div>
+            <div class="form-group">
+                <label class="form-control-label">주소2</label>
+                <input type="text" class="form-control" name="address2" value="{{- address2 }}" />
+            </div>
+            <div class="form-group">
+                <label class="form-control-label">위치안내</label>
+                <textarea class="form-control" name="locNote" rows="4">{{- locNote }}</textarea>
+            </div>
+            <div class="form-group">
+                <label class="form-control-label">약도URL</label>
+                <input type="text" class="form-control" name="locUrl" value="{{- locUrl }}" />
+            </div>
+            <div class="form-group">
+                <label class="form-control-label">외부노출여부</label>
+                <select class="chosen" name="visibleYn">
+                    <option value="1"{{ if(visibleYn == 1) { }}selected="selected"{{ } }}>노출</option>
+                    <option value="0"{{ if(visibleYn == 0) { }}selected="selected"{{ } }}>비노출</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</form>
+<!-- ]]> --></script>
+
+<script th:inline="javascript">// <![CDATA[
+var branchTypeMap = JSON.parse([[${branchTypeMapJSON}]]);
+var branchTypes = JSON.parse([[${branchTypes}]]);
+
+$(function(){
+
+    // Branch
+
+    var BranchModel = Backbone.Model.extend({
+        idAttribute: 'branchId',
+        defaults: function() {
+            return {
+                name: '', hpUrl: '',
+                tel: '', telEtc: '', postcode: '', address1: '', address2: '',
+                locNote: '', locUrl: '', opNote: '', visibleYn: 1,
+            };
+        },
+    });
+
+    var BranchListCollection = Backbone.Collection.extend({
+        model: BranchModel,
+        url: [[@{/admin/api/branches}]],
+
+    });
+
+    var BranchList = new BranchListCollection;
+
+    var BranchView = Backbone.View.extend({
+        tagName: 'tr',
+        template: _.template($('#branch-template').html()),
+        events: {
+            "dblclick" : "formBranch",
+        },
+        initialize: function() {
+            this.listenTo(this.model, 'change', this.change);
+            this.listenTo(this.model, 'destroy', this.remove);
+
+        },
+        change: function() {
+            this.render();
+
+        },
+        render: function() {
+            var data = this.model.toJSON();
+            data['index'] = BranchList.indexOf(this.model);
+
+            this.$el.html(this.template(data));
+
+            return this;
+
+        },
+        formBranch: function(e) {
+            BranchList.trigger('formBranch', this.model);
+
+        },
+
+    });
+
+    var BranchListView = Backbone.View.extend({
+        el: $('#branch-list-app'),
+        templateForForm: _.template($('#branch-form-template').html()),
+        currentBranchModel: null,
+        events: {
+            'click #btn-form-new-branch': 'formNewBranch',
+            'click #btn-save-new-branch': 'saveNewBranch',
+            'click #btn-save-branch': 'saveBranch',
+            'click #btn-delete-branch': 'deleteBranch',
+        },
+        initialize: function() {
+            this.listenTo(BranchList, 'add', this.addOneBranch);
+            this.listenTo(BranchList, 'formBranch', this.formBranch);
+            this.listenTo(BranchList, 'reset', this.reset);
+
+            //BranchList.fetch();
+
+        },
+        reset: function() {
+            BranchList.forEach(this.addOneBranch);
+
+        },
+        render: function() {
+
+        },
+        formNewBranch: function(e, branchType) {
+            var data = new BranchModel().toJSON();
+            
+            //data['branchType'] = branchType;
+            //data['branchType'] = new ;
+            data['branchType'] = branchType;
+            data['brabchTypes'] = branchTypes;
+            var currentDate = sysDate.clone();
+            data['openDt'] = currentDate.valueOf();
+            
+            var bodyHtml = this.templateForForm(data);
+
+            $('#modal-new-branch-form')
+            .one('show.bs.modal', function(e) {
+                var $modal = $(this);
+                $modal.find('.modal-title').html('새 지점');
+                $modal.find('.modal-body').html(bodyHtml);
+
+                var $datepicker = $modal.find('.datePicker');
+                $datepicker.datepicker({
+                  language: 'ko', autoclose: true, todayHighlight: true, format: datepickerFormat,
+                }).on('changeDate', function(e) {
+                    var orgInputName = $(e.target).attr('data-org-input-name');
+                    if (!(_.isEmpty(orgInputName))) {
+                        var $orgInput = $modal.find('[name=' + orgInputName + ']');
+                        $orgInput.val(moment(e.date).format('YYYY-MM-DD'));
+                    }
+                });
+				
+                $modal.find('.chosen').chosen({width: "100%"});
+                
+            })
+            .one('shown.bs.modal', function(e) {
+                var $modal = $(this);
+                $modal.find('[name=name]').focus();
+
+                $modal.find('form').on('submit', function(e) {
+                    e.preventDefault();
+
+                });
+
+
+            })
+            .modal();
+        },
+        saveNewBranch: function(e) {
+            var values = {};
+            var $modal = $('#modal-new-branch-form');
+            var $inputs = $modal.find(':input');
+			var $form = $modal.find('form');
+            
+			$form.validate({
+				ignore: "not:hidden",
+				rules: {
+					branchType: {
+						required: true,
+					},
+					name: {
+						required: true,
+					}
+				},
+				messages: {
+					branchType: {
+						required: "유형을 선택하세요",
+					},
+					name: {
+						required: "지점명을 입력하세요",
+					}					
+				}
+			});
+			
+			if ($form.valid()) {
+	            $inputs.each(function(i, element) {
+	                var $element = $(element);
+	                if ($element.is('[type=radio]')) {
+	                    if ($element.is(':checked')) {
+	                        var name = $element.attr('name');
+	                        if (!(_.isEmpty(name))) {
+	                            values[name] = $element.val();
+	
+	                        }
+	                    }
+	
+	                } else {
+	                    var name = $element.attr('name');
+	                    if (!(_.isEmpty(name))) {
+	                        values[name] = $element.val();
+	
+	                    }
+	
+	                }
+	
+	            });
+	
+	            BranchList.create(values, {
+	                wait : true,
+	                success : function (model, response) {
+	                    model.set('branchId', response.branchId);
+	                    model.set('insertDt', response.insertDt);
+	                    model.set('updateDt', response.updateDt);
+	
+	                    $modal.modal('hide');
+	
+	                }
+	
+	            });
+			};
+        },
+        addOneBranch: function(branch) {
+            var view = new BranchView({ model: branch });
+
+            this.$('#branch-list').append(view.render().el);
+
+        },
+        formBranch: function(model) {
+            this.currentBranchModel = model;
+
+            var data = model.toJSON();
+            var titleHtml = data.name;
+            var bodyHtml = this.templateForForm(data);
+
+            $('#modal-branch-form')
+            .one('show.bs.modal', function(e) {
+                var $modal = $(this);
+                $modal.find('.modal-title').html(titleHtml);
+                $modal.find('.modal-body').html(bodyHtml);
+
+                var $datepicker = $modal.find('.datePicker');
+                $datepicker.datepicker({
+                  language: 'ko', autoclose: true, todayHighlight: true, format: datepickerFormat,
+                }).on('changeDate', function(e) {
+                    var orgInputName = $(e.target).attr('data-org-input-name');
+                    if (!(_.isEmpty(orgInputName))) {
+                        var $orgInput = $modal.find('[name=' + orgInputName + ']');
+                        $orgInput.val(moment(e.date).format('YYYY-MM-DD'));
+                    }
+                });
+                
+                $modal.find('.chosen').chosen({width: "100%"});
+                
+                $modal.find('form').on('submit', function(e) {
+                    e.preventDefault();
+
+                });
+
+            })
+            .modal();
+
+        },
+        saveBranch: function(e) {
+            var values = {};
+            var $modal = $('#modal-branch-form');
+            var $inputs = $modal.find(':input');
+			var $form = $modal.find('form');
+            
+			$form.validate({
+				ignore: "not:hidden",
+				rules: {
+					branchType: {
+						required: true,
+					},
+					name: {
+						required: true,
+					}
+				},
+				messages: {
+					branchType: {
+						required: "유형을 선택하세요",
+					},
+					name: {
+						required: "지점명을 입력하세요",
+					}					
+				}
+			});
+			
+			if ($form.valid()) {            
+	            $inputs.each(function(i, element) {
+	                var $element = $(element);
+	                if ($element.is('[type=radio]')) {
+	                    if ($element.is(':checked')) {
+	                        var name = $element.attr('name');
+	                        if (!(_.isEmpty(name))) {
+	                            values[name] = $element.val();
+	
+	                        }
+	
+	                    }
+	
+	                } else {
+	                    var name = $element.attr('name');
+	                    if (!(_.isEmpty(name))) {
+	                        values[name] = $element.val();
+	
+	                    }
+	
+	                }
+	            });
+	
+	            this.currentBranchModel.save(values, {
+	                wait: true,
+	                success: function (model, response) {
+	                    $modal.modal('hide');
+	
+	                },
+	
+	            });
+			};
+        },
+        deleteBranch: function(e) {
+            var $modal = $('#modal-branch-form');
+
+            if(confirm('정말로 삭제하시겠습니까?')) {
+                this.currentBranchModel.destroy({
+                    wait: true,
+                    success: function (model, response) {
+                        $modal.modal('hide');
+
+                    },
+
+                });
+
+            }
+
+        },
+    });
+
+    var BranchApp = new BranchListView;
+
+    BranchList.reset(JSON.parse([[${branchListJSON}]]));
+
+});
+
+// ]]></script>
+<!-- Validation : https://jqueryvalidation.org/documentation/ -->
+<script th:src='@{/lib/jquery-validation/dist/jquery.validate.min.js}' ></script>
+<!-- DatePicker : https://bootstrap-datepicker.readthedocs.io/en/latest/ -->
+<script th:src='@{/lib/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js}'></script>
+<script charset='UTF-8' th:src='@{/lib/bootstrap-datepicker/dist/locales/bootstrap-datepicker.ko.min.js}'></script>
+<link rel='stylesheet' th:href='@{/lib/bootstrap-datepicker/dist/css/bootstrap-datepicker3.min.css}' />
+<!-- Chosen : https://github.com/harvesthq/chosen -->
+<link rel='stylesheet' th:href='@{/lib/chosen/chosen.css}' />
+<script th:src='@{/lib/chosen/chosen.jquery.js}'></script>

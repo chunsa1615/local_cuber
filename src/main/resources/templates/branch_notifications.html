@@ -1,0 +1,578 @@
+<div class="container-fluid" id="notification-list-app">
+    <section class="row">
+        <div class="col-md-2" style = "margin-top : 24px">
+            <button type="button" class="btn btn-outline-primary" id="btn-form-new-sms">임의발송</button>
+        </div>                
+        <div class="col-md-2 col-sm-12">
+        </div>
+        <div class="col-md-10 col-sm-12">
+            <form id="searchFrom">
+                <div class="row">
+                    <div class="col-md-5">
+                        <div class="form-group">
+                            <label class="form-control-label" for="sNotificationStartDt">발송일자</label>
+                            <div class="input-group input-daterange">
+                                <input type="text" class="form-control" id="sNotificationStartDt" name="sNotificationStartDt" th:value="${sNotificationStartDt}" readonly="readonly" />
+                                <div class="input-group-addon">부터</div>
+                                <input type="text" class="form-control" id="sENotificationEndDt" name="sNotificationEndDt" th:value="${sNotificationEndDt}" readonly="readonly" />
+                                <div class="input-group-addon">까지</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                        <div class="form-group">
+                            <label class="form-control-label" for="sMember">회원</label>
+                            <select class="form-control chosen" id="sMember" name="sMember">
+                                <option value="">전체</option>
+                                <option th:each="member : ${members}" th:selected="${member.memberId == sMember}" th:value="${member.memberId}" th:text="${member.no + ' ' + member.name}"></option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2" style = "margin-top : 24px">
+                        <label class="form-control-label" for="btn-search"></label>
+                        <button type="submit" class="btn btn-outline-primary" id="btn-search">검색</button>
+                    </div>
+                </div>
+                
+            </form>
+        </div>
+    </section>
+    <section class="row">
+        <table class="table">
+            <!--<colgroup>-->
+                <!--<col width="10%" />-->
+                <!--<col width="30%" />-->
+                <!--<col width="30%" />-->
+                <!--<col width="30%" />-->
+            <!--</colgroup>-->
+            <thead class="thead-inverse">
+                <tr>
+                	<th><input type="checkbox" name="" id="chk-select-all-notification" value="">  전체 선택</input></th>
+                    <th class="p-l-3">발송일시</th>
+                    <th class="p-l-3">문자내용</th>
+                    <th>발신번호</th>
+                    <th>수신번호</th>
+                    <th class="text-xs-center">회원</th>
+                    <th>상태</th>
+                </tr>
+            </thead>
+            <tbody id="notification-list"></tbody>
+                <tr>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th class="text-xs-left">
+                        <label class="view">총 <span id="totalNotification"></span> 건</label>
+                    </th>
+                </tr>
+            <tfoot>            
+            </tfoot>
+        </table>
+        <button type="button" class="btn btn-outline-primary" id="btn-resend-notification">재발송</button>
+    </section>
+	<section th:if="${pageMaker.endPage != 0}">
+		<div style="text-align: center;">
+			<nav aria-label="Page navigation">
+			  <ul class="pagination">
+		    	<li th:if="${pageMaker.prev}" class="page-item">								    
+			      <a class="page-link prev" href="#" aria-label="Previous">
+			        <span aria-hidden="true">&laquo;</span>
+			        <span class="sr-only">Previous</span>
+			      </a>				     
+		   		</li>
+			    <li th:each="page : ${#numbers.sequence(pageMaker.startPage, pageMaker.endPage)}"  class='page-item' th:value="${page}" th:classappend="${page == pageMaker.page.page ? 'active' :''}">	 			     
+			    	<a class="page-link button"  id="page-linkbutton" th:text="${page}" th:value="${page}" href="#"></a>						  
+			    </li>
+				<li th:if="${pageMaker.next}" class="page-item">
+			      <a class="page-link next" href="#" aria-label="Next">
+			        <span aria-hidden="true">&raquo;</span>
+			        <span class="sr-only">Next</span>
+			      </a>
+			    </li>
+			  </ul>
+			</nav>
+		</div>
+	</section>    
+
+    <div class="modal fade" id="modal-new-sms-form" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title"></h4>
+                </div>
+                <div class="modal-body">
+                </div>
+                <div class="modal-footer">
+                    <div class="pull-xs-left">
+                        <!--<button type="button" class="btn btn-outline-primary" data-dismiss="modal" id="btn-new-member">회원 추가</button>-->
+                    </div>
+                    <button type="button" class="btn btn-primary" id="btn-send-new-sms">발송</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script th:inline="javascript" type="text/template" id="sms-template"><![CDATA[ -->
+<form>
+	<div class="container-fluid">
+		<div class="col-lg-6 col-md-12 col-xs-12">
+			<div class="form-group">
+				<label class="form-control-label">발송내용</label>
+				<textarea class="form-control" name="msg">{{- msg }}</textarea>
+			</div>
+		</div>
+		<div class="col-lg-6 col-md-12 col-xs-12">
+			<div class="form-group">
+				<label class="form-control-label">회원&nbsp;&nbsp;&nbsp;</label> <input type="checkbox" id="chk-select-all-sms-send" value="">전체 전송</input>&nbsp;&nbsp;&nbsp; <input type="checkbox" id="chk-select-reg-sms-send" value="">현재등록자 전송</input> 
+                <!-- <select class="chosen" name="userId" id="userId"> -->
+                	<div class="select-userId" >
+	                	<select class="form-control" name="selectUserId" multiple="multiple" >
+	                    {{ _.each(users, function(user){ }}<option value="{{- user.memberId }}" {{ if(userId == user.memberId) { }}selected="selected"{{ } }}>{{- user.no }} {{- user.name }}</option>{{ }); }}
+	                	</select>
+	                </div>
+			</div>
+		</div>
+	</div>
+</form>
+
+<!-- ]]> --></script>
+
+<script th:inline="javascript" type="text/template" id="notification-template"><![CDATA[ -->
+	<td>
+		<input type="checkbox" name="chk-select-notification" id="{{- cmid}}" value=""></input>
+	</td>
+    <td>
+        <label class="view">{{- moment(smsDt).format('LL HH:mm') }}</label>
+    </td>
+    <td>
+        <label class="view">{{- msg }}</label>
+    </td>
+    <td>
+        <label class="view">{{- fromNumber }}</label>
+    </td>
+    <td>
+        <label class="view">{{- toNumber }}</label>
+    </td>
+    <td class="text-xs-center">
+        <label class="view"><span class="tag tag-primary">{{- member.no }}</span> {{- member.name }}</label>
+    </td>
+    <td>
+        <label class="view">{{ if(resultCode == 200) { }}전송완료{{ } else if(result_code != 200) { }}전송실패{{ } }}</label>
+    </td>
+<!-- ]]> --></script>
+<script th:inline="javascript">// <![CDATA[
+$(function(){    
+	
+	var pageMaker = [[${pageMaker}]];
+	
+	// Search Form
+    var $sForm = $('#searchFrom');
+    $sForm.find('.input-daterange').datepicker({
+        language: 'ko', autoclose: true, todayHighlight: true, format: 'yyyy-mm-dd',
+
+    }).on('changeDate', function(e) {
+
+    });
+
+    $sForm.find('.chosen').chosen({width: "100%"});   
+    
+    // Branch
+	var branchList = [[${branches}]];
+    
+    // Member
+    var MemberList = new MemberListCollection();
+    MemberList.branchId = [[${branch.branchId}]];
+    MemberList.reset(JSON.parse([[${memberListJSON}]]));
+
+    // Reservation
+    var ReservationList = new ReservationListCollection;
+    ReservationList.branchId = [[${branch.branchId}]];    
+
+    // Notification
+    var NotificationList = new NotificationListCollection;
+    NotificationList.branchId = [[${branch.branchId}]];
+
+    var NotificationView = Backbone.View.extend({
+        tagName: 'tr',
+        className: 'notification',
+        template: _.template($('#notification-template').html()),
+        events: {
+        	
+        },
+        initialize: function() {
+            this.listenTo(this.model, 'change', this.change);
+            this.listenTo(this.model, 'destroy', this.remove);
+
+        },
+        change: function() {
+            this.render();
+
+        },
+        render: function() {
+            var data = this.model.toJSON();
+
+            if (MemberList.get(this.model.get('userId'))) {
+	            data['member'] = MemberList.get(this.model.get('userId')).toJSON();
+	
+	            this.el.id = data.notificationId;
+				
+	            //수신번호 암호화
+	           	if (data['toNumber'].match('-')) { // 하이푼('-')이 포함이 되있는지 안 되어있는지 구분
+	           		var temp = data['toNumber'].split('-');
+	           		//data['toNumber'] = temp[0] + '-****-' + temp[2];
+	           		data['toNumber'] = temp[0] + '-' + temp[1] + '-' + temp[2];
+	           	}
+	           	else {
+	           		//data['toNumber'] = data['toNumber'].substring(0,3) + '-****-' + data['toNumber'].substring(7,11);
+	           		data['toNumber'] = data['toNumber'].substring(0,3) + '-' +  data['toNumber'].substring(3,7) + '-' + data['toNumber'].substring(7,11);
+	           	}
+	           
+	            this.$el.html(this.template(data));
+            }
+            return this;
+
+        },
+        
+
+
+    });
+
+    var BranchNotificationView = Backbone.View.extend({
+        el: $('#notification-list-app'),
+        templateForForm: _.template($('#sms-template').html()),
+        events: {
+        	'click #chk-select-all-notification' : 'selectAllNotification',
+			'click #btn-resend-notification' : 'resendNotification',
+			'click #btn-form-new-sms' : 'formNewSms',
+			'click #btn-send-new-sms'  : 'sendNewSms',
+			'click #chk-select-all-sms-send' : 'allSendSms',
+			'click #chk-select-reg-sms-send' : 'regSendSms',
+			'click .page-link.button' : 'paging',
+			'click .page-link.prev'  : 'prevPaging',
+			'click .page-link.next'  : 'nextPaging',
+        	
+        },
+        initialize: function() {
+
+            this.listenTo(ReservationList, 'add', this.addOneReservation);
+            this.listenTo(ReservationList, 'reset', this.resetReservation);
+            
+        	this.listenTo(NotificationList, 'add', this.addOneNotification);
+            this.listenTo(NotificationList, 'reset', this.reset);
+            
+
+
+        },
+        reset: function() {
+        	NotificationList.forEach(this.addOneNotification);
+        	        	
+        	$('#totalNotification').text(pageMaker.totalCount);
+        	
+
+        },
+        render: function() {
+
+        },
+        addOneNotification: function(notification) {
+            var view = new NotificationView({ model: notification });
+			
+            this.$('#notification-list').append(view.render().el);
+
+        },
+        resetReservation: function() {
+        	ReservationList.forEach(this.addOneReservation, this);
+        	
+        		return this;
+
+        },
+        addOneReservation: function(reservation) {
+        	var branchId = [[${branch.branchId}]];
+            var orderId = reservation.get('orderId');
+            
+        	reservation.reservationsOfOrder = new ReservationListCollection;
+            reservation.reservationsOfOrder.url = ctxRoot + 'api/v1/branch/' + branchId + '/orders/' + orderId + '/reservations';
+            
+                      
+        },
+
+        formNewSms: function(userId) {
+        	var data = new NotificationModel().toJSON();
+        	
+         	data['userId'] = userId;
+            data['users'] = MemberList.toJSON();
+            
+            var bodyHtml = this.templateForForm(data);
+            
+            $('#modal-new-sms-form')
+            .one('show.bs.modal', function(e) {
+                var $modal = $(this);
+                
+                $modal.find('.modal-title').html('새 발송');
+                $modal.find('.modal-body').html(bodyHtml);
+
+                $modal.find('.chosen').chosen({width: "100%"});
+                $modal.find('[name=selectUserId]').chosen({width: '100%', disable_search: false, placeholder_text_multiple: '회원 선택'});
+
+                
+                $modal.find('form').validate({
+                	ignore: "not:hidden",
+                	rules: {
+                		selectUserId: {            			
+            				//required: true,
+            			},
+            			
+            		},
+            		messages: {
+            			selectUserId: {            	
+            	    		//required: "회원을 선택하세요",
+            			},
+      
+            		}	
+                });
+                
+
+            })
+            .one('shown.bs.modal', function(e) {
+                var $modal = $(this);
+                $modal.find('[name=msg]').focus();
+                
+                $modal.find('form').on('submit', function(e) {
+                    e.preventDefault();
+
+                });
+
+            })
+            .modal();
+        },
+        sendNewSms: function() {
+        	
+        
+            var values = {};
+            var $modal = $('#modal-new-sms-form');
+            
+            var $inputs = $modal.find(':input');
+            var $form = $modal.find('form');
+            
+            if($form.valid()) {
+	            $inputs.each(function(i, element) {
+	                var $element = $(element);
+	                
+	                if ($element.is('[type=radio]')) {
+	                    if ($element.is(':checked')) {
+	                        var name = $element.attr('name');
+	                        if (!(_.isEmpty(name))) {
+	                            values[name] = $element.val();
+	
+	                        }
+	                    }
+	
+	                } else {
+	                    var name = $element.attr('name');
+	                    if (!(_.isEmpty(name))) {
+	                     
+	                    	values[name] = $element.val();
+	                        
+	                    }
+	                }
+	
+	            });
+
+		        var branch = $.grep(branchList, function(branch) { return branch.branchId == [[${branch.branchId}]]; });
+		        values['fromNumber'] = branch[0].tel;
+		        values['msg'] = '[CNT ' + branch[0].name + '] ' + values['msg'];
+		        values['cmid'] = '';
+		        values['result_code'] = '';
+		        debugger;
+		        //전체 전송 체크박스 확인
+		        if ($('#chk-select-all-sms-send').prop("checked")){
+    				values['selectUserId'] = new Array();
+    				MemberList.forEach(function (item, index) {
+    					values['selectUserId'][index] = item.get('memberId'); 	
+    				});
+    			}
+		        if ($('#chk-select-reg-sms-send').prop("checked")){
+    				values['selectUserId'] = new Array();
+					if (ReservationList != null) {
+	    				ReservationList.forEach(function (item, index) {
+	    					values['selectUserId'][index] = item.get('memberId'); 	
+	    				});
+					}
+    			}
+		        
+		        
+		        if (values['selectUserId'].length > 0) {
+		        	var member;
+		        	for (var i =0; i < values['selectUserId'].length; i++) {
+		        		member = MemberList.filter({ memberId : values['selectUserId'][i] });
+			       		values['toNumber'] = member[0].get('telParent');
+			       		values['userId'] = values['selectUserId'][i];
+			       		
+				       	NotificationList.create(values, {
+			                wait : true,
+			                success : function (model, response) {
+			                    $modal.modal('hide');
+								location.reload();
+			                }
+			
+			        	});
+		        	}
+		        }
+
+                
+         };
+         
+        },
+        resendNotification: function(e) {
+        	        
+		if (confirm("메시지를 재전송 하시겠습니까?") == true){
+					
+        	var $inputs = this.$el.find('[name=chk-select-notification]');
+        	var id = [];
+        	var notification = new Array();
+        	
+        	$inputs.each(function(i, element) {
+        		var $element = $(element);
+        		if ($element.is('[type=checkbox]')) {
+        			if($element.is(':checked')) {        				
+        				id.push($element.attr('id'));
+        				notification.push(NotificationList.findWhere({cmid:$element.attr('id')}).toJSON());
+
+        			}
+        			else {
+        						
+        			}
+        		}
+        		
+        	})
+        	
+            // Resend  
+            if (id != '') {
+            	
+            	jQuery.ajax({
+                    method : "POST",       
+                    url : "/api/v1/branch/" + [[${branch.branchId}]] + "/notifications/resend",              
+                    data : JSON.stringify(notification),
+                    contentType: "application/json;charset=utf-8",
+                    dataType : 'json',
+                    success : function(id) {
+                       //alert("Suceeded!");         
+                    },
+                    error : function(id) {
+                       //alert("Failed!");
+                    }
+                });
+            	
+            }
+            else {
+            	alert('선택된 메시지 이력이 없습니다.');            	
+           	}
+        	
+		}
+		
+		else {
+			return;
+		}
+		
+
+        	
+        },
+        
+        selectAllNotification: function(e) {
+
+        	if ($(e.currentTarget).prop("checked")){
+        		
+        		$(e.delegateTarget).find('[name=chk-select-notification]').each(function(i, element) {
+        			$(element).prop("checked", true);
+        		})
+        		
+        	}
+        	else {
+        		
+        		$(e.delegateTarget).find('[name=chk-select-notification]').each(function(i, element) {
+        			$(element).prop("checked", false);
+        		})
+        	}
+        	
+        },
+        allSendSms: function(e) {
+        	var $modal = $('#modal-new-sms-form');
+        	var chk = $(this).is(":checked");
+			
+			if ($('#chk-select-reg-sms-send').prop("checked")) {
+				$("input:checkbox[id='chk-select-reg-sms-send']").attr("checked", false);					
+			}			
+						
+			if ($(e.currentTarget).prop("checked")){
+				$modal.find('.select-userId').hide();
+				 
+			}
+			else {
+				$modal.find('.select-userId').show();
+			}
+
+        },
+        regSendSms: function(e) {
+        	var $modal = $('#modal-new-sms-form');
+        	var chk = $(this).is(":checked");
+			
+			if ($('#chk-select-all-sms-send').prop("checked")) {
+				$("input:checkbox[id='chk-select-all-sms-send']").attr("checked", false);					
+			}		
+			
+			if ($(e.currentTarget).prop("checked")){
+				$modal.find('.select-userId').hide();
+				 
+			}
+			else {
+				$modal.find('.select-userId').show();
+			}
+        },
+        paging: function(e) {
+			paging(e);
+        	
+        },
+        prevPaging: function(e) {
+        	var page = [[${pageMaker.startPage -1}]];
+        	prevPaging(e, page);
+        	
+        },
+        nextPaging: function(e) {
+        	var page = [[${pageMaker.endPage +1}]];
+        	nextPaging(e, page);
+        	
+        },
+        
+    });
+   	
+    	
+    var App = new BranchNotificationView;
+    
+
+    ReservationList.reset(JSON.parse([[${reservationListJSON}]]));
+    NotificationList.reset(JSON.parse([[${notificationListJSON}]]));
+
+});
+
+// ]]></script>
+<script th:src='@{/common/api_branch_member.js}' ></script>
+<script th:src='@{/common/api_branch_notification.js}' ></script>
+<script th:src='@{/common/api_branch_reservation.js}' ></script>
+<!-- DatePicker : https://bootstrap-datepicker.readthedocs.io/en/latest/ -->
+<script th:src='@{/lib/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js}' ></script>
+<script charset='UTF-8' th:src='@{/lib/bootstrap-datepicker/dist/locales/bootstrap-datepicker.ko.min.js}' ></script>
+<link rel='stylesheet' th:href='@{/lib/bootstrap-datepicker/dist/css/bootstrap-datepicker3.min.css}' />
+<!-- Chosen : https://github.com/harvesthq/chosen -->
+<link rel='stylesheet' th:href='@{/lib/chosen/chosen.css}' />
+<script th:src='@{/lib/chosen/chosen.jquery.js}' ></script>
+<!-- Validation : https://jqueryvalidation.org/documentation/
+    INPUT : https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input -->
+<script th:src='@{/lib/jquery-validation/dist/jquery.validate.min.js}' ></script>

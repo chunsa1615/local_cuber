@@ -1,0 +1,133 @@
+<![CDATA[ -->
+<form>
+      <div class="container-fluid">
+      	<div class="col-lg-6 col-md-12 col-xs-12">
+      		
+      		<div class="form-group">
+      			<label class="form-control-label">지점선택</label>&nbsp;&ensp;&emsp;&nbsp;&ensp;&emsp;&nbsp;&ensp;&emsp;&nbsp;&ensp;&emsp;&nbsp;&ensp;&emsp;&nbsp;&ensp;&emsp;&nbsp;&ensp;&emsp;&nbsp;&ensp;&emsp;&nbsp;&ensp;<i class="fa fa-check" style="color:green" aria-hidden="true"></i> <B>필수입력</B>
+      			<input type="text" class="form-control" value="{{- branchNm }}" readonly="readonly"/>
+      		</div>
+      		
+      		<div class="form-group">      			
+      			<label class="form-control-label">좌석예약일</label>
+      			<input type="hidden" name="startDt" value="{{- startDt }}" />
+      			<div class="input-group input-daterange">
+	                <span class="input-group-btn">
+	                    <button class="btn btn-secondary" type="button"><i class="fa fa-calendar" aria-hidden="true"></i></button>
+	                </span>
+	                <input type="text" class="form-control" data-org-input-name="startDt" id="startDt" value="{{- momentDateFormat(startDt) }}" readonly="readonly"  />
+                </div>
+      		</div>
+      	    
+      	    <div class="form-group">
+                <label class="form-control-label">예약유형</label>
+                <div class="input-group">
+                    <label class="form-check-inline">
+                        <input class="form-check-input" type="radio" name="type" value="10" {{ if(type == 10){ }}checked="checked"{{ } else { }}checked="checked"{{ } }} /> 사전예약
+                    </label>
+                    <label class="form-check-inline">
+                        <input class="form-check-input" type="radio" name="type" value="20" {{ if(type == 20){ }}checked="checked"{{ } }} /> 무료체험
+                    </label>
+                </div>
+            </div>  
+            
+            <div class="form-group">
+                <label class="form-control-label">고객유형</label>
+                <div class="input-group">
+                    <label class="form-check-inline">
+                        <input class="form-check-input" type="radio" name="role" value="10" {{ if(role == 10){ }}checked="checked"{{ } else { }}checked="checked"{{ } }} /> 일반
+                    </label>
+                    <label class="form-check-inline">
+                        <input class="form-check-input" type="radio" name="role" value="20" {{ if(role == 20){ }}checked="checked"{{ } }} /> 보호자
+                    </label>
+                </div>
+            </div>
+			
+			<div class="form-group">
+		        <i class="fa fa-check" style="color:green" aria-hidden="true"></i> <label class="form-control-label">희망 좌석</label>
+		        <select class="chosen" name="roomType" id="roomType">
+					<option value="">- 선택 -</option>
+					{{ _.each(roomTypes, function(r){ }}<option value="{{- r.value }}" {{ if(roomType == r.value) { }}selected="selected"{{ } }}>{{- r.text }}</option>{{ }); }}
+		   		</select>
+			</div>
+		
+			<div class="form-group">
+      		    <div class="form-group">
+		        <i class="fa fa-check" style="color:green" aria-hidden="true"></i> <label class="form-control-label">예약 상태</label>
+		        <select class="chosen" name="status" id="status">
+					<option value="">- 선택 -</option>
+					{{ _.each(statusTypes, function(r){ }}<option value="{{- r.value }}" {{ if(status == r.value) { }}selected="selected"{{ } }}>{{- r.text }}</option>{{ }); }}
+		   		</select>
+			</div>
+
+			
+      	</div>
+      </div>
+      
+      <div class="col-lg-6 col-md-12 col-xs-12">
+		 <div class="form-group">
+  		     		   
+  		   <div class="form-group">
+      			<i class="fa fa-check" style="color:green" aria-hidden="true"></i> <label class="form-control-label">이름</label>
+      			<input type="text" class="form-control" name="name" value="{{- name }}" readonly="readonly" />
+      	   </div>
+      	   
+      	   <!--
+      	    <div class="form-group">
+                <label class="form-control-label">회원</label> <button type="button" class="btn btn-sm btn-outline-primary pull-xs-right" id="btn-new-member">새 회원</button>
+                <select class="chosen" name="memberId" id = "memberId">
+                    <option value="">선택</option>
+                    {{ _.each(members, function(member){ }}<option value="{{- member.memberId }}" {{ if(memberId == member.memberId) { }}selected="selected"{{ } }}>{{- member.no }} {{- member.name }}</option>{{ }); }}
+                </select>
+            </div>
+      	   -->
+      	   
+           <div class="form-group">
+      			<i class="fa fa-check" style="color:green" aria-hidden="true"></i> <label class="form-control-label">연락처 ( '-' 없이 입력해 주세요.)</label>
+      			<input type="text" class="form-control" name="tel" value="{{- tel }}" />
+      	   </div>  
+      	   <div class="form-group">
+                <label class="form-control-label">성별</label>
+                <div class="input-group">
+                    <label class="form-check-inline">
+                        <input class="form-check-input" type="radio" name="gender" value="1" {{ if(gender == 1){ }}checked="checked"{{ } else { }}checked="checked"{{ } }} /> 남
+                    </label>
+                    <label class="form-check-inline"> 
+                        <input class="form-check-input" type="radio" name="gender" value="2" {{ if(gender == 2){ }}checked="checked"{{ } }} /> 여
+                    </label>
+                </div>
+           </div>
+   		   </div>
+   		 	  <div class="form-group">
+      			<label class="form-control-label">이메일</label>
+      			<div class="input-group mb10">
+	      			<input type="text" class="form-control emailText" name="emailText" value="{{- emailText }}" />
+	      			<div class="form-control" style="display:inline-block;width:40px;height:38px;background-color:#eceeef;border-left:none !important;border-right:none !important;text-align:center;">@</div>
+	      			<input type="text" class="form-control emailText" name="emailAdd" value="{{- emailAdd }}" />
+      			</div>
+      			<select class="chosen email_select" name="emailSelect" id="emailSelecct" style="margin-top:10px !important;">
+                    <option value="">직접입력</option>
+                    <option value="chol.com">chol.com</option>
+                    <option value="dreamwiz.com">dreamwiz.com</option>
+                    <option value="empal.com">empal.com</option>
+                    <option value="freechal.com">freechal.com</option>
+                    <option value="gmail.com">gmail.com</option>
+                    <option value="hanafos.com">hanafos.com</option>
+                    <option value="hanmail.net">hanmail.net</option>
+                    <option value="hanmir.com">hanmir.com</option>                        
+                    <option value="naver.com">naver.com</option>
+                    <option value="hitel.net">hitel.net</option>
+                    <option value="hotmail.com">hotmail.com</option>
+                    <option value="korea.com">korea.com</option>
+                    <option value="lycos.co.kr">lycos.co.kr</option>
+                    <option value="nate.com">nate.com</option>
+                    <option value="netian.com">netian.com</option>
+                    <option value="paran.com">paran.com</option>
+                    <option value="yahoo.com">yahoo.com</option>
+                    <option value="yahoo.co.kr">yahoo.co.kr</option>
+                </select>
+      		</div>
+       </div>
+</form>
+<!-- ]]> -->
+ 

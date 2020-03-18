@@ -1,0 +1,11 @@
+<![CDATA[ -->
+<td class="text-xs-center"><input type="checkbox" class="form-check-input" name = "checked_return" id="checkbox-for-return" value= "1"
+ 	{{ if( rentalStateType == 0 ){ }}   readonly = "readonly" {{ } }}/></td>
+<td>{{- momentDateFormat(rentalDt) }} {{-  momentTimeFormat(rentalTm)}}</td>
+<td>{{- rentalType}}</td>
+<td class="text-xs-center"><span class="tag tag-primary">{{- member.no }}</span> {{- member.name }}</td>
+<td><span {{ if(rentalStateType == 0){ }}style="color:red" {{ } }} >{{- RentalStateTypeMap[rentalStateType]}}</span></td>
+<td class="view small">{{- rentalNote }}</td>
+<td><button type="button" class="btn btn-outline-primary btn-form-rental">수정</button></td>
+<!-- ]]> -->
+

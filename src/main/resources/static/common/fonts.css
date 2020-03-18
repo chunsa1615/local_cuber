@@ -1,0 +1,59 @@
+@charset "utf-8";
+/* ==========================================================================
+   Nanum Barun Gothic and Nanum Gothic (KR)
+   ========================================================================== */
+
+@font-face {
+  font-family: 'NBGNormal';
+  font-style: normal;
+  font-weight: 400;
+  src: url(nanum/NanumBarunGothic-Regular.eot);
+  src: local(※),url(nanum/NanumBarunGothic-Regular.eot?#iefix) format('embedded-opentype'),
+       url(nanum/NanumBarunGothic-Regular.woff2) format('woff2'),
+       url(nanum/NanumBarunGothic-Regular.woff) format('woff'),
+       url(nanum/NanumBarunGothic-Regular.ttf) format('truetype');
+}
+
+@font-face {
+  font-family: 'NBGBold';
+  font-style: normal;
+  font-weight: 700;
+  src: url(nanum/NanumBarunGothic-Bold.eot);
+  src: local(※),url(nanum/NanumBarunGothic-Bold.eot?#iefix) format('embedded-opentype'),
+       url(nanum/NanumBarunGothic-Bold.woff2) format('woff2'),
+       url(nanum/NanumBarunGothic-Bold.woff) format('woff'),
+       url(nanum/font/NanumBarunGothic-Bold.ttf) format('truetype');
+}
+
+/*@font-face {
+  font-family: 'NGNormal';
+  font-style: normal;
+  font-weight: 400;
+  src: url(fonts/nanum/NanumGothic-Regular.eot);
+  src: local(※),url(fonts/nanum/NanumGothic-Regular.eot?#iefix) format('embedded-opentype'),
+       url(fonts/nanum/NanumGothic-Regular.woff2) format('woff2'),
+       url(fonts/nanum/NanumGothic-Regular.woff) format('woff'),
+       url(fonts/nanum/NanumGothic-Regular.ttf) format('truetype');
+}
+
+@font-face {
+  font-family: 'NGBold';
+  font-style: normal;
+  font-weight: 700;
+  src: url(fonts/nanum/NanumGothic-Bold.eot);
+  src: local(※),url(fonts/nanum/NanumGothic-Bold.eot?#iefix) format('embedded-opentype'),
+       url(fonts/nanum/NanumGothic-Bold.woff2) format('woff2'),
+       url(fonts/nanum/NanumGothic-Bold.woff) format('woff'),
+       url(fonts/nanum/NanumGothic-Bold.ttf) format('truetype');
+}
+
+@font-face {
+  font-family: 'NGBold2';
+  font-style: normal;
+  font-weight: 800;
+  src: url(fonts/nanum/NanumGothic-ExtraBold.eot);
+  src: local(※),url(fonts/nanum/NanumGothic-ExtraBold.eot?#iefix) format('embedded-opentype'),
+       url(fonts/nanum/NanumGothic-ExtraBold.woff2) format('woff2'),
+       url(fonts/nanum/NanumGothic-ExtraBold.woff) format('woff'),
+       url(fonts/nanum/NanumGothic-ExtraBold.ttf) format('truetype');
+}*/

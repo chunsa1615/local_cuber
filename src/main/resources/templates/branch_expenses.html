@@ -1,0 +1,927 @@
+<div class="container-fluid" id="expense-list-app">
+    <section class="row">
+        <div class="col-md-2 col-sm-12">
+            <button type="button" class="btn btn-outline-primary" id="btn-form-new-expense">지출 추가</button>
+        </div>
+        <div class="col-md-10 col-sm-12">
+            <form id="searchFrom">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-control-label" for="sExpenseStartDt">지출일자</label>
+                            <div class="input-group input-daterange">
+                                <input type="text" class="form-control" id="sExpenseStartDt" name="sExpenseStartDt" th:value="${sExpenseStartDt}" readonly="readonly" />
+                                <div class="input-group-addon">부터</div>
+                                <input type="text" class="form-control" id="sExpenseEndDt" name="sExpenseEndDt" th:value="${sExpenseEndDt}" readonly="readonly" />
+                                <div class="input-group-addon">까지</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label class="form-control-label" for="sPayType">지출구분</label>
+                            <select class="form-control chosen" id="sPayType" name="sPayType">
+                                <option value="">전체</option>
+                                <option th:each="payType : ${payTypes}" th:value="${payType.value}" th:text="${payType.text}" ></option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-2">
+                        <label class="form-control-label" for="btn-search"></label>
+                        <button type="submit" class="btn btn-outline-primary" id="btn-search">검색</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </section>
+    <section class="row">
+        <table class="table">
+<!--             <colgroup> -->
+<!--                 <col width="30%" /> -->
+<!--                 <col width="20%" /> -->
+<!--                 <col width="20%" /> -->
+<!--                 <col width="15%" /> -->
+<!--                 <col width="15%" /> -->
+<!--             </colgroup> -->
+            <thead class="thead-inverse">
+                <tr>
+                    <th class="p-l-3">지출일시</th>
+					<th>유형</th>
+                    <th>지출구분</th>
+					<th>지출그룹</th>
+					<th>지출옵션</th>
+					<th>메모</th>
+                    <th class="text-xs-right p-r-3">결제금액</th>
+                    <th>-</th>
+                </tr>
+            </thead>
+            <tbody id="expense-list"></tbody>
+            
+                <tr>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th class="text-xs-left">                        
+                        <label class="view">현금 <span id="cash"></span> 원</label><br></br>
+                        <label class="view">현금 <span id="accountTransfer"></span> 원</label><br></br>                        
+                        <label class="view">카드 <span id="card"></span> 원</label><br></br>
+                        <label class="view">미수금 <span id="debt"></span> 원</label><br></br>
+                        <label class="view">총 <span id="total"></span> 원</label>
+                    </th>                    
+                </tr>
+            <tfoot>
+            </tfoot>
+        </table>
+    </section>
+
+	<section th:if="${pageMaker.endPage != 0}">
+		<div style="text-align: center;">
+			<nav aria-label="Page navigation">
+			  <ul class="pagination">
+		    	<li th:if="${pageMaker.prev}" class="page-item">								    
+			      <a class="page-link prev" href="#" aria-label="Previous">
+			        <span aria-hidden="true">&laquo;</span>
+			        <span class="sr-only">Previous</span>
+			      </a>				     
+		   		</li>
+			    <li th:each="page : ${#numbers.sequence(pageMaker.startPage, pageMaker.endPage)}"  class='page-item' th:value="${page}" th:classappend="${page == pageMaker.page.page ? 'active' :''}">	 			     
+			    	<a class="page-link button"  id="page-linkbutton" th:text="${page}" th:value="${page}" href="#"></a>		  
+			    </li>
+				<li th:if="${pageMaker.next}" class="page-item">
+			      <a class="page-link next" href="#" aria-label="Next">
+			        <span aria-hidden="true">&raquo;</span>
+			        <span class="sr-only">Next</span>
+			      </a>
+			    </li>
+			  </ul>
+			</nav>
+		</div>
+	</section>	
+
+    <div class="modal fade" id="modal-new-expense-form" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title"></h4>
+                </div>
+                <div class="modal-body">
+                </div>
+                <div class="modal-footer">
+                    <div class="pull-xs-left">
+                        <!--<button type="button" class="btn btn-outline-primary" data-dismiss="modal" id="btn-new-member">회원 추가</button>-->
+                    </div>
+                    <button type="button" class="btn btn-primary" id="btn-save-new-expense">추가</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modal-expense-form" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title"></h4>
+                </div>
+                <div class="modal-body">
+                </div>
+                <div class="modal-footer">
+                    <div class="pull-xs-left">
+                        <button type="button" class="btn btn-danger" id="btn-delete-expense">삭제</button>
+                    </div>
+                    <button type="button" class="btn btn-primary" id="btn-save-expense">수정</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:include="tmpl_tr_expense" th:inline="javascript" type="text/template" id="expense-template"></script>
+
+<script th:inline="javascript" type="text/template" id="expense-form-template"><![CDATA[ -->
+    <form >
+        <div class="container-fluid">
+            <div class="col-lg-6 col-md-12 col-xs-12">
+                <div class="form-group">
+                    <label class="form-control-label">지출일자</label>
+                    <input type="hidden" name="expenseDt" value="{{- expenseDt }}" />
+                    <div class="input-group">
+                        <span class="input-group-btn">
+                            <button class="btn btn-secondary" type="button"><i class="fa fa-calendar" aria-hidden="true"></i></button>
+                        </span>
+                        <input type="text" class="form-control datepicker" data-org-input-name="expenseDt" value="{{- momentDateFormat(expenseDt) }}" readonly="readonly" />
+                    </div>
+                </div>
+                <div class="form-group">
+                <label class="form-control-label">지출구분</label>
+					<div class="form-group">
+						<label class="form-check-inline">
+							<input class="form-check-input" style="display: none;" type="radio" name="payType" value="no" {{ if((payType != 1) && (payType != 2) && (payType != 3)){ }}checked="checked"{{ } }} />
+						</label>
+						<label class="form-check-inline">
+	                        <input class="form-check-input" type="radio" name="payType" value="1" {{ if(payType == 1){ }}checked="checked"{{ } }} />현금 
+	                    </label>
+	                    <label class="form-check-inline">
+	                        <input class="form-check-input" type="radio" name="payType" value="5" {{ if(payType == 5){ }}checked="checked"{{ } }} />계좌이체 
+	                    </label>	                    	
+						<label class="form-check-inline">
+	                        <input class="form-check-input" type="radio" name="payType" value="2" {{ if(payType == 2){ }}checked="checked"{{ } }} />신용카드 
+	                    </label>
+						<label class="form-check-inline">
+	                        <input class="form-check-input" type="radio" name="payType" value="3" {{ if(payType == 3){ }}checked="checked"{{ } }} />미수금 
+	                    </label>
+	                    <label class="form-check-inline">
+	                        <input class="form-check-input" type="radio" name="payType" value="4" {{ if(payType == 4){ }}checked="checked"{{ } }} />본사지출 
+	                    </label>
+						<label class="form-check-inline">
+	                        <input class="form-check-input" type="radio" name="payType" value="no" {{ if((payType != 1) && (payType != 2) && (payType != 3) && (payType != 4) && (payType != 5) ){ }}checked="checked"{{ } }} />미입력 
+	                    </label>	                    					
+					</div>
+            	</div>
+                <div class="form-group">
+                    <label class="form-control-label">지출금액</label>
+                    <div class="input-group">
+                        <input id="expenseAmount" type="text" class="form-control text-xs-right" name="expenseAmount" value="{{- expenseAmount }}" />
+                        <div class="input-group-addon">원</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 col-md-12 col-xs-12">             
+				<div class="form-group">
+					<label class="form-control-label">지출그룹</label>
+					<select class="chosen" name="expenseGroup" id="expenseGroup">
+						<!-- <option value="">선택안함</option> -->
+						{{ _.each(expenseGroups, function(expenseGroup){ }}<option value="{{- expenseGroup.value }}" {{ if(dataGroup == expenseGroup.value) { }}selected="selected"{{ } }}>{{- expenseGroup.text }}</option>{{ }); }}
+					</select>
+				</div>
+				
+				<div class="form-group">
+					<label class="form-control-label">지출옵션</label>
+					<select class="chosen" name="expenseOption" id="expenseOption">						
+						{{ if(dataGroup == "101"){ }}
+							<option value="101" {{ if(dataOption == 101) { }}selected="selected"{{ } }}>전기</option>
+							<option value="102" {{ if(dataOption == 102) { }}selected="selected"{{ } }}>가스</option>
+							<option value="103" {{ if(dataOption == 103) { }}selected="selected"{{ } }}>수도</option>
+							<option value="109" {{ if(dataOption == 109) { }}selected="selected"{{ } }}>기타</option>
+						{{ } else if(dataGroup == "201") { }}  
+							<option value="201" {{ if(dataOption == 201) { }}selected="selected"{{ } }}>수리비</option>
+							<option value="202" {{ if(dataOption == 202) { }}selected="selected"{{ } }}>소모품</option>
+							<option value="203" {{ if(dataOption == 203) { }}selected="selected"{{ } }}>청소비</option>
+							<option value="209" {{ if(dataOption == 209) { }}selected="selected"{{ } }}>기타</option>
+						{{ } else if(dataGroup == "301") { }}
+							<option value="301" {{ if(dataOption == 301) { }}selected="selected"{{ } }}>책임총무</option>
+							<option value="302" {{ if(dataOption == 302) { }}selected="selected"{{ } }}>총무1</option>
+							<option value="303" {{ if(dataOption == 303) { }}selected="selected"{{ } }}>총무2</option>
+							<option value="304" {{ if(dataOption == 304) { }}selected="selected"{{ } }}>총무3</option>
+							<option value="305" {{ if(dataOption == 305) { }}selected="selected"{{ } }}>총무4</option>
+							<option value="309" {{ if(dataOption == 309) { }}selected="selected"{{ } }}>기타</option>
+						{{ } else if(dataGroup == "401") { }}
+							<option value="401" {{ if(dataOption == 401) { }}selected="selected"{{ } }}>로열티</option>
+							<option value="409" {{ if(dataOption == 409) { }}selected="selected"{{ } }}>기타</option>
+						{{ } else { }}
+							<option value="0">선택안함</option>
+						{{ } }}
+						<!-- {{ _.each(expenseOptions, function(expenseOption){ }}<option value="{{- expenseOption.value }}" {{ if(dataOption == expenseOption.value) { }}selected="selected"{{ } }}>{{- expenseOption.text }}</option>{{ }); }} -->
+					</select>
+				</div>
+                
+                <div class="form-group">
+                    <label class="form-control-label">지출메모</label>
+                    <textarea class="form-control" name="expenseNote">{{- expenseNote }}</textarea>
+                </div>
+            </div>
+        </div>
+    </form>
+<!-- ]]> --></script>
+<script th:inline="javascript">// <![CDATA[
+//var payTypeMap = JSON.parse([[${payListJSON}]]);
+var PayStateTypeMap = JSON.parse([[${PayStateTypeMapJSON}]]);
+
+$(function(){
+	// Search Form
+    var $sForm = $('#searchFrom');
+
+    $sForm.find('.input-daterange').datepicker({
+        language: 'ko', autoclose: true, todayHighlight: true, format: 'yyyy-mm-dd',
+
+    }).on('changeDate', function(e) {
+
+    });
+
+    $sForm.find('.chosen').chosen({width: "100%"});
+
+
+    var payTypes = [[${payTypes}]];
+	var payInOutTypes = [[${payInOutTypes}]];
+    var expenseOptions = [[${expenseOptions}]];
+    var expenseGroups = [[${expenseGroups}]];
+
+    // Expense
+    var ExpenseList = new ExpenseListCollection;
+    ExpenseList.branchId = [[${branch.branchId}]];
+    ExpenseList.reset(JSON.parse([[${expenseListJSON}]]));
+    
+    var ExpenseView = Backbone.View.extend({
+        tagName: 'tr',
+        className: 'expense',
+        template: _.template($('#expense-template').html()),
+        events: {
+            'dblclick' : 'formExpense',
+            'click .btn-form-expense' : 'formExpense',			
+        },
+        initialize: function() {
+            this.listenTo(this.model, 'change', this.change);
+            this.listenTo(this.model, 'destroy', this.remove);
+
+        },
+        change: function() {
+            this.render();
+
+        },
+        render: function() {
+            var data = this.model.toJSON();
+
+            var payInOutTypeText = _.findWhere(payInOutTypes, {value: Number(data.payInOutType)});
+            data['payInOutTypeText'] = payInOutTypeText ? payInOutTypeText.text : '';
+            
+            var payTypeText = _.findWhere(payTypes, {value: Number(data.payType)});
+            data['payTypeText'] = payTypeText ? payTypeText.text : '';
+            
+            var expenseGroupText = _.findWhere(expenseGroups, {value: Number(data.expenseGroup)});
+            data['expenseGroupText'] = expenseGroupText ? expenseGroupText.text : '';
+            
+            var expenseOptionText = _.findWhere(expenseOptions, {value: Number(data.expenseOption)});
+            data['expenseOptionText'] = expenseOptionText ? expenseOptionText.text : '';
+            
+            data['expenseAmount'] = AddComma(data['expenseAmount']);
+            
+            this.$el.html(this.template(data));
+            return this;
+
+        },
+        formExpense: function() {
+        	ExpenseList.trigger('formExpense', this.model);
+
+        },
+
+    });
+
+    var BranchExpenseView = Backbone.View.extend({
+        el: $('#expense-list-app'),
+        templateForForm: _.template($('#expense-form-template').html()),
+        currentExpenseModel: null,
+        events: {
+            'click #btn-new-member' : 'goMemberPage',
+            'click #btn-form-new-expense' : 'formNewExpense',
+            'click #btn-save-new-expense' : 'saveNewExpense',
+            'click #btn-save-expense' : 'saveExpense',
+            'click #btn-delete-expense' : 'deleteExpense',
+            'click .page-link.button' : 'paging',
+			'click .page-link.prev'  : 'prevPaging',
+			'click .page-link.next'  : 'nextPaging',
+			'keyup #payExpense' : 'keyup',
+
+        },
+        initialize: function() {
+            this.listenTo(ExpenseList, 'add', this.addOneExpense);
+            this.listenTo(ExpenseList, 'formExpense', this.formExpense);
+            this.listenTo(ExpenseList, 'reset', this.reset);
+
+        },
+        reset: function() {
+        	ExpenseList.forEach(this.addOneExpense);
+            var expenseTotal = [[${expenseTotal}]];
+			
+            var totalPay = 0;
+			var totalCash = 0;
+			var totalCard = 0;
+			var totalDebt = 0;
+			var totalAccountTransfer = 0;
+            
+			expenseTotal.forEach(function (item){
+
+				var payStateType = item.payStateType;
+				var payType = item.payType; 
+				
+				if(payStateType != 0) {
+					totalPay = totalPay + item.expenseAmount;
+				
+					if(payType == 1) { //현금
+						totalCash = totalCash + item.expenseAmount; 
+					}
+					else if(payType == 2) { //카드
+						totalCard = totalCard + item.expenseAmount;
+					}
+					else if(payType == 3) { //미수금
+						totalDebt = totalDebt + item.expenseAmount;
+					}
+					else if(payType == 5) { //계좌이체
+						totalAccountTransfer = totalAccountTransfer + item.expenseAmount;
+					} 
+				}
+
+			});
+            
+			totalPay = AddComma(totalPay);
+			totalCash = AddComma(totalCash);
+			totalCard = AddComma(totalCard);
+			totalDebt = AddComma(totalDebt);
+			
+            $('#total').text(totalPay);
+             $('#cash').text(totalCash);
+             $('#accountTransfer').text(totalAccountTransfer);
+             $('#card').text(totalCard);
+             $('#debt').text(totalDebt);
+            
+            //var stats = PayList.getStats();
+            //$('#total').text(stats['total']);
+			
+            $(document).trigger('appLoaded');
+
+        },
+        render: function() {
+
+        },
+        goMemberPage: function(e) {
+            location.assign(ctxRoot + 'branch/' + [[${branch.branchId}]] + '/members?action=newMember');
+        },
+        formNewExpense: function(e) {
+            var data = new ExpenseModel().toJSON();
+
+            data['payInOutTypes'] = payInOutTypes;
+            data['payTypes'] = payTypes;
+			data['expenseGroups'] = expenseGroups;
+			data['dataGroup'] = 0;
+			data['expenseOptions'] = expenseOptions;
+			data['dataOption'] = 0;
+            
+            // TODO : 시간단위까지 조정
+            var currentDate = sysDate.clone();
+            data['expenseDt'] = currentDate.valueOf();
+            data['expenseTm'] = currentDate.format('HH:mm:ss');
+
+            var bodyHtml = this.templateForForm(data);
+
+            $('#modal-new-expense-form')
+            .one('show.bs.modal', function(e) {
+                var $modal = $(this);
+                $modal.find('.modal-title').html('새 지출');
+                $modal.find('.modal-body').html(bodyHtml);
+
+                $modal.find('.datepicker, .input-daterange').datepicker({
+                    language: 'ko', autoclose: true, todayHighlight: true, format: datepickerFormat,
+
+                }).on('changeDate', function(e) {
+                    var orgInputName = $(e.target).attr('data-org-input-name');
+                    if (!(_.isEmpty(orgInputName))) {
+                        var $orgInput = $('#modal-new-expense-form').find('[name=' + orgInputName + ']');
+                        $orgInput.val(e.date.valueOf());
+
+                    }
+
+                });
+
+                $modal.find('.chosen').chosen({width: "100%"});
+                                
+                $('#expenseGroup').chosen().change(function (evt, params) {                	
+                	$('#expenseOption').empty().trigger('chosen:updated');
+                	
+                	if(params.selected == "101") { //관리비                		
+                		$('#expenseOption').append($("<option/>", {
+                            value: "101",
+                            text: "전기",
+                        }));
+                		$('#expenseOption').append($("<option/>", {
+                            value: "102",
+                            text: "가스",
+                        }))    
+                		$('#expenseOption').append($("<option/>", {
+                            value: "103",
+                            text: "수도",
+                        }))
+                        $('#expenseOption').append($("<option/>", {
+                            value: "104",
+                            text: "기타",
+                        }))
+                        .trigger('chosen:updated');
+                	}
+                	else if(params.selected == "201") { //운영비
+                		$('#expenseOption').append($("<option/>", {
+                            value: "201",
+                            text: "수리비",
+                        }));
+                		$('#expenseOption').append($("<option/>", {
+                            value: "202",
+                            text: "소모품",
+                        }))    
+                		$('#expenseOption').append($("<option/>", {
+                            value: "203",
+                            text: "청소비",
+                        }))
+                        $('#expenseOption').append($("<option/>", {
+                            value: "204",
+                            text: "기타",
+                        }))
+                        .trigger('chosen:updated');
+                	}
+                	else if(params.selected == "301") { //인건비
+                		$('#expenseOption').append($("<option/>", {
+                            value: "301",
+                            text: "책임총무",
+                        }));
+                		$('#expenseOption').append($("<option/>", {
+                            value: "302",
+                            text: "총무1",
+                        }))    
+                		$('#expenseOption').append($("<option/>", {
+                            value: "303",
+                            text: "총무2",
+                        }))
+                        $('#expenseOption').append($("<option/>", {
+                            value: "304",
+                            text: "총무3",
+                        }))
+                        $('#expenseOption').append($("<option/>", {
+                            value: "305",
+                            text: "총무4",
+                        }))
+                        $('#expenseOption').append($("<option/>", {
+                            value: "309",
+                            text: "기타",
+                        }))
+                        .trigger('chosen:updated');
+                	}
+                	else if(params.selected == "401") { //로열티
+                		$('#expenseOption').append($("<option/>", {
+                            value: "401",
+                            text: "로열티",
+                        }))
+                		$('#expenseOption').append($("<option/>", {
+                            value: "409",
+                            text: "기타",
+                        }))
+                        .trigger('chosen:updated');
+                	}
+                	else {
+                		$('#expenseOption').append($("<option/>", {
+                            value: "0",
+                            text: "선택없음",
+                        }))
+                        .trigger('chosen:updated');
+                	}
+                	
+                });
+
+                $.validator.addMethod(
+                		'chkNumeric', function (value, element) {
+                			value = value.replace(/,/g, '');
+    		                return this.optional(element) || /^[0-9]+$/.test(value);
+    		                
+    		                	}, '숫자만 사용 가능합니다'
+                );
+                
+                
+                $modal.find('form').validate({
+                	ignore: "not:hidden",
+                	rules: {
+            			memberId: {            			
+            				required: true,
+            			},
+            			payType: {
+            				required: true,
+            				number: true,
+            			},
+            			expenseAmount: {
+            				//min: 1000,
+            				chkNumeric: true,
+            			}
+            			
+            		},
+            		messages: {
+            			memberId: {            	
+            	    		required: "회원을 선택하세요",
+            			},
+            			payType: {
+            				required: "결제유형을 선택하세요",
+            				number : "결제유형을 선택하세요",
+            			},
+            			expenseAmount: {
+            				//min: "금액을 입력하세요",
+            			}
+            		}	
+                });
+                
+
+            })
+            .one('shown.bs.modal', function(e) {
+                var $modal = $(this);
+                $modal.find('[name=name]').focus();
+
+                $modal.find('form').on('submit', function(e) {
+                    e.preventDefault();
+
+                });
+
+
+            })
+            .modal();
+            
+
+            
+            
+        },
+        saveNewExpense: function(e) {
+            var values = {};
+            var $modal = $('#modal-new-expense-form');
+            var $inputs = $modal.find(':input');			
+            var $form = $modal.find('form');
+            
+            if($form.valid()) {
+		            $inputs.each(function(i, element) {
+		                var $element = $(element);
+		                if ($element.is('[type=radio]')) {
+		                    if ($element.is(':checked')) {
+		                        var name = $element.attr('name');
+		                        if (!(_.isEmpty(name))) {
+		                            values[name] = $element.val();
+		
+		                        }
+		                    }
+		
+		                } else {
+		                    var name = $element.attr('name');
+		                    if (!(_.isEmpty(name))) {
+		                        values[name] = $element.val();
+		
+		                    }
+		
+		                }
+		
+		            });
+					
+		            console.log(values);
+	                if (values['payType'] == "") {
+	                	alert("payType null!");
+	                }
+	                else {	                		               	                	
+	                	values['payInOutType'] = '10'; //임시
+	                	values['expenseAmount'] = values['expenseAmount'].replace(/,/g, '');
+	                	ExpenseList.create(values, {
+			                wait : true,
+			                success : function (model, response) {
+			                    model.set('expenseId', response.expenseId);
+			                    model.set('insertDt', response.insertDt);
+			                    model.set('updateDt', response.updateDt);
+			
+			                    $modal.modal('hide');
+								location.reload();
+			                }
+			
+			            });
+	                }
+            	
+
+            
+            };
+            
+
+        },
+        addOneExpense: function(expense) {
+            var view = new ExpenseView({ model: expense });
+
+            this.$('#expense-list').append(view.render().el);
+
+        },
+        formExpense: function(model) {
+            this.currentExpenseModel = model;
+
+            var data = model.toJSON();            
+
+            data['payInOutTypes'] = payInOutTypes;
+            data['payTypes'] = payTypes;
+			data['expenseGroups'] = expenseGroups;
+			data['dataGroup'] = data.expenseGroup;								
+			data['expenseOptions'] = expenseOptions;
+			data['dataOption'] = data.expenseOption;
+			
+            var titleHtml = '지출';
+            var bodyHtml = this.templateForForm(data);
+
+            $('#modal-expense-form')
+            .one('show.bs.modal', function(e) {
+                var $modal = $(this);
+                $modal.find('.modal-title').html(titleHtml);
+                $modal.find('.modal-body').html(bodyHtml);
+
+                $modal.find('.datepicker, .input-daterange').datepicker({
+                    language: 'ko', autoclose: true, todayHighlight: true, format: datepickerFormat,
+                }).on('changeDate', function(e) {
+                    var orgInputName = $(e.target).attr('data-org-input-name');
+                    if (!(_.isEmpty(orgInputName))) {
+                        var $orgInput = $('#modal-expense-form').find('[name=' + orgInputName + ']');
+                        $orgInput.val(e.date.valueOf());
+                    }
+
+                });
+
+                $modal.find('.chosen').chosen({width: "100%"});
+
+                $('#expenseGroup').chosen().change(function (evt, params) {                	
+                	$('#expenseOption').empty().trigger('chosen:updated');
+                	
+                	if(params.selected == "101") { //관리비                		
+                		$('#expenseOption').append($("<option/>", {
+                            value: "101",
+                            text: "전기",
+                        }));
+                		$('#expenseOption').append($("<option/>", {
+                            value: "102",
+                            text: "가스",
+                        }))    
+                		$('#expenseOption').append($("<option/>", {
+                            value: "103",
+                            text: "수도",
+                        }))
+                        $('#expenseOption').append($("<option/>", {
+                            value: "104",
+                            text: "기타",
+                        }))
+                        .trigger('chosen:updated');
+                	}
+                	else if(params.selected == "201") { //운영비
+                		$('#expenseOption').append($("<option/>", {
+                            value: "201",
+                            text: "수리비",
+                        }));
+                		$('#expenseOption').append($("<option/>", {
+                            value: "202",
+                            text: "소모품",
+                        }))    
+                		$('#expenseOption').append($("<option/>", {
+                            value: "203",
+                            text: "청소비",
+                        }))
+                        $('#expenseOption').append($("<option/>", {
+                            value: "204",
+                            text: "기타",
+                        }))
+                        .trigger('chosen:updated');
+                	}
+                	else if(params.selected == "301") { //인건비
+                		$('#expenseOption').append($("<option/>", {
+                            value: "301",
+                            text: "책임총무",
+                        }));
+                		$('#expenseOption').append($("<option/>", {
+                            value: "302",
+                            text: "총무1",
+                        }))    
+                		$('#expenseOption').append($("<option/>", {
+                            value: "303",
+                            text: "총무2",
+                        }))
+                        $('#expenseOption').append($("<option/>", {
+                            value: "304",
+                            text: "총무3",
+                        }))
+                        $('#expenseOption').append($("<option/>", {
+                            value: "305",
+                            text: "총무4",
+                        }))
+                        $('#expenseOption').append($("<option/>", {
+                            value: "309",
+                            text: "기타",
+                        }))
+                        .trigger('chosen:updated');
+                	}
+                	else if(params.selected == "401") { //로열티
+                		$('#expenseOption').append($("<option/>", {
+                            value: "401",
+                            text: "로열티",
+                        }))
+                		$('#expenseOption').append($("<option/>", {
+                            value: "409",
+                            text: "기타",
+                        }))
+                        .trigger('chosen:updated');
+                	}
+                	else {
+                		$('#expenseOption').append($("<option/>", {
+                            value: "0",
+                            text: "선택없음",
+                        }))
+                        .trigger('chosen:updated');
+                	}
+                	
+                });
+                
+                $modal.find('form').on('submit', function(e) {
+                    e.preventDefault();
+
+                });
+                
+                $.validator.addMethod(
+                		'chkNumeric', function (value, element) {
+                			value = value.replace(/,/g, '');
+    		                return this.optional(element) || /^[0-9]+$/.test(value);
+    		                
+    		                	}, '숫자만 사용 가능합니다'
+                );
+                
+                $modal.find('form').validate({
+                	ignore: "not:hidden",
+                	rules: {
+            			memberId: {            			
+            				required: true,
+            			},
+            			payType: {
+            				required: true,
+            				number: true,
+            			},
+            			expenseAmount: {
+            				//min: 1000,
+            				chkNumeric: true,
+            			}
+            			
+            		},
+            		messages: {
+            			memberId: {            	
+            	    		required: "회원을 선택하세요",
+            			},
+            			payType: {
+            				required: "결제유형을 선택하세요",
+            				number: "결제유형을 선택하세요",
+            			},
+            			expenseAmount: {
+            				//min: "금액을 입력하세요",            				
+            			}
+            		}	
+                });
+
+            })
+            .modal();
+
+        },
+        saveExpense: function(e) {
+            var values = {};
+            var $modal = $('#modal-expense-form');
+            var $form = $modal.find('form');
+            
+            if($form.valid()) {
+	            var $inputs = $modal.find(':input');
+	            $inputs.each(function(i, element) {
+	                var $element = $(element);
+	                if ($element.is('[type=radio]')) {
+	                    if ($element.is(':checked')) {
+	                        var name = $element.attr('name');
+	                        if (!(_.isEmpty(name))) {
+	                            values[name] = $element.val();
+	
+	                        }
+	                    }
+	
+	                } else {
+	                    var name = $element.attr('name');
+	                    if (!(_.isEmpty(name))) {
+	                        values[name] = $element.val();
+	
+	                    }
+	
+	                }
+	            });
+
+	            values['expenseAmount'] = values['expenseAmount'].replace(/,/g, '');
+	            this.currentExpenseModel.save(values, {
+	                wait: true,
+	                success: function (model, response) {
+	                    $modal.modal('hide');
+	
+	                },
+	
+	            });
+            }
+
+        },
+        deleteExpense: function(e) {
+            var $modal = $('#modal-expense-form');
+
+            if(confirm('정말로 삭제하시겠습니까?')) {
+                this.currentExpenseModel.destroy({
+                    wait: true,
+                    success: function (model, response) {
+                        $modal.modal('hide');
+
+                    },
+
+                });
+
+            }
+
+        },
+        paging: function(e) {
+        	paging(e);
+        	
+        },
+        prevPaging: function(e) {
+        	var page = [[${pageMaker.startPage -1}]];
+        	prevPaging(e, page);
+        
+        },
+        nextPaging: function(e) {
+        	var page = [[${pageMaker.endPage +1}]];
+        	nextPaging(e, page);      	
+         
+        },
+        keyup : function(e) {
+        	//console.log(e.keyCode);
+        	if ( (e.keyCode >= 96 && e.keyCode <= 105) || (e.keyCode >= 48 && e.keyCode <= 57) ) {
+	        	var num = $('#expenseAmount').val();
+	        	//num = num.replace(/[^0-9]/g,'');	        	
+	        	num = num.replace(/[^a-zA-Z0-9]/g,''); 
+	        	
+	        	num = AddComma(num);
+	        	$('#expenseAmount').val(num);
+        	}
+        	//else {
+        		
+        	//}
+
+        },
+
+    });
+
+
+    var App = new BranchExpenseView;
+    ExpenseList.reset(JSON.parse([[${expenseListJSON}]]));
+
+});
+
+// ]]></script>
+<script th:inline="javascript" th:if="${!#strings.isEmpty(param.action) and param.action[0] == 'newPay'}">// <![CDATA[
+
+// ]]></script>
+<script th:src='@{/common/api_branch_member.js}' ></script>
+<script th:src='@{/common/api_branch_pay.js}' ></script>
+<script th:src='@{/common/api_branch_expense.js}' ></script>
+<!-- DatePicker : https://bootstrap-datepicker.readthedocs.io/en/latest/ -->
+<script th:src='@{/lib/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js}' ></script>
+<script charset='UTF-8' th:src='@{/lib/bootstrap-datepicker/dist/locales/bootstrap-datepicker.ko.min.js}' ></script>
+<link rel='stylesheet' th:href='@{/lib/bootstrap-datepicker/dist/css/bootstrap-datepicker3.min.css}' />
+<!-- Chosen : https://github.com/harvesthq/chosen -->
+<link rel='stylesheet' th:href='@{/lib/chosen/chosen.css}' />
+<script th:src='@{/lib/chosen/chosen.jquery.js}' ></script>
+<!-- Validation : https://jqueryvalidation.org/documentation/
+    INPUT : https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input -->
+<script th:src='@{/lib/jquery-validation/dist/jquery.validate.min.js}' ></script>

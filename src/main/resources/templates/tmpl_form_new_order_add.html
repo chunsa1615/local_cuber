@@ -1,0 +1,124 @@
+<!-- new order --><![CDATA[ -->
+<form id="formNewOrderAdd">
+    <div class="container-fluid">
+        <div class="col-lg-7 col-md-12 col-xs-12">
+            <div class="form-group row">
+                <label class="col-xs-2 col-form-label">회원</label>                                
+                <div class="col-xs-7">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-btn">
+                            <button class="btn btn-secondary" type="button"><i class="fa fa-barcode" aria-hidden="true"></i></button>
+                        </span>
+                        <input type="text" name="membership" id="membership" class="form-control" placeholder="멤버십번호, 회원번호"/>
+                        <span class="input-group-btn">
+                            <button class="btn btn-secondary" type="button" id="btn-search-membership">찾기</button>
+                        </span>
+                    </div>
+                </div>
+                <div class="col-xs-3">
+                    <button type="button" class="btn btn-sm btn-outline-primary pull-xs-right" id="btn-new-member">새 회원</button>
+                </div>
+                <div class="col-xs-12">
+                    <select class="chosen" name="memberId" id = "memberId">
+                        <option value="">선택</option>
+                        {{ _.each(members, function(member){ }}<option value="{{- member.memberId }}" {{ if(memberId == member.memberId) { }}selected="selected"{{ } }}>{{- member.no }} {{- member.name }}</option>{{ }); }}                         
+                         
+                    </select>
+                </div>
+            </div>            
+            <div class="form-group">
+            	<label class="form-control-label" >인원</label>	
+					<div class="input-group">
+						<input type="number" class="form-control text-xs-right" name="reservationNum" value="{{- reservationNum }}" min="1" step="1" />
+						<div class="input-group-addon">명</div>
+					</div>
+            </div>
+            <div class="form-group">
+                <label class="form-control-label">등록기간</label>
+                &nbsp<label class="form-control-label" id="dateCount">총 1일</label>&nbsp
+                <div class="pull-xs-right">
+                    <button type="button" class="btn btn-sm btn-secondary newReservation btn-set-time" data-add-value="3" data-add-unit="h">3시간</button>
+                    <button type="button" class="btn btn-sm btn-secondary newReservation btn-set-time" data-add-value="6" data-add-unit="h">6시간</button>
+                    <button type="button" class="btn btn-sm btn-secondary newReservation btn-set-time" data-add-value="1" data-add-unit="d" id="1day">1일</button>
+                    <button type="button" class="btn btn-sm btn-secondary newReservation btn-set-time" data-add-value="2" data-add-unit="PM">1달</button>
+                    <button type="button" class="btn btn-sm btn-secondary newReservation btn-set-time" data-add-value="1" data-add-unit="PM">+1일</button>
+                    <button type="button" class="btn btn-sm btn-secondary newReservation btn-set-time" data-add-value="-1" data-add-unit="PM">-1일</button>
+
+                </div>
+                <input type="hidden" name="deskStartDt" value="{{- deskStartDt }}" />
+                <input type="hidden" name="deskEndDt" value="{{- deskEndDt }}" />
+                <div class="input-group input-daterange">
+                    <input type="text" class="form-control" data-org-input-name="deskStartDt" id="deskStartDt" value="{{- momentDateFormat(deskStartDt) }}" readonly="readonly" />
+                    <div class="input-group-addon">부터</div>
+                    <input type="text" class="form-control" data-org-input-name="deskEndDt" id="deskEndDt" value="{{- momentDateFormat(deskEndDt) }}" readonly="readonly" />
+                    <div class="input-group-addon">까지</div>
+                </div>
+
+				<input type="hidden" name="deskStartTm" value="{{- deskStartTm }}" />
+                <input type="hidden" name="deskEndTm" value="{{- deskEndTm }}" />
+				<div class="input-group clockpicker-with-callbacks input-timerange">
+				    <input class="form-control" time-org-input-name="deskStartTm" id="deskStartTm"  value="{{- momentTimeFormat(deskStartTm) }}" placeholder="Now">
+				    <span class="input-group-addon">
+				        <span class="fa fa-clock-o"></span>
+				    </span>
+
+				    <input class="form-control" time-org-input-name="deskEndTm" id="deskEndTm" value="{{- momentTimeFormat(deskEndTm) }}" placeholder="Now">
+				    <span class="input-group-addon">
+				        <span class="fa fa-clock-o"></span>
+				    </span>
+				</div>
+            </div>
+            <div class="form-group">
+                <label class="form-control-label">좌석</label>
+
+                <select class="chosen" name="deskId" id="deskId">
+                    <option value="">지정안함</option>
+                    {{ _.each(desks, function(desk){ }}<option value="{{- desk.deskId }}" {{ if(deskId == desk.deskId) { }}selected="selected"{{ } }}>{{- desk.name }}</option>{{ }); }}
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-control-label">등록메모</label>
+                <textarea class="form-control" name="reservationNote"></textarea>
+            </div>
+            
+        </div>
+        <div class="col-lg-5 col-md-12 col-xs-12">
+            <div class="form-group">
+                <label class="form-control-label">결제구분</label>
+					<div class="form-group">
+						<label class="form-check-inline">
+							<input class="form-check-input" style="display: none;" type="radio" name="payType" value="no" {{ if((payType != 1) && (payType != 2) && (payType != 3)){ }}checked="checked"{{ } }} />
+						</label>
+						<label class="form-check-inline">
+	                        <input class="form-check-input" type="radio" name="payType" value="1" {{ if(payType == 1){ }}checked="checked"{{ } }} />현금 
+	                    </label>
+	                    <label class="form-check-inline">
+	                        <input class="form-check-input" type="radio" name="payType" value="5" {{ if(payType == 5){ }}checked="checked"{{ } }} />계좌이체 
+	                    </label>
+						<label class="form-check-inline">
+	                        <input class="form-check-input" type="radio" name="payType" value="2" {{ if(payType == 2){ }}checked="checked"{{ } }} />신용카드 
+	                    </label>
+						<label class="form-check-inline">
+	                        <input class="form-check-input" type="radio" name="payType" value="3" {{ if(payType == 3){ }}checked="checked"{{ } }} />미수금 
+	                    </label>						
+						<label class="form-check-inline">
+	                        <input class="form-check-input" type="radio" name="payType" value="no" {{ if((payType != 1) && (payType != 2) && (payType != 3) && (payType != 5) ){ }}checked="checked"{{ } }} />미입력 
+	                    </label>	                    					
+					</div>
+            </div>
+            <div class="form-group">
+                <label class="form-control-label">결제금액</label>
+                <div class="input-group">
+					<input id="payAmount" type="text" class="form-control text-xs-right" name="payAmount" value="{{- payAmount }}" />
+                    <div class="input-group-addon">원</div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-control-label">결제메모</label>
+                <textarea class="form-control" name="payNote"></textarea>
+            </div>
+        </div>
+    </div>
+</form>
+
+<!-- ]]> -->

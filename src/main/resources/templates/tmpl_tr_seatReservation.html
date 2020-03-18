@@ -1,0 +1,12 @@
+<![CDATA[ -->
+<td><label class="view">{{ if(type == 10){ }}사전예약{{ } else if(type == 20){ }}무료체험{{ } }}</label></td>
+<td><label class="view">{{ if(status == 10){ }}<strong style="color:blue">예약요청</strong>{{ } else if(status == 20){ }}<strong>예약완료</strong>{{ } else if(status == 90){ }}<strong style="color:red">예약취소</strong>{{ } else if(status == 100){ }}<strong style="color:red">자동취소</strong>{{ } }}</label></td>
+<td><label class="view">{{ if(role == 10){ }}일반{{ } else if(role == 20){ }}보호자{{ } }}</label></td>
+<td><label class="view">{{- name }} / {{ if(gender == 1){ }}남{{ } else if(gender == 2){ }}여{{ } }}</label></td>
+<td><label class="view">{{- momentDateFormat(startDt) }}</label></td>
+<td><label class="view">{{ if( roomType == 10){ }}멀티{{ } else if(roomType == 20){ }}싱글{{ } else if(roomType == 30){ }}프라이빗{{ } }}</label></td>
+<td><label class="view">{{- tel }}</label></td>
+<td><label class="view">{{- email }}</label></td>
+<td><label class="view">{{- momentDateFormat(insertDt) }}</label></td>
+<td><button type="button" class="btn btn-outline-primary btn-form-seatReservation" >수정</button></td>
+<!-- ]]>-->

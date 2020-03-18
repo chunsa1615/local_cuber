@@ -1,0 +1,85 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <title th:text="${title} + ' - ' + ${brand}"></title>
+    <!--/*  favicon : http://realfavicongenerator.net/  */-->
+    <link rel="apple-touch-icon" sizes="57x57" th:href='@{/apple-touch-icon-57x57.png}'/>
+    <link rel="apple-touch-icon" sizes="60x60" th:href='@{/apple-touch-icon-60x60.png}'/>
+    <link rel="apple-touch-icon" sizes="72x72" th:href='@{/apple-touch-icon-72x72.png}'/>
+    <link rel="apple-touch-icon" sizes="76x76" th:href='@{/apple-touch-icon-76x76.png}'/>
+    <link rel="apple-touch-icon" sizes="114x114" th:href='@{/apple-touch-icon-114x114.png}'/>
+    <link rel="apple-touch-icon" sizes="120x120" th:href='@{/apple-touch-icon-120x120.png}'/>
+    <link rel="apple-touch-icon" sizes="144x144" th:href='@{/apple-touch-icon-144x144.png}'/>
+    <link rel="apple-touch-icon" sizes="152x152" th:href='@{/apple-touch-icon-152x152.png}'/>
+    <link rel="apple-touch-icon" sizes="180x180" th:href='@{/apple-touch-icon-180x180.png}'/>
+    <link rel="icon" type="image/png" th:href='@{/favicon-32x32.png}' sizes="32x32"/>
+    <link rel="icon" type="image/png" th:href='@{/android-chrome-96x96.png}' sizes="96x96" />
+    <link rel="icon" type="image/png" th:href='@{/favicon-16x16.png}' sizes="16x16" />
+    <link rel="manifest" th:href='@{/manifest.json}'/>
+    <link rel="mask-icon" th:href='@{/safari-pinned-tab.svg}' color="#5bbad5"/>
+    <meta name="msapplication-TileColor" content="#ffffff"/>
+    <meta name="msapplication-TileImage" th:content='@{/mstile-144x144.png}'/>
+    <meta name="theme-color" content="#ffffff"/>
+    <script th:src='@{/lib/jquery/dist/jquery.min.js}'></script>
+    <!--<script th:src='@{/lib/jquery-ui/jquery-ui.min.js}' ></script>-->
+    <script th:src='@{/lib/tether/dist/js/tether.min.js}'></script>
+    <script th:src='@{/lib/bootstrap/dist/js/bootstrap.min.js}'></script>
+    <script th:src='@{/lib/underscore/underscore-min.js}'></script>
+    <script th:src='@{/lib/backbone/backbone-min.js}'></script>
+    <script th:src='@{/lib/moment/min/moment.min.js}'></script>
+    <script th:src='@{/lib/moment/locale/ko.js}'></script>
+    <script th:src='@{/common/common.js}'></script>
+    <!--<link rel='stylesheet' th:href='@{/lib/jquery-ui/themes/base/jquery-ui.min.css}' />-->
+    <link rel='stylesheet' th:href='@{/lib/tether/dist/css/tether.min.css}'/>
+    <link rel='stylesheet' th:href='@{/lib/bootstrap/dist/css/bootstrap.min.css}'/>
+    <!--<link rel='stylesheet' th:href='@{/lib/bootstrap-scc/dist/css/bootstrap.min.css}' />-->
+    <link rel='stylesheet' th:href='@{/lib/font-awesome/css/font-awesome.min.css}'/>
+    <link rel='stylesheet' th:href='@{/common/common.css}'/>
+    <script th:inline="javascript">// <![CDATA[
+    var ctxRoot = [[@{/}]];
+    var sysDate = moment([[${#dates.createNow()}]]);
+    var sysDateIntervalID = setInterval(function () {
+        $('#sysDate').text(sysDate.add(1, 'seconds').format('llll'));
+    }, 1000);
+
+    $(function () {
+
+    });
+    // ]]></script>
+    <script th:inline="javascript">// <![CDATA[
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-86032811-1', 'auto');
+  ga('send', 'pageview');
+// ]]></script>
+</head>
+<body>
+<header class="navbar navbar-full navbar-main">
+    <a class="navbar-brand" th:href="@{/}"><img th:src="@{/images/logo-studycodi-w.png}" width="152" height="35"/></a>
+</header>
+<header id="navbar-sub" class="navbar navbar-full navbar-dark bg-inverse navbar-sub">
+</header>
+
+<div id="content" class="container-fluid" th:include="${view}"></div>
+
+<footer id="footer" class="navbar navbar-full navbar-light navbar-fixed-bottom bg-faded" ><!-- /*   */ -->
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-8 col-md-12">
+                <div id="stats"></div>
+            </div>
+            <div class="col-lg-2 col-md-12">
+                <span id="sysDate"></span>
+            </div>
+            <div class="col-lg-2 col-md-12">
+                <a th:href="@{#}" th:text="${brand} + ' © 2016'"></a>
+            </div>
+        </div>
+    </div>
+</footer>
+</body>
+</html>

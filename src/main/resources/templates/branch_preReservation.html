@@ -1,0 +1,662 @@
+<div class="container-fluid" id="pre-reservation-list-app">
+  <section class="row">
+        <div class="col-md-2 col-sm-12">
+            <button type="button" class="btn btn-outline-primary" id="btn-form-new-preReservation">사전예약 추가</button>
+        </div>
+        <div class="col-md-2 col-sm-12">
+        </div>
+        <div class="col-md-10 col-sm-12">
+            <form id="searchFrom">
+                <div class="row">
+                    <div class="col-md-5">
+                        <div class="form-group">
+                            <label class="form-control-label" for="sNotificationStartDt">신청일</label>
+                            <div class="input-group input-daterange">
+                                <input type="hidden" class="form-control" name="startDt" readonly="readonly" th:value="${startDt == null? '': #dates.format(startDt, 'yyyy-MM-dd')}"/>
+                                <input type="text" class="form-control" data-org-input-name="startDt" readonly="readonly" th:value="${startDt == null? '': #dates.format(startDt, 'yyyy년 MM월 dd일')}"/>
+                                <div class="input-group-addon">부터</div>
+                                <input type="hidden" class="form-control" name="endDt" readonly="readonly" th:value="${endDt == null? '': #dates.format(endDt, 'yyyy-MM-dd')}"/>
+                                <input type="text" class="form-control" data-org-input-name="endDt" readonly="readonly" th:value="${endDt == null? '': #dates.format(endDt, 'yyyy년 MM월 dd일')}"/>
+                                <div class="input-group-addon">까지</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                        <div class="form-group">
+                            <label class="form-control-label" for="keyword">검색(이름, 이메일)</label>
+                            <input type="text" class="form-control" id="keyword" name="keyword" th:value="${keyword}" />
+                        </div>
+                    </div>
+                    <div class="col-md-2" style = "margin-top : 24px">
+                        <label class="form-control-label" for="btn-search"></label>
+                        <button type="button" class="btn btn-outline-primary" id="btn-search">검색</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </section>
+  <section id="pre-reservation-list" class="row">
+    <table class="table">
+      <!--<colgroup>-->
+      <!--<col width="10%" />-->
+      <!--<col width="30%" />-->
+      <!--<col width="30%" />-->
+      <!--<col width="30%" />-->
+      <!--</colgroup>-->
+      <thead class="thead-inverse">
+        <tr>
+          <th>#</th>
+          <th>이름</th>
+          <th>성별</th>
+          <th>연락처</th>
+          <th>희망기간</th>
+          <th>이메일</th>
+          <th>생년월일</th>
+          <th>추가문의사항</th>
+          <th>신청일</th>
+          <th>수정</th>
+        </tr>
+      </thead>
+      <tbody class="pre-reservation">
+      </tbody>
+      <tfoot>
+      </tfoot>
+    </table>
+  </section>
+  <section th:if="${pageMaker.endPage != 0}">
+    <div style="text-align: center;">
+      <nav aria-label="Page navigation">
+        <ul class="pagination">
+          <li th:if="${pageMaker.prev}" class="page-item">                    
+            <a class="page-link prev" href="#" aria-label="Previous">
+              <span aria-hidden="true">&laquo;</span>
+              <span class="sr-only">Previous</span>
+            </a>             
+          </li>
+          <li th:each="page : ${#numbers.sequence(pageMaker.startPage, pageMaker.endPage)}"  class='page-item' th:value="${page}" th:classappend="${page == pageMaker.page.page ? 'active' :''}">            
+            <a class="page-link button"  id="page-linkbutton" th:text="${page}" th:value="${page}" href="#"></a>              
+          </li>
+        <li th:if="${pageMaker.next}" class="page-item">
+            <a class="page-link next" href="#" aria-label="Next">
+              <span aria-hidden="true">&raquo;</span>
+              <span class="sr-only">Next</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </section>  
+  
+  <div class="modal fade" id="modal-modify" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+          <h4 class="modal-title">사전 예약 수정</h4>
+        </div>
+        <div class="modal-body"></div>
+        <div class="modal-footer">
+			<div class="pull-xs-left">
+				<button type="button" class="btn btn-danger" id="btn-delete-preReservation">삭제</button>
+			</div>
+          <button type="button" class="btn btn-primary btn-save-modify">수정</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+        </div>
+      </div>
+    </div>
+  </div>
+	
+    <div class="modal fade" id="modal-new-preReservation-form" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title"></h4>
+                </div>                
+                 <div class="modal-body">
+                    <section class="newPreReservation"></section>
+                 </div>                
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="btn-save-new-pre-reservation">추가</button>                    
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<script th:inline="javascript" type="text/template" id="pre-reservation-template"><!-- <![CDATA[ -->
+    <td>
+        <label class="view">{{- (page.page - 1) * page.perPageNum + (pr.index + 1) }}</label>
+    </td>
+    <td>
+        <label class="view">{{- pr.name }}</label>
+    </td>
+    <td>
+        <label class="view">{{ _.each(genderTypes, function(t) { if ( t.value == pr.gender) { }} {{- t.text }}  {{   } }) }}</label>
+    </td>
+    <td>
+        <label class="view">{{- pr.phone }}</label>
+    </td>
+    <td>
+        <label class="view">{{ if( parseInt(pr.period) >= 5) { }} {{- '5개월 이상' }} {{ } else { }} {{- pr.period + '개월' }} {{ }  }} </label>
+    </td>
+    <td>
+        <label class="view">{{- pr.email }}</label>
+    </td>
+    <td>
+        <label class="view">{{- momentDateFormat(pr.birth) }}</label>
+    </td>
+    <td>
+        <label class="view">{{- pr.memo }}</label>
+    </td>
+    <td>
+        <label class="view">{{- momentDateFormat(pr.insertDt) }}</label>
+    </td>
+    <td>
+        <button type="button" class="btn btn-outline-primary btn-modify">수정</button>
+    </td>
+<!-- ]]> --></script>
+<script th:inline="javascript" type="text/template" id="pre-reservation-form-template">
+  <![CDATA[ -->
+  <form>
+      <fieldset>
+        <div class="form-group">
+          <input type="hidden" name="branchId" value="{{- branch.branchId }}" />
+          <input type="hidden" name="preReservationId" value="{{- pr.preReservationId }}" />
+          <label class="form-control-label" for="radios">지점</label> : {{- branch.name }}<br/>
+          <label class="form-control-label" for="radios">오픈 일자</label> : {{- moment(branch.openDt).format('YYYY년 MM월 DD일') }}
+        </div>
+        <div class="form-group">
+          <label class="form-control-label" for="radios">사용기간</label>
+          <div>
+            <label class="radio-inline" for="radios-0"> <input type="radio" name="period" id="radios-0" value="1"  {{ if ( pr.period == 1 ) { }} checked="checked"  {{ } }}  /> 1개월 </label> 
+            <label class="radio-inline" for="radios-1"> <input type="radio" name="period" id="radios-1" value="2"  {{ if ( pr.period == 2 ) { }} checked="checked"  {{ } }}  /> 2개월 </label> 
+            <label class="radio-inline" for="radios-2"> <input type="radio" name="period" id="radios-2" value="3"  {{ if ( pr.period == 3 ) { }} checked="checked"  {{ } }}  /> 3개월 </label> 
+            <label class="radio-inline" for="radios-3"> <input type="radio" name="period" id="radios-3" value="4"  {{ if ( pr.period == 4 ) { }} checked="checked"  {{ } }}  /> 4개월 </label> 
+            <label class="radio-inline" for="radios-4"> <input type="radio" name="period" id="radios-4" value="99" {{ if ( pr.period == 99 ) { }} checked="checked" {{ } }}  /> 5개월 이상 </label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-control-label" for="radios">성별</label>
+          <div class="radio">
+            <label class="radio-inline" for="gender-0"> <input type="radio" name="gender" id="gender-0" value="10" {{ if ( pr.gender == 10 ) { }} checked="checked" {{ } }}/> 남자 </label>     
+  			<label class="radio-inline" for="gender-1"> <input type="radio" name="gender" id="gender-1" value="20" {{ if ( pr.gender == 20 ) { }} checked="checked" {{ } }}/> 여자 </label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-control-label" for="name">성명</label>
+          <div>
+            <input id="name" name="name" type="text" placeholder="" class="form-control input-md" required="required" value="{{- pr.name}}"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-control-label" for="email">연락처</label>
+          <div>
+            <input id="phone" name="phone" type="text" placeholder="" class="form-control input-md" required="required" value="{{- pr.phone }}"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-control-label" for="email">이메일</label>
+          <div>
+            <input id="email" name="email" type="email" placeholder="" class="form-control input-md" required="required" value="{{- pr.email }}"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-control-label" for="birth">생년월일</label>
+          <div>
+            <input type="hidden" name="birth" value="{{- pr.birth}}" />
+            <div class="">
+            <input type="text" class="form-control datePicker" data-org-input-name="birth" value="{{- momentDateFormat(pr.birth)}}" readonly="readonly" />
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-control-label" for="memo">추가 문의사항</label>
+          <div>
+            <textarea class="form-control" id="memo" name="memo">{{- pr.memo}}</textarea>
+          </div>
+        </div>
+      </fieldset>
+   </form>
+<!-- ]]> --></script>
+<script th:inline="javascript" type="text/template" id="pre-reservation-new-form-template">
+  <form>
+      <input type="hidden" name="branchId" th:value="${branch.branchId}" />
+      <fieldset>
+        <h5 class="text-xs-right muted" th:text="${#dates.format(branch.openDt, 'yyyy년 MM월 dd일')} + '  오픈'"></h5>
+        <blockquote class="blockquote">
+            사전예약 신청시 안내사항 ....
+        </blockquote>
+        <div class="form-group">
+          <label class="form-control-label" for="period-radios-0">사용기간</label>
+          <div>
+            <label class="radio-inline" for="period-radios-0"> <input type="radio" name="period" id="period-radios-0" value="1" checked="checked"/> 1개월 </label>
+            <label class="radio-inline" for="period-radios-1"> <input type="radio" name="period" id="period-radios-1" value="2" /> 2개월 </label>
+            <label class="radio-inline" for="period-radios-2"> <input type="radio" name="period" id="period-radios-2" value="3" /> 3개월 </label>
+            <label class="radio-inline" for="period-radios-3"> <input type="radio" name="period" id="period-radios-3" value="4" /> 4개월 </label>
+            <label class="radio-inline" for="period-radios-4"> <input type="radio" name="period" id="period-radios-4" value="99"/> 5개월 이상 </label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-control-label" for="gender-radios-0">성별</label>
+          <div class="radio">
+            <label class="radio-inline" for="gender-radios-0"> <input type="radio" name="gender" id="gender-radios-0" value="10" checked="checked"/> 남자 </label>
+            <label class="radio-inline" for="gender-radios-1"> <input type="radio" name="gender" id="gender-radios-1" value="20" /> 여자 </label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-control-label" for="name">성명</label>
+          <div>
+            <input id="name" name="name" type="text" placeholder="" class="form-control input-md" required="required" value=""/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-control-label" for="email">연락처</label>
+          <div>
+            <input id="phone" name="phone" type="text" placeholder="" class="form-control input-md" required="required" value=""/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-control-label" for="email">이메일</label>
+          <div>
+            <input id="email" name="email" type="email" placeholder="" class="form-control input-md" required="required" value=""/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-control-label" for="birth">생년월일</label>
+          <div>
+            <div class="form-group">
+            	<input type="hidden" name="birth" value="" />
+            	<input type="text" class="form-control datePicker" data-org-input-name="birth" value="{{- moment().format('YYYY년 M월 DD일')}}" readonly="readonly" />
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-control-label" for="memo">추가 문의사항</label>
+          <div>
+            <textarea class="form-control" id="memo" name="memo"></textarea>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-control-label" for="notice-for-privacy">개인정보 수집 및 이용안내</label>
+          <textarea class="form-control" id="notice-for-privacy" rows="4">
+  스터디코디는 사전예약 신청시에 다음과 같이 신청자의 개인정보를 수집하고 있습니다.
+  1. 개인정보 수집범위 : 성명, 연락처, 이메일, 생년월일
+  2. 개인정보 수집 및 이용목적 : 사전예약 신청 확인 및 상담 자료
+  3. 개인정보 수집 및 보유기간 : 신청자의 개인정보는 원칙적으로 개인정보의 수집 및 이용 목적이 달성되면 지체없이 파기하며 보유기간은 최대 3년을 넘기지 않는 것을 원칙으로 합니다.
+          </textarea>
+          <div class="form-check">
+            <label class="form-check-label">
+              <input type="checkbox" class="form-check-input" id="checkbox-for-privacy" value="acknowledged" /> 개인정보 수집 및 이용에 동의합니다.
+            </label>
+          </div>
+        </div>
+      </fieldset>
+   </form>
+</script>
+<script th:inline="javascript"> // <![CDATA[>
+$(function() {
+  
+  var PreReservationList = new PreReservationListCollection;
+  PreReservationList.branchId = [[${branch.branchId}]];
+  
+  var branch = [[${branch}]];
+  var genderTypes = [[${genderTypes}]];
+  
+  var PreReservationView = Backbone.View.extend({
+    tagName : 'tr',
+    className : 'pre-reservation',
+    template: _.template($('#pre-reservation-template').html()),
+    initialize : function() {
+      this.listenTo(this.model, 'change', this.change);
+      this.listenTo(this.model, 'destroy', this.remove);
+    },
+    events: {
+      'dblclick': 'formPreReservation',
+      'click .btn-modify' : 'formPreReservation',
+  	},
+    change: function() {
+      this.render();
+    },
+    render : function() {
+      var data = this.model.toJSON();
+      var page = [[${pageMaker.page}]];
+      data['index'] = PreReservationList.indexOf(this.model);
+      this.$el.html(this.template({ genderTypes : genderTypes, pr : data, page : page}));
+      return this;
+    }, 
+
+    formPreReservation : function() {
+        
+        var preReservation = this.model.attributes;
+        var modifyFormTplt = _.template($('#pre-reservation-form-template').html());
+        
+        var $modal = $('#modal-modify');      
+        var $modalBody = $modal.find('.modal-body');
+        
+        $modal.one('show.bs.modal', function(e){
+          $modalBody.html(modifyFormTplt({ branch : branch, pr : preReservation}));
+          
+          var $datepicker = $modalBody.find('.datePicker');
+          $datepicker.datepicker({
+            language: 'ko', autoclose: true, todayHighlight: true, format: datepickerFormat,
+          }).on('changeDate', function(e) {
+              var orgInputName = $(e.target).attr('data-org-input-name');
+              if (!(_.isEmpty(orgInputName))) {
+                  var $orgInput = $modalBody.find('[name=' + orgInputName + ']');
+                  $orgInput.val(moment(e.date).format('YYYY-MM-DD'));
+              }
+          });
+        });
+        
+        $modal.on('hidden.bs.modal', function(e){
+          $modalBody.html('');
+        });
+        
+        $modal.modal('show');
+      
+    },    
+    
+  });
+  
+  var PreReservationListView = Backbone.View.extend({
+    el : $('#pre-reservation-list-app'),
+    template: _.template($('#pre-reservation-template').html()),
+    templateForNewPreReservationForm: _.template($('#pre-reservation-new-form-template').html()),
+    events : {
+      'click .btn-save-modify' : 'modifyPreReservation',
+      'click #btn-delete-preReservation' : 'deletePreReservation',
+      'click #btn-search' : 'searchPreReservation',
+      'click .page-link.button' : 'paging',
+	  'click .page-link.prev'  : 'prevPaging',
+	  'click .page-link.next'  : 'nextPaging',
+	  'click #btn-form-new-preReservation' : 'formNewPreReservation',
+	  'click #btn-save-new-pre-reservation' : 'newPreReservation',
+    },
+    initialize : function() {
+      this.listenTo(PreReservationList, 'add', this.addOnePreReservation);
+      this.listenTo(PreReservationList, 'reset', this.reset);  
+    },
+    reset : function() {
+      PreReservationList.forEach(this.addOnePreReservation);           
+    },
+    formNewPreReservation : function() {
+    	var data = new PreReservationModel().toJSON();
+    	var bodyHtml = this.templateForNewPreReservationForm();
+    	                
+    	$('#modal-new-preReservation-form')
+    	.one('show.bs.modal', function(e) {
+    		var $modal = $(this);
+            $modal.find('.modal-title').html('새 사전예약');
+            $modal.find('.newPreReservation').html(bodyHtml);
+        
+            var $modalBody = $modal.find('.modal-body');
+            
+            var $datepicker = $modalBody.find('.datePicker');
+            $datepicker.datepicker({
+              language: 'ko', autoclose: true, todayHighlight: true, format: datepickerFormat,
+            }).on('changeDate', function(e) {
+                var orgInputName = $(e.target).attr('data-org-input-name');
+                if (!(_.isEmpty(orgInputName))) {
+                    var $orgInput = $modalBody.find('[name=' + orgInputName + ']');
+                    $orgInput.val(moment(e.date).format('YYYY-MM-DD'));
+                }
+            });
+            
+    	})
+    	
+    	.one('shown.bs.modal', function(e) {
+    		
+    	})
+        .one('hidden.bs.modal', function(e) {
+
+        })
+        .modal();
+    },
+    newPreReservation : function() {
+    	var $modal = $('#modal-new-preReservation-form');
+    	var values = {};
+        var $inputs = this.$el.find(':input');
+        var $form = $modal.find('form');
+                
+        $form.validate({
+        	ignore: "not:hidden",
+        	rules: {
+  				name: {
+  					required: true,
+  				},
+  				phone:{
+  					required: true,
+  				},
+  				email:{
+  				  required: true,
+  				}
+  			},
+  			messages: {
+  				name: {
+  					required: "이름을 입력하세요",
+  				},
+  				phone:{
+  					required: "전화번호를 입력하세요",
+  				},
+  				email:{
+  				    required: "이메일을 입력해주세요.",
+  				    email : "유효한 이메일을 입력해주세요."
+  				}
+  			}
+  	    });
+      
+      
+      if ($form.valid()){
+        $inputs.each(function(i, element) {
+            var $element = $(element);
+            if ($element.is('[type=radio]')) {
+                if ($element.is(':checked')) {
+                    values[$element.attr('name')] = $element.val();
+                }
+            } else {
+                var name = $element.attr('name');
+                if (!(_.isEmpty(name))) {
+                    values[name] = $element.val();
+
+                }
+            }
+        });
+        
+        var data = {
+          branchId : values['branchId'],
+          period : values['period'],
+          gender : values['gender'],
+          name : values['name'],
+          phone : values['phone'],
+          email : values['email'],
+          birth : values['birth'],
+          memo : values['memo'],
+        };
+        
+        // Model Create
+        PreReservationList.create(data, {
+          success : function ( model, response ) {
+            $modal.modal('hide');
+          }
+        });
+      };
+      
+    },
+    paging: function(e) {
+		paging(e);
+	},
+	prevPaging: function(e) {
+    	var page = [[${pageMaker.startPage - 1 }]];
+        prevPaging(e, page);
+	},
+    nextPaging: function(e) {
+    	var page = [[${pageMaker.endPage + 1 }]];
+    	nextPaging(e, page);
+	},
+    searchPreReservation : function() {
+	  var values = {};
+      var $searchForm = this.$el.find('#searchFrom');
+	  var $inputs = $searchForm.find(':input');
+	  
+	  $inputs.each(function(i, element) {
+        var $element = $(element);
+        if ($element.is('[type=radio]')) {
+            if ($element.is(':checked')) {
+                values[$element.attr('name')] = $element.val();
+            }
+        } else {
+            var name = $element.attr('name');
+            if (!(_.isEmpty(name))) {
+                values[name] = $element.val();
+            }
+        }
+	  });
+
+	  $searchForm.submit();
+    },
+	addOnePreReservation : function(data) {
+	  var view = new PreReservationView({model: data});
+	  this.$('#pre-reservation-list-app').find('tbody').append(view.render().el);	
+	},
+	modifyPreReservation : function(model) {
+		currentPreReservationModel = this.model; 
+//     if ( !confirm("수정하시겠습니까?") ) {
+//       return;
+//     }
+      
+    var values = {};
+    var $modal = $('#modal-modify');
+    var $form  = $modal.find('form');
+    var $inputs = $modal.find(':input');
+    
+    $form.validate({
+    	ignore: "not:hidden",
+    	rules: {
+				name: {
+					required: true,
+				},
+				phone:{
+					required: true,
+				},
+				email:{
+				  required: true,
+				}
+			},
+			messages: {
+				name: {
+					required: "이름을 입력하세요",
+				},
+				phone:{
+					required: "전화번호를 입력하세요",
+				},
+				email:{
+				    required: "이메일을 입력해주세요.",
+				    email : "유효한 이메일을 입력해주세요."
+				}
+			}
+	    });
+    
+    if ($form.valid()){
+      $inputs.each(function(i, element) {
+          var $element = $(element);
+          if ($element.is('[type=radio]')) {
+              if ($element.is(':checked')) {
+                  values[$element.attr('name')] = $element.val();
+              }
+          } else {
+              var name = $element.attr('name');
+              if (!(_.isEmpty(name))) {
+                  values[name] = $element.val();
+
+              }
+          }
+      });
+      
+      var data = {
+          branchId : values['branchId'],
+          preReservationId : values['preReservationId'],
+          period : values['period'],
+          gender : values['gender'],
+          name : values['name'],
+          phone : values['phone'],
+          email : values['email'],
+          birth : values['birth'],
+          memo : values['memo'],
+      };
+      
+      var PreReservationModel = PreReservationList.get(data.preReservationId);
+      // Model Save
+      PreReservationModel.save(data, {
+        success : function ( model, response ) {
+//           alert('수정 되었습니다.');
+          $modal.modal('hide');
+        }
+      });
+    };
+    
+  },
+  deletePreReservation: function() {
+	  	var $modal = $('#modal-modify');	  	  		
+	  	var PreReservationId = $("input[name=preReservationId]").attr("value");
+	  	var PreReservationModel = PreReservationList.get(PreReservationId);
+
+		if(confirm('정말로 삭제하시겠습니까?')) {		 
+			PreReservationModel.destroy({
+				wait: true,
+				success: function (model, response) {
+					$modal.modal('hide');
+				},
+			});
+		}
+	  
+  }
+  
+	
+  });
+    
+  var preReservationApp = new PreReservationListView;
+  PreReservationList.reset(JSON.parse([[${preReservationListJSON}]]));
+  
+  var $app = $('#pre-reservation-list-app');
+  $app.find('.input-daterange').datepicker({
+    language: 'ko', autoclose: true, todayHighlight: true, 
+    format: {
+      toDisplay: function (date, format, language) {
+        console.log(date);
+        var d = moment(new Date(date));
+        return d.format("YYYY년 MM월 DD일");
+      },
+      toValue: function (date, format, language) {
+        var d = moment(new Date(date));
+        return d.format("YYYY-MM-DD");
+      }
+    },
+  }).on('changeDate', function(e) {
+    var orgInputName = $(e.target).attr('data-org-input-name');
+    if (!(_.isEmpty(orgInputName))) {
+        var $orgInput = $app.find('[name=' + orgInputName + ']');
+        $orgInput.val(moment(e.date).format('YYYY-MM-DD'));
+    }
+  });
+        
+});
+//]]> </script>
+<script th:src='@{/common/api_branch_pre_reservation.js}'></script>
+<script th:src='@{/lib/jquery-validation/dist/jquery.validate.min.js}'></script>
+<!-- DatePicker : https://bootstrap-datepicker.readthedocs.io/en/latest/ -->
+<script th:src='@{/lib/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js}'></script>
+<script charset='UTF-8' th:src='@{/lib/bootstrap-datepicker/dist/locales/bootstrap-datepicker.ko.min.js}'></script>
+<link rel='stylesheet' th:href='@{/lib/bootstrap-datepicker/dist/css/bootstrap-datepicker3.min.css}' />
+<!-- Chosen : https://github.com/harvesthq/chosen -->
+<link rel='stylesheet' th:href='@{/lib/chosen/chosen.css}' />
+<script th:src='@{/lib/chosen/chosen.jquery.js}'></script>
+<!-- Validation : https://jqueryvalidation.org/documentation/
+    INPUT : https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input -->
+<script th:src='@{/lib/jquery-validation/dist/jquery.validate.min.js}'></script>
+

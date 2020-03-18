@@ -1,0 +1,272 @@
+<script th:src='@{/lib/animejs/anime.min.js}' ></script>
+<script th:src='@{/lib/holderjs/holder.min.js}' ></script>
+<style>
+    .form-control, .btn {
+        margin-top: .5rem;
+    }
+</style>
+<div class="container-fluid" id="entry-app">
+    <form id="new-entry-form">
+        <div class="row">
+            <div class="col-xs-12">
+                <input class="invisible" type="text" name="_id" style="height: 0.1px;" autocomplete="off" tabindex="1" />
+            </div>
+            <div class="col-xs-12">
+                <input class="invisible" type="password" name="_pwd" style="height: 0.1px;" autocomplete="off" tabindex="2" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-8 col-md-6 col-sm-12 col-xs-12">
+                <div>
+                    <div id="carousel-ad" class="carousel slide center-block" data-ride="carousel" style="width: 95%; height: 450px;">
+                        <ol class="carousel-indicators">
+                            <li data-target="#carousel-ad" data-slide-to="0" class="active"></li>
+                        </ol>
+                        <div class="carousel-inner">
+                            <div class="carousel-item active">
+                                <img th:src="@{/images/376152628_249e3630c0_b.jpg}" class="img-rounded center-block" style="width: 900px; height: 450px;" />
+                                <div class="carousel-caption">
+                                    <h1 id="sysDateTime"></h1>
+                                    <p id="sysDateDate"></p>
+                                    <h5>
+                                        <span th:text="${brand}"></span>
+                                        <span th:text="${branch.name}"></span>
+                                    </h5>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--/* <div class="col-lg-4 col-lg-offset-8 col-md-6 col-md-offset-6 col-sm-8 col-sm-offset-4 col-xs-12"> */-->
+            <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12">
+                <div class="row">
+                    <div class="col-xs-12">
+                        <!--<label class="form-control-label" for="no">회원번호</label>-->
+                        <input class="form-control form-control-lg" type="text" id="no" name="no" next-id="submit" value="" placeholder="회원번호" maxlength="6" autocomplete="off" />
+                    </div>
+                </div>
+                <!--/* <div class="row">
+                    <div class="col-xs-12">
+                        <input class="form-control form-control-lg" type="password" id="password" name="password" prev-id="no" next-id="submit" value="" placeholder="비밀번호" maxlength="4" autocomplete="off" />
+                    </div>
+                </div> */-->
+                <div class="row">
+                    <div class="col-xs-3"><button type="button" class="btn btn-number btn-outline-primary btn-lg btn-block">1</button></div>
+                    <div class="col-xs-3"><button type="button" class="btn btn-number btn-outline-primary btn-lg btn-block">2</button></div>
+                    <div class="col-xs-3"><button type="button" class="btn btn-number btn-outline-primary btn-lg btn-block">3</button></div>
+                    <div class="col-xs-3"><button type="button" class="btn btn-outline-secondary btn-lg btn-block" id="previous"><i class="fa fa-long-arrow-left" aria-hidden="true"></i></button></div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-3"><button type="button" class="btn btn-number btn-outline-primary btn-lg btn-block">4</button></div>
+                    <div class="col-xs-3"><button type="button" class="btn btn-number btn-outline-primary btn-lg btn-block">5</button></div>
+                    <div class="col-xs-3"><button type="button" class="btn btn-number btn-outline-primary btn-lg btn-block">6</button></div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-3"><button type="button" class="btn btn-number btn-outline-primary btn-lg btn-block">7</button></div>
+                    <div class="col-xs-3"><button type="button" class="btn btn-number btn-outline-primary btn-lg btn-block">8</button></div>
+                    <div class="col-xs-3"><button type="button" class="btn btn-number btn-outline-primary btn-lg btn-block">9</button></div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-3 offset-xs-3"><button type="button" class="btn btn-outline-primary btn-lg btn-block">0</button></div>
+                    <!--<div class="col-xs-6"><button type="button" class="btn btn-primary btn-lg btn-block" id="next">다음</button></div>-->
+                </div>
+                <div class="row">
+                    <div class="col-xs-6">
+                        <button type="button" class="btn btn-outline-primary btn-lg btn-block" id="entryTypeIn">입실</button>
+                    </div>
+                    <div class="col-xs-6">
+                        <button type="button" class="btn btn-outline-primary btn-lg btn-block" id="entryTypeOut">퇴실</button>
+                    </div>
+                    <div class="col-xs-6">
+                        <button type="button" class="btn btn-outline-primary btn-lg btn-block" id="entryTypeOuting">외출</button>
+                    </div>
+                    <div class="col-xs-6">
+                        <button type="button" class="btn btn-outline-primary btn-lg btn-block" id="entryTypeReturn">복귀</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+<script th:inline="javascript">// <![CDATA[
+$(function(){
+
+    // Entry
+    var EntryModel = Backbone.Model.extend({
+    idAttribute: 'id',
+    defaults: function() {
+            return {
+                deskId: null,
+                entryDt: '', entryType: -1, memberId: null,
+            };
+        },
+    });
+
+    var EntryListCollection = Backbone.Collection.extend({
+        model: EntryModel,
+        branchId: null,
+        url: function() {
+            return ctxRoot + 'entry/api/b/' + this.branchId + '/entries';
+        },
+    });
+	console.log(ctxRoot);
+    
+    var EntryList = new EntryListCollection;
+    EntryList.branchId = [[${branch.branchId}]];
+
+    var EntryView = Backbone.View.extend({
+        el: $('#entry-app'),
+        focusedInput: null,
+        events: {
+            'click .carousel-item': 'clickAd',
+            'click #entryTypeIn': 'clickEntryIn',
+            'click #entryTypeOut': 'clickEntryOut',
+            'click #entryTypeOuting' : 'clickEntryOuting',
+            'click #entryTypeReturn' : 'clickEntryReturn',
+            'click .btn-number' : 'clickNumber',
+            'click #previous': 'clickPrevious',
+            'click #next': 'clickNext',
+            'focus #no': 'focusNo',
+//            'focus #password': 'focusPassword',
+
+        },
+        initialize: function() {
+
+        },
+        reset: function() {
+            PayList.forEach(this.addOnePay);
+
+            $(document).trigger('appLoaded');
+
+        },
+        render: function() {
+
+        },
+        clickAd: function(e) {
+            var $no = $('#no');
+            $('html, body').stop().animate({
+                scrollTop: $no.offset().top
+            }, 1500, 'easeInOutExpo');
+            event.preventDefault();
+
+            $no.focus();
+
+        },
+        clickEntryIn: function(e) {
+            this.saveNewEntry('1');
+
+        },
+        clickEntryOut: function(e) {
+            this.saveNewEntry('2');
+
+        },
+        clickEntryOuting : function(e) {
+        	this.saveNewEntry('3');
+        },
+		clickEntryReturn : function(e) {
+			this.saveNewEntry('4');	
+        },
+        clickNumber: function(e) {
+            var $i = $(this.focusedInput);
+            $i.val($i.val() + $(e.target).text());
+
+        },
+        clickPrevious: function(e) {
+            var $i = $(this.focusedInput);
+            var v = $i.val();
+            var l = v.length;
+            if (l != 0) {
+                $i.val(v.substring(0, l - 1));
+
+            } else {
+                var prevId = $i.attr('prev-id');
+                $('#' + prevId).focus();
+
+            }
+
+        },
+        clickNext: function(e) {
+            var $i = $(this.focusedInput);
+            var nextId = $i.attr('next-id');
+
+            if (nextId == 'submit') {
+                this.saveNewEntry();
+
+            } else {
+                $('#' + nextId).focus();
+
+            }
+
+        },
+        focusNo: function(e) {
+            this.focusedInput = e.target;
+
+        },
+//        focusPassword: function(e) {
+//            this.focusedInput = e.target;
+//
+//        },
+        saveNewEntry: function(entryType) {
+            var values = {entryType: entryType};
+            var $form = $('#new-entry-form');
+
+            var $inputs = $form.find(':input');
+
+            $inputs.each(function(i, element) {
+                var $element = $(element);
+                if ($element.is('[type=radio]')) {
+                    if ($element.is(':checked')) {
+                        var name = $element.attr('name');
+                        if (!(_.isEmpty(name))) {
+                            values[name] = $element.val();
+
+                        }
+                    }
+
+                } else {
+                    var name = $element.attr('name');
+                    if (!(_.isEmpty(name))) {
+                        values[name] = $element.val();
+
+                    }
+
+                }
+
+            });
+
+            EntryList.create(values, {
+                wait : true,
+                success : function (model, response, options) {
+                    //console.info('success');
+                    //console.info(response);
+                    //console.info(options);
+					console.log(values);
+                    alert('출입이 기록되었습니다.');
+
+                    $form[0].reset();
+
+                },
+                error : function (model, response, options) {
+                    //console.info('failure');
+                    console.info(response);
+                    //console.info(options);
+
+                    alert('회원번호 또는 비밀번호를 확인해주세요.');
+
+                    $('#no').focus();
+
+                },
+
+            });
+
+        },
+
+    });
+
+    var App = new EntryView;
+
+    $('#no').focus();
+
+});
+// ]]></script>

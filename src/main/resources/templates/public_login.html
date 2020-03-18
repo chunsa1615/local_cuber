@@ -1,0 +1,65 @@
+<div class="container-fluid">
+	<article class="main_wrap">
+		<div class="login-cover">
+			<div class="login-cover-image"></div>
+			<div class="login-cover-bg"></div>
+		</div>
+		
+    <div>
+        <div class="row">
+            <div class="col-md-4 offset-md-4">            
+                <div class="login-panel panel panel-default">                    
+                    <div class="panel-heading">
+<!--                         <h3 class="panel-title">로그인</h3> -->
+                    </div>
+                    <div class="panel-body">
+<!--                         <div class="alert alert-warning" role="alert" th:if="${param.error}"><label style="">아이디 및 패스워드를 확인해주세요.</label></div> -->
+                        <div class="inner">
+                        	<h1>
+                        		<a class="navbar-brand" th:href="@{/}"><img th:src="@{/images/login_ci.png}" /></a>
+                        	</h1>
+	                        <div class="alert alert-info" role="alert" th:if="${param.logout}">로그아웃되었습니다.</div>
+	                        <form name="loginForm" role="form" method="post" th:action="@{/login/process}" onsubmit="showLoadingOverlay()">
+	                            <fieldset>
+	                                <div class="form-group">
+	                                    <input class="form-control" placeholder="사용자 이름" name="name" type="text" autofocus="true" style="height:50px"/>
+	                                </div>
+	                                <div class="form-group">
+	                                    <input class="form-control" placeholder="패스워드" name="password" type="password" value="" style="height:50px "/>
+	                                </div>
+	                                
+	                            	<div class="login_check mt20 mb20">
+										<label class="checkbox-wrap">
+											<input type="checkbox" id="id_save" />
+											<i class="check-icon"></i>
+										</label>
+										<label for="id_save">아이디저장</label>
+									</div>
+										
+	                                <input type="submit" class="btn_login btn-block" value="로그인" />
+	                                
+	                            <footer id="login_notice">
+									<div class="icon_notice" th:if="${param.error}"><img th:src="@{/images/icon_notice.jpg}" /> <span class="memo_notice">아이디 및 패스워드를 확인해주세요.</span></div>
+								</footer>		
+	                            </fieldset>
+	                        </form>
+	                	</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </article>
+</div>
+
+<link rel='stylesheet' th:href='@{/common/common.css}' />
+<link rel='stylesheet' th:href='@{/common/fonts.css}' />
+<link rel='stylesheet' th:href='@{/common/login.css}' />
+<!-- Digits : https://docs.fabric.io/web/digits/getting-started.html -->
+<script id="digits-sdk" src="https://cdn.digits.com/1/sdk.js" async="true"></script>
+<script th:inline="javascript">// <![CDATA[
+document.getElementById('digits-sdk').onload = function() {
+    Digits.init({ consumerKey: '5FhBPpaTGVbd2MjtKQ7i4EvkO' });
+};
+
+// ]]></script>

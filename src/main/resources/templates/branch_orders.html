@@ -1,0 +1,539 @@
+<div class="container-fluid" id="order-list-app">
+    <section class="row">
+        <div class="col-md-2 col-sm-12">
+            <button type="button" class="btn btn-outline-primary" id="btn-form-new-order">주문 추가</button>
+        </div>
+        <div class="col-md-10 col-sm-12">
+            <form id="searchFrom">
+                <div class="row">
+                    <div class="col-md-5">
+                        <div class="form-group">
+                            <label class="form-control-label" for="sOrderStartDt">주문일자</label>
+                            <div class="input-group input-daterange">
+                                <input type="text" class="form-control" id="sOrderStartDt" name="sOrderStartDt" th:value="${sOrderStartDt}" readonly="readonly" />
+                                <div class="input-group-addon">부터</div>
+                                <input type="text" class="form-control" id="sOrderEndDt" name="sOrderEndDt" th:value="${sOrderEndDt}" readonly="readonly" />
+                                <div class="input-group-addon">까지</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                        <div class="form-group">
+                            <label class="form-control-label" for="sMember">회원</label>
+                            <select class="form-control chosen" id="sMember" name="sMember">
+                                <option value="">전체</option>
+                                <option th:each="member : ${members}" th:selected="${member.memberId == sMember}" th:value="${member.memberId}" th:text="${member.no + ' ' + member.name}"></option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-control-label" for="btn-search"></label>
+                        <button type="submit" class="btn btn-outline-primary" id="btn-search">검색</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </section>
+    <section class="row">
+        <table class="table">
+            <!--<colgroup>-->
+                <!--<col width="10%" />-->
+                <!--<col width="30%" />-->
+                <!--<col width="30%" />-->
+                <!--<col width="30%" />-->
+            <!--</colgroup>-->
+            <thead class="thead-inverse">
+                <tr>
+                    <th>주문일시</th>
+                    <th class="text-xs-center">회원</th>
+                    <th>상태</th>
+                    <th>예약내역</th>
+                    <th>결제내역</th>
+                    <th>-</th>
+                </tr>
+            </thead>
+            <tbody id="order-list"></tbody>
+            <tfoot>
+                <tr>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                </tr>
+            </tfoot>
+        </table>
+    </section>
+
+    <div class="modal fade" id="modal-new-order-form" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title"></h4>
+                </div>
+                <div class="modal-body">
+                </div>
+                <div class="modal-footer">
+                    <div class="pull-xs-left">
+                        <button type="button" class="btn btn-outline-primary" data-dismiss="modal" id="btn-new-member">회원 추가</button>
+                    </div>
+                    <button type="button" class="btn btn-primary" id="btn-save-new-order">추가</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modal-order-form" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title"></h4>
+                </div>
+                <div class="modal-body">
+                </div>
+                <div class="modal-footer">
+                    <div class="pull-xs-left">
+                        <button type="button" class="btn btn-danger" id="btn-delete-order">삭제</button>
+                    </div>
+                    <button type="button" class="btn btn-primary" id="btn-save-order">수정</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript" type="text/template" id="order-template"><![CDATA[ -->
+    <td>
+        <label class="view">{{- momentDateFormat(orderDt) }} {{- momentTimeFormat(orderTm) }}</label>
+    </td>
+    <td class="text-xs-center">
+        <label class="view"><span class="tag tag-primary">{{- member.no }}</span> {{- member.name }}</label>
+    </td>
+    <td>
+        {{- orderStatusTypeMap[orderStatus] }}
+    </td>
+    <td>
+        {{ if(orderStatus == 20) { }}<button type="button" class="btn btn-outline-primary btn-form-order">수정</button>{{ } }}
+    </td>
+    <td>{{- orderNote }}</td>
+<!-- ]]> --></script>
+
+<script th:inline="javascript" type="text/template" id="order-form-template"><![CDATA[ -->
+    <form>
+        <input type="hidden" name="orderId" value="{{- orderId}}" />
+        <div class="container-fluid">
+            <div class="col-lg-6 col-md-12 col-xs-12">
+                <div class="form-group">
+                    <label class="form-control-label">회원</label>
+                    <select class="chosen" name="memberId">
+                        <option value="">미입력</option>
+                        {{ _.each(members, function(member){ }}<option value="{{- member.memberId }}" {{ if(memberId == member.memberId) { }}selected="selected"{{ } }}>{{- member.name }}</option>{{ }); }}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label">열람실 / 좌석</label>
+                    <select class="chosen" name="deskId">
+                        <option value="">미입력</option>
+                        {{ _.each(desks, function(desk){ }}<option value="{{- desk.deskId }}" {{ if(deskId == desk.deskId) { }}selected="selected"{{ } }}>{{- _.find(rooms, function(room){ return (room.roomId == desk.roomId) }).name }} / {{- desk.name }}</option>{{ }); }}
+                    </select>
+                </div>
+            </div>
+            <div class="col-lg-6 col-md-12 col-xs-12">
+                <div class="form-group">
+                    <label class="form-control-label">사용기간</label>
+                    <input type="hidden" name="deskStartDt" value="{{- deskStartDt }}" />
+                    <input type="hidden" name="deskEndDt" value="{{- deskEndDt }}" />
+                    <div class="input-group input-daterange">
+                        <input type="text" class="form-control" data-org-input-name="deskStartDt" value="{{- momentDateFormat(deskStartDt) }}" readonly="readonly" />
+                        <div class="input-group-addon">부터</div>
+                        <input type="text" class="form-control" data-org-input-name="deskEndDt" value="{{- momentDateFormat(deskEndDt) }}" readonly="readonly" />
+                        <div class="input-group-addon">까지</div>
+                    </div>
+                    <input type="hidden" name="deskStartTm" value="{{- deskStartTm }}" />
+                    <input type="hidden" name="deskEndTm" value="{{- deskEndTm }}" />
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label">메모</label>
+                    <textarea class="form-control" name="orderNote">{{- orderNote }}</textarea>
+                </div>
+            </div>
+        </div>
+    </form>
+<!-- ]]> --></script>
+
+<script th:include="tmpl_tr_reservation" th:inline="javascript" type="text/template" id="reservation-template"></script>
+
+<script th:inline="javascript">// <![CDATA[
+var orderStatusTypeMap = JSON.parse([[${orderStatusTypeMapJSON}]]);
+
+$(function(){
+
+    // Search Form
+    var $sForm = $('#searchFrom');
+    $sForm.find('.input-daterange').datepicker({
+        language: 'ko', autoclose: true, todayHighlight: true, format: 'yyyy-mm-dd',
+
+    }).on('changeDate', function(e) {
+
+    });
+
+    $sForm.find('.chosen').chosen({width: "100%"});
+
+    // Member
+    var MemberList = new MemberListCollection();
+    MemberList.branchId = [[${branch.branchId}]];
+    MemberList.reset(JSON.parse([[${memberListJSON}]]));
+
+    // Room
+    var RoomList = new RoomListCollection;
+    RoomList.branchId = [[${branch.branchId}]];
+    RoomList.reset(JSON.parse([[${roomListJSON}]]));
+
+    // Desk
+    var DeskList = new DeskListCollection;
+    DeskList.branchId = [[${branch.branchId}]];
+    DeskList.reset(JSON.parse([[${deskListJSON}]]));
+
+    // Order
+    var OrderList = new OrderListCollection;
+    OrderList.branchId = [[${branch.branchId}]];
+
+    var OrderView = Backbone.View.extend({
+        tagName: 'tr',
+        className: 'order',
+        template: _.template($('#order-template').html()),
+        events: {
+            'dblclick': 'formOrder',
+            'click .btn-form-order' : 'formOrder',
+        },
+        initialize: function() {
+            this.listenTo(this.model, 'change', this.change);
+            this.listenTo(this.model, 'destroy', this.remove);
+
+        },
+        change: function() {
+            this.render();
+
+        },
+        render: function() {
+            var data = this.model.toJSON();
+            data['member'] = MemberList.get(this.model.get('memberId')).toJSON();
+
+            this.el.id = data.orderId;
+
+            if(data.orderStatus != 20) this.$el.addClass('text-muted');
+
+            this.$el.html(this.template(data));
+
+            return this;
+
+        },
+        formOrder: function() {
+            OrderList.trigger('formOrder', this.model);
+
+        },
+    });
+
+    var BranchOrderView = Backbone.View.extend({
+        el: $('#order-list-app'),
+        templateForForm: _.template($('#order-form-template').html()),
+        currentOrderModel: null,
+        events: {
+            'click #btn-new-member' : 'goMemberPage',
+            'click #btn-form-new-order': 'formNewOrder',
+            'click #btn-save-new-order': 'saveNewOrder',
+            'click #btn-save-order': 'saveOrder',
+            'click #btn-delete-order': 'deleteOrder',
+
+        },
+        initialize: function() {
+            this.listenTo(OrderList, 'add', this.addOneOrder);
+            this.listenTo(OrderList, 'formOrder', this.formOrder);
+            this.listenTo(OrderList, 'reset', this.reset);
+
+        },
+        reset: function() {
+            OrderList.forEach(this.addOneOrder);
+
+            $(document).trigger('appLoaded');
+
+        },
+        render: function() {
+
+        },
+        goMemberPage: function(e) {
+            location.assign(ctxRoot + 'branch/' + [[${branch.branchId}]] + '/members?action=newMember');
+        },
+        formNewOrder: function(e, memberId, deskId) {
+            var data = new OrderModel().toJSON();
+
+            data['memberId'] = memberId;
+            data['deskId'] = deskId;
+
+            data['members'] = MemberList.toJSON();
+            data['desks'] = DeskList.toJSON();
+            data['rooms'] = RoomList.toJSON();
+
+            // TODO : 시간단위까지 조정
+            var currentDate = sysDate.clone();
+            data['orderDt'] = currentDate.valueOf();
+            data['deskStartDt'] = currentDate.startOf('day').valueOf();
+            data['deskEndDt'] = currentDate.endOf('day').valueOf();
+            data['deskStartTm'] = '00:00:00';
+            data['deskEndTm'] = '23:59:59';
+
+            var bodyHtml = this.templateForForm(data);
+
+            $('#modal-new-order-form')
+            .one('show.bs.modal', function(e) {
+                var $modal = $(this);
+                $modal.find('.modal-title').html('새 예약');
+                $modal.find('.modal-body').html(bodyHtml);
+
+                $modal.find('.datepicker, .input-daterange').datepicker({
+                    language: 'ko', autoclose: true, todayHighlight: true, format: datepickerFormat,
+
+                }).on('changeDate', function(e) {
+                    var orgInputName = $(e.target).attr('data-org-input-name');
+                    if (!(_.isEmpty(orgInputName))) {
+                        var $orgInput = $('#modal-new-order-form').find('[name=' + orgInputName + ']');
+                        $orgInput.val(e.date.valueOf());
+
+                    }
+
+                });
+
+                $modal.find('.chosen').chosen({width: "100%"});
+
+            })
+            .one('shown.bs.modal', function(e) {
+                var $modal = $(this);
+                $modal.find('[name=name]').focus();
+
+                /*
+                $modal.find('form').on('submit', function(e) {
+                    e.preventDefault();
+
+                });
+                */
+
+            })
+            .modal();
+        },
+        saveNewOrder: function(e) {
+            var values = {};
+            var $modal = $('#modal-new-order-form');
+
+            var $form = $modal.find('form');
+
+            $form.validate({
+                debug: true,
+                rules: {
+                    //orderNote: { required: true, depends: function(element){ console.info(element); return false; }, },
+                    memberId: { depends: function(element){ console.info(element); return false; }, },
+                    deskId: { required: true, },
+                },
+            });
+
+            if($form.valid()) {
+                var $inputs = $form.find(':input');
+
+                $inputs.each(function(i, element) {
+                    var $element = $(element);
+                    if ($element.is('[type=radio]')) {
+                        if ($element.is(':checked')) {
+                            var name = $element.attr('name');
+                            if (!(_.isEmpty(name))) {
+                                values[name] = $element.val();
+
+                            }
+                        }
+
+                    } else {
+                        var name = $element.attr('name');
+                        if (!(_.isEmpty(name))) {
+                            values[name] = $element.val();
+
+                        }
+
+                    }
+
+                });
+
+                OrderList.create(values, {
+                    wait : true,
+                    success : function (model, response) {
+                        model.set('orderId', response.orderId);
+                        model.set('insertDt', response.insertDt);
+                        model.set('updateDt', response.updateDt);
+
+                        $modal.modal('hide');
+
+                    }
+
+                });
+            }
+
+        },
+        addOneOrder: function(order) {
+            var view = new OrderView({ model: order });
+
+            var branchId = [[${branch.branchId}]];
+            var orderId = order.get('orderId');
+
+            order.reservations = new ReservationListCollection;
+            order.reservations.branchId = branchId;
+            order.reservations.url = ctxRoot + 'api/v1/branch/' + branchId + '/orders/' + orderId + '/reservations';
+            order.reservations.fetch();
+
+            order.pays = new PayListCollection;
+            order.pays.branchId = branchId;
+            order.pays.url = ctxRoot + 'api/v1/branch/' + branchId + '/orders/' + orderId + '/pays';
+            order.pays.fetch();
+
+            this.$('#order-list').append(view.render().el);
+
+        },
+        formOrder: function(model) {
+            this.currentOrderModel = model;
+
+            var data = model.toJSON();
+            data['members'] = MemberList.toJSON();
+            data['desks'] = DeskList.toJSON();
+            data['rooms'] = RoomList.toJSON();
+
+            var titleHtml = '예약';
+            var bodyHtml = this.templateForForm(data);
+
+            $('#modal-order-form')
+            .one('show.bs.modal', function(e) {
+                var $modal = $(this);
+                $modal.find('.modal-title').html(titleHtml);
+                $modal.find('.modal-body').html(bodyHtml);
+
+                $modal.find('.datepicker, .input-daterange').datepicker({
+                    language: 'ko', autoclose: true, todayHighlight: true, format: datepickerFormat,
+                }).on('changeDate', function(e) {
+                    var orgInputName = $(e.target).attr('data-org-input-name');
+                    if (!(_.isEmpty(orgInputName))) {
+                        var $orgInput = $('#modal-order-form').find('[name=' + orgInputName + ']');
+                        $orgInput.val(e.date.valueOf());
+                    }
+
+                });
+
+                $modal.find('.chosen').chosen({width: "100%"});
+
+                /*
+                $modal.find('form').on('submit', function(e) {
+                    e.preventDefault();
+
+                });
+                */
+
+            })
+            .modal();
+
+        },
+        saveOrder: function(e) {
+            var values = {};
+            var $modal = $('#modal-order-form');
+            var $form = $modal.find('form');
+            $form.validate();
+
+            if($form.valid()) {
+                var $inputs = $form.find(':input');
+                $inputs.each(function(i, element) {
+                    var $element = $(element);
+                    if ($element.is('[type=radio]')) {
+                        if ($element.is(':checked')) {
+                            var name = $element.attr('name');
+                            if (!(_.isEmpty(name))) {
+                                values[name] = $element.val();
+
+                            }
+                        }
+
+                    } else {
+                        var name = $element.attr('name');
+                        if (!(_.isEmpty(name))) {
+                            values[name] = $element.val();
+
+                        }
+
+                    }
+                });
+
+                this.currentOrderModel.save(values, {
+                    wait: true,
+                    success: function (model, response) {
+                        $modal.modal('hide');
+
+                        OrderList.fetch();
+
+                    },
+
+                });
+
+            }
+
+        },
+        deleteOrder: function(e) {
+            var $modal = $('#modal-order-form');
+
+            if(confirm('정말로 삭제하시겠습니까?')) {
+                this.currentOrderModel.destroy({
+                    wait: true,
+                    success: function (model, response) {
+                        $modal.modal('hide');
+
+                    },
+
+                });
+
+            }
+
+        },
+
+    });
+
+
+    var App = new BranchOrderView;
+
+    OrderList.reset(JSON.parse([[${orderListJSON}]]));
+
+});
+
+// ]]></script>
+<script th:inline="javascript" th:if="${!#strings.isEmpty(param.action) and param.action[0] == 'newOrder'}">// <![CDATA[
+$(document).one('appLoaded', function(e) {
+    $('#btn-form-new-order').trigger('click', [ [[${!#strings.isEmpty(param.memberId) ? param.memberId[0] : null}]], [[${!#strings.isEmpty(param.deskId) ? param.deskId[0] : null}]] ]);
+
+});
+// ]]></script>
+<script th:src='@{/common/api_branch_room.js}' ></script>
+<script th:src='@{/common/api_branch_desk.js}' ></script>
+<script th:src='@{/common/api_branch_member.js}' ></script>
+<script th:src='@{/common/api_branch_reservation.js}' ></script>
+<script th:src='@{/common/api_branch_pay.js}' ></script>
+<script th:src='@{/common/api_branch_order.js}' ></script>
+<!-- DatePicker : https://bootstrap-datepicker.readthedocs.io/en/latest/ -->
+<script th:src='@{/lib/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js}' ></script>
+<script charset='UTF-8' th:src='@{/lib/bootstrap-datepicker/dist/locales/bootstrap-datepicker.ko.min.js}' ></script>
+<link rel='stylesheet' th:href='@{/lib/bootstrap-datepicker/dist/css/bootstrap-datepicker3.min.css}' />
+<!-- Chosen : https://github.com/harvesthq/chosen -->
+<link rel='stylesheet' th:href='@{/lib/chosen/chosen.css}' />
+<script th:src='@{/lib/chosen/chosen.jquery.js}' ></script>
+<!-- Validation : https://jqueryvalidation.org/documentation/
+    INPUT : https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input -->
+<script th:src='@{/lib/jquery-validation/dist/jquery.validate.min.js}' ></script>
+<script th:src='@{/lib/jquery-validation/src/localization/messages_ko.js}' ></script>

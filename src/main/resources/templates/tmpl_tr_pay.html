@@ -1,0 +1,11 @@
+<![CDATA[ -->
+<td>{{- momentDateFormat(payDt) }} {{- momentTimeFormat(payTm) }}</td>
+<td>{{- payInOutTypeText}}</td>
+<td>{{- payTypeText }}</td>
+<td class="text-xs-center"><span class="tag tag-primary">{{- member.no }}</span> {{- member.name }}</td>
+<td><span {{ if(payStateType == 0){ }}style="color:red" {{ } }} >{{- PayStateTypeMap[payStateType]}}</span></td>
+<td class="view small">{{- payNote }}</td>
+<td class="text-xs-right p-r-3">{{- payAmount }} 원</td>
+<td><button type="button" class="btn btn-outline-primary btn-form-pay">수정</button></td>
+<!-- ]]> -->
+

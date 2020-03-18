@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" output="target/classes" path="src/main/java">
+		<attributes>
+			<attribute name="optional" value="true"/>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="target/test-classes" path="src/test/java">
+		<attributes>
+			<attribute name="optional" value="true"/>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry excluding="**" kind="src" output="target/classes" path="src/main/resources">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+			<attribute name="org.eclipse.jst.component.dependency" value="/WEB-INF/lib"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/Users/Kwon/Downloads/poi-bin-3.16-20170419/poi-3.16/poi-3.16.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Kwon/Downloads/commons-collections4-4.1-bin.tar/commons-collections4-4.1.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/Users/Kwon/Downloads/UCanAccess-4.0.2-bin/UCanAccess-4.0.2-bin/ucanaccess-4.0.2.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Kwon/Downloads/UCanAccess-4.0.2-bin/UCanAccess-4.0.2-bin/lib/commons-lang-2.6.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Kwon/Downloads/UCanAccess-4.0.2-bin/UCanAccess-4.0.2-bin/lib/commons-logging-1.1.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Kwon/Downloads/UCanAccess-4.0.2-bin/UCanAccess-4.0.2-bin/lib/hsqldb-2.3.4.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Kwon/Downloads/UCanAccess-4.0.2-bin/UCanAccess-4.0.2-bin/lib/jackcess-2.1.6.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
+	<classpathentry kind="lib" path="libs/RXTXcomm.jar" sourcepath="libs/RXTXcomm.jar">
+		<attributes>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="SCC_Web/libs"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="libs/serial.jar"/>
+	<classpathentry kind="output" path="target/classes"/>
+</classpath>

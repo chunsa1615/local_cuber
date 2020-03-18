@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="PushDao">  <!-- sql문을 처리하는 매핑할 정보의 패키지명을 적어준다. --> 
+    
+    <!-- [아이폰] DB에 deviceID 존재 여부 -->
+	<select id="getIPhoneKeyCount"	parameterType="Push" resultType="Integer">
+    <![CDATA[ 
+        select   count(*)
+        from     tb_iphone_push_info with(nolock)
+        where    device_id = #{deviceId}
+	]]>
+	</select>
+	
+	<!-- [아이폰] DB에 alarm_yn, agree_yn 정보 -->
+	<select id="getIPhoneKeyInfo"	parameterType="Push" resultType="Push">
+    <![CDATA[ 
+        select   top 1 device_id as deviceId, registration_id as registrationId, alarm_yn as alarmYN, agree_yn as agreeYN, location_yn as locationYN
+        from     tb_iphone_push_info with(nolock)
+        where    device_id = #{deviceId}
+	]]>
+	</select>
+	
+	<!-- [아이폰] deviceID, RegistraitionId, Push 수신 동의 여부 Insert 
+		예약픽업 Smith: Push 수신 동의 여부는 default = 'Y'
+	-->
+    <insert id="insertRegistraionId_IPhone" parameterType="Push">
+    <![CDATA[ 
+		insert into tb_iphone_push_info(device_id, registration_id, last_date)
+		values (#{deviceId}, #{registrationId}, GETDATE());
+	]]>
+    </insert>
+    
+    <!-- [아이폰] RegistraitionId Update -->
+    <update id="updateRegistraionId_IPhone" parameterType="Push">
+    <![CDATA[ 
+		update	tb_iphone_push_info
+		set		registration_id = #{registrationId}
+				, last_date	= GETDATE()
+		where	device_id = #{deviceId}
+	]]>
+    </update>
+    
+	
+    <!-- [안드로이드] DB에 deviceID 존재 여부 -->
+	<select id="getAndroidKeyCount"	parameterType="Push" resultType="Integer">
+    <![CDATA[ 
+        select   count(*)
+        from     tb_android_push_info with(nolock)
+        where    device_id = #{deviceId}
+	]]>
+	</select>
+	
+	<!-- [안드로이드] deviceID, RegistraitionId, Push 수신 동의 여부 Insert 
+		예약픽업 Smith: Push 수신 동의 여부는 default = 'Y'-->
+    <insert id="insertRegistraionId_Android" parameterType="Push">
+    <![CDATA[ 
+		insert into tb_android_push_info(device_id, registration_id, last_date)
+		values (#{deviceId}, #{registrationId}, GETDATE());
+	]]>
+    </insert>
+    
+    <!-- [안드로이드] RegistraitionId Update -->
+    <update id="updateRegistraionId_Android" parameterType="Push">
+    <![CDATA[ 
+		update	tb_android_push_info
+		set		registration_id = #{registrationId}
+				, last_date	= GETDATE()
+		where	device_id = #{deviceId}
+	]]>
+    </update>
+    
+   <!-- [안드로이드] DB에 alarm_yn, agree_yn 정보 -->
+	<select id="getAndroidKeyInfo"	parameterType="Push" resultType="Push">
+    <![CDATA[ 
+        select   top 1 device_id as deviceId, registration_id as registrationId, alarm_yn as alarmYN, agree_yn as agreeYN, location_yn as locationYN
+        from     tb_android_push_info with(nolock)
+        where    device_id = #{deviceId}
+	]]>
+	</select>
+	
+    
+    <!-- 푸시도착 알림 설정 -->
+    <update id="updateAlarm" parameterType="Push">
+    <![CDATA[ 
+		update	tb_${osType}_push_info
+		set		alarm_yn = #{alarmYN}
+				, last_date	= GETDATE()
+		where	device_id = #{deviceId}
+	]]>
+    </update>
+    
+    <!-- 마케팅 수신동의 설정 -->
+    <update id="updateAgree" parameterType="Push">
+    <![CDATA[ 
+		update	tb_${osType}_push_info
+		set		agree_yn = #{agreeYN}
+				, last_date	= GETDATE()
+		where	device_id = #{deviceId}
+	]]>
+    </update>
+    
+    <!-- 위치기반서비스 동의 설정 -->
+    <update id="updateLocation" parameterType="Push">
+    <![CDATA[ 
+		update	tb_${osType}_push_info
+		set		location_yn = #{locationYN}
+				, last_date	= GETDATE()
+		where	device_id = #{deviceId}
+	]]>
+    </update>
+    
+    <!-- [예약픽업] orderId로 RegistraitionId 정보가져오기 -->
+	<select id="getPickupKeyInfo" parameterType="Push" resultType="Push">
+    <![CDATA[ 
+        select   top 1 A.registration_id as registrationId, ISNULL(alarm_YN, 'N') as alarmYN
+        from     TB_${osType}_Push_Info_Pickup A with(nolock) left join TB_${osType}_Push_Info B with(nolock)
+        		 ON A.device_id = B.device_id
+        where	 order_id = #{orderId}
+	]]>
+	</select>
+	
+    <!-- [예약픽업] orderId, deviceId, registraitionId Insert -->
+    <insert id="insertPickupKeyInfo" parameterType="Push">
+    <![CDATA[ 
+		insert into TB_${osType}_Push_Info_Pickup(order_id, device_id, registration_id, last_date)
+		values (#{orderId}, #{deviceId}, #{registrationId}, GETDATE());
+	]]>
+    </insert>
+    
+</mapper>

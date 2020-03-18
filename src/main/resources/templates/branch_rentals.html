@@ -1,0 +1,1121 @@
+<div class=" col-lg-7 col-md-12 col-sm-12 col-xs-12 container-fluid" id="rental-list-app">
+    <section class="row">
+        <div class="col-md-2 col-sm-12">
+            <button type="button" class="btn btn-outline-primary" id="btn-form-new-rental">대여 추가</button>             
+        </div>
+        <div class="col-md-10 col-sm-12">
+            <form id="searchFrom">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-control-label" for="sRentalStartDt">대여일자</label>
+                            <div class="input-group input-daterange">
+                                <input type="text" class="form-control" id="sRentalStartDt" name="sRentalStartDt" th:value="${sRentalStartDt}" readonly="readonly" />
+                                <div class="input-group-addon">부터</div>
+                                <input type="text" class="form-control" id="sRentalEndDt" name="sRentalEndDt" th:value="${sRentalEndDt}" readonly="readonly" />
+                                <div class="input-group-addon">까지</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label class="form-control-label" for="sGoodsId">대여물품</label>
+                            <select class="form-control chosen" id="sGoodsId" name="sGoodsId">
+                                <option value="">전체</option>
+                                <option th:each="rentalType : ${rentalTypes}" th:value="${rentalType.goodsId}" th:text="${rentalType.rentalType}" ></option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label class="form-control-label" for="sMember">회원</label>
+                            <select class="form-control chosen" id="sMember" name="sMember">
+                                <option value="">전체</option>
+                                <option th:each="member : ${members}" th:selected="${member.memberId == sMember}" th:value="${member.memberId}" th:text="${member.no + ' ' + member.name}"></option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-control-label" for="btn-search"></label>
+                        <button type="submit" class="btn btn-outline-primary" id="btn-search">검색</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        
+    </section>
+    <section class="row">
+    <form name="rentForm">
+        <table class="table">
+<!--             <colgroup> -->
+<!--                 <col width="30%" /> -->
+<!--                 <col width="20%" /> -->
+<!--                 <col width="20%" /> -->
+<!--                 <col width="15%" /> -->
+<!--                 <col width="15%" /> -->
+<!--             </colgroup> -->
+            <thead class="thead-inverse">
+                <tr>
+                	<th class="text-xs-center">선택</th>
+                    <th class="p-l-3">대여일시</th>
+                    <th>대여물품</th>
+					<th class="text-xs-center">회원</th>
+					<th>대여상태</th>
+					<th>메모</th>
+                    <th>-</th>
+                </tr>
+            </thead>
+            <tbody id="rental-list"></tbody>        
+                <tr>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                </tr>
+            <tfoot>
+            </tfoot>
+        </table>
+      </form> 
+    <button type="button" class="btn btn-outline-primary" id="btn-form-return-rental">선택 반납</button>
+    </section>
+	
+	<section th:if="${pageMaker.endPage != 0}">
+		<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="text-align: center;">
+			<nav aria-label="Page navigation">
+			  <ul class="pagination">
+		    	<li th:if="${pageMaker.prev}" class="page-item">								    
+			      <a class="page-link prev" href="#" aria-label="Previous">
+			        <span aria-hidden="true">&laquo;</span>
+			        <span class="sr-only">Previous</span>
+			      </a>				     
+		   		</li>
+			    <li th:each="page : ${#numbers.sequence(pageMaker.startPage, pageMaker.endPage)}"  class='page-item' th:value="${page}" th:classappend="${page == pageMaker.page.page ? 'active' :''}">	 			     
+			    	<a class="page-link button"  id="page-linkbutton" th:text="${page}" th:value="${page}" href="#"></a>		  
+			    </li>
+				<li th:if="${pageMaker.next}" class="page-item">
+			      <a class="page-link next" href="#" aria-label="Next">
+			        <span aria-hidden="true">&raquo;</span>
+			        <span class="sr-only">Next</span>
+			      </a>
+			    </li>
+			  </ul>
+			</nav>
+		</div>
+	</section>	
+
+    <div class="modal fade" id="modal-new-rental-form" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title"></h4>
+                </div>
+                <div class="modal-body">
+                </div>
+                <div class="modal-footer">
+                    <div class="pull-xs-left">
+                        <!--<button type="button" class="btn btn-outline-primary" data-dismiss="modal" id="btn-new-member">회원 추가</button>-->
+                    </div>
+                    <button type="button" class="btn btn-primary" id="btn-save-new-rental">추가</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modal-rental-form" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title"></h4>
+                </div>
+                <div class="modal-body">
+                </div>
+                <div class="modal-footer">
+                    <div class="pull-xs-left">
+                        <button type="button" class="btn btn-danger" id="btn-delete-rental">삭제</button>
+                    </div>
+                    <button type="button" class="btn btn-primary" id="btn-save-rental">수정</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script th:include="tmpl_tr_rental" th:inline="javascript" type="text/template" id="rental-template"></script>
+
+<!-- 대여추가 클릭후 뜨는 새 대여 창  -->
+<script th:inline="javascript" type="text/template" id="rental-form-template"><![CDATA[ -->
+    <form >
+        <div class="container-fluid">
+            <div class="col-lg-6 col-md-12 col-xs-12">
+                <div class="form-group">
+                    <label class="form-control-label">대여일자</label>
+                    <input type="hidden" name="rentalDt" value="{{- rentalDt }}" />
+                    <div class="input-group">
+                        <span class="input-group-btn">
+                            <button class="btn btn-secondary" type="button"><i class="fa fa-calendar" aria-hidden="true"></i></button>
+                        </span>
+                        <input type="text" class="form-control datepicker" data-org-input-name="rentalDt" value="{{- momentDateFormat(rentalDt) }}" readonly="readonly" />
+                    </div>
+                </div>
+                <div class="form-group">
+                <label class="form-control-label">대여물품</label>
+					<div class="form-group">
+							<input type="hidden" name="goodsIds" value="{{- goodsIds }}" />
+							{{ if( is_modify) { }}							
+							<label class="form-control-label" values="{{- goodsId }}">대여 목록 : {{- rentalType }}</label> 
+							
+							<!-- <select class="chosen" name="select-goodsIds" id="select-goodsIds" multiple="multiple">
+								{{ _.each(goodsList, function(g){ }} 
+									 <option value="{{- g.goodsId }}" > {{- g.rentalType }} </option> {{ }); }}
+							</select> -->
+							  
+							{{ } }}	   
+							{{ if( !(is_modify)) { }}
+							<select class="chosen" name="select-goodsIds" id="select-goodsIds" multiple="multiple">
+								{{ _.each(goodsList, function(g){ }} 
+									 <option value="{{- g.goodsId }}" > {{- g.rentalType }} </option> {{ }); }} 
+							</select>
+							{{ } }}	  
+					       					
+					</div>
+            	</div>
+            </div>
+            <div class="col-lg-6 col-md-12 col-xs-12">
+                <div class="form-group">
+                    <label class="form-control-label">회원</label>
+                    <select class="chosen" name="memberId" id="memberId">  
+                        <option value="">전체</option>
+                        {{ _.each(members, function(member){ }}<option value="{{- member.memberId }}" {{ if(memberId == member.memberId) { }}selected="selected"{{ } }}>{{- member.no }} {{- member.name }}</option>{{ }); }}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label">대여메모</label>
+                    <textarea class="form-control" name="rentalNote">{{- rentalNote }}</textarea>
+                </div>
+            </div>
+        </div>
+    </form>
+<!-- ]]> --></script>
+
+
+<div class="col-lg-5 col-md-12 col-sm-12 col-xs-12 container-fluid" id="goods-list-app">
+    <section class="row">
+		<div class="col-md-12 col-sm-12">
+			<h3 class="text-xs-center">물품목록</h3>
+			<div class="pull-xs-right">
+				<button type="button" class="btn btn-outline-primary" id="btn-form-new-goods">물품 추가</button>
+			</div>
+		</div>
+    </section>
+
+    <section class="row">
+	    <form name="goodsForm">
+	        <table class="table">
+	            <thead class="thead-inverse">
+	                <tr>
+	                	<th class="text-xs-center">물품</th>
+						<th>메모</th>
+	                    <th>-</th>
+	                </tr>
+	            </thead>
+	            <tbody id="goods-list"></tbody>        
+	                <tr>
+	                    <th></th>
+	                    <th></th>
+	                    <th></th>
+	                </tr>
+	            <tfoot>
+	            </tfoot>
+	        </table>
+	      </form> 
+    </section>
+
+    <div class="modal fade" id="modal-new-goods-form" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title"></h4>
+                </div>
+                <div class="modal-body">
+                </div>
+                <div class="modal-footer">                                        
+					<button type="button" class="btn btn-primary" id="btn-save-new-goods">추가</button>
+					<button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>                    
+                </div>
+            </div>
+        </div>
+    </div>
+    
+        <div class="modal fade" id="modal-goods-form" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title"></h4>
+                </div>
+                <div class="modal-body">
+                </div>
+                <div class="modal-footer">                                        
+					<div class="pull-xs-left">
+                        <button type="button" class="btn btn-danger" id="btn-delete-goods">삭제</button>
+                    </div>
+					<button type="button" class="btn btn-primary" id="btn-save-goods">수정</button>
+					<button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+
+
+
+
+<script th:include="tmpl_tr_goods" th:inline="javascript" type="text/template" id="goods-template"></script>
+
+<script th:inline="javascript" type="text/template" id="goods-form-template"><![CDATA[ -->
+    <form >
+        <div class="container-fluid">
+           <div class="col-lg-6 col-md-12 col-xs-12">
+                <div class="form-group">
+                	<label class="form-control-label">대여물품</label>					
+					<input type="text" class="form-control"  id="rentalType" name="rentalType" value="{{- rentalType }}" />	
+				</div>
+            	</div>
+			
+         <div class="col-lg-6 col-md-12 col-xs-12">
+            <div class="form-group">
+                <label class="form-control-label">대여메모</label>
+                <textarea class="form-control" name="goodsNote" value="{{- goodsNote }}" >{{- goodsNote }}</textarea>
+            </div>
+         <div>
+        </div>
+    </form>
+<!-- ]]> --></script>
+
+
+
+
+<script th:inline="javascript">// <![CDATA[
+//var rentalTypeMap = JSON.parse([[${rentalListJSON}]]);
+var RentalStateTypeMap = JSON.parse([[${RentalStateTypeMapJSON}]]);
+
+$(function(){
+	// Search Form
+    var $sForm = $('#searchFrom');
+
+    $sForm.find('.input-daterange').datepicker({
+        language: 'ko', autoclose: true, todayHighlight: true, format: 'yyyy-mm-dd',
+
+    }).on('changeDate', function(e) {
+
+    });
+
+    $sForm.find('.chosen').chosen({width: "100%"});
+
+/////////////////////////////////////////////////////////// 데이터 변경 //////////////////////////////////////////////////////////////////////////////////////////
+    var rentalTypes = [[${rentalTypes}]];
+	var preGoods = "";
+	var nextGoods = "";
+    // Member
+    var MemberList = new MemberListCollection();
+    MemberList.branchId = [[${branch.branchId}]];
+    MemberList.reset(JSON.parse([[${memberListJSON}]]));
+
+    // Rental
+    var RentalList = new RentalListCollection;
+    RentalList.branchId = [[${branch.branchId}]];
+	RentalList.reset(JSON.parse([[${rentalListJSON}]]));
+	console.log(JSON.parse([[${rentalListJSON}]]));
+	
+    var RentalView = Backbone.View.extend({
+        tagName: 'tr',
+        className: 'rental',
+        template: _.template($('#rental-template').html()),
+        events: {
+            'dblclick': 'formRental',
+            'click .btn-form-rental': 'formRental',
+			'click .form-check-input': 'formReturn',
+        },
+        initialize: function() {
+            this.listenTo(this.model, 'change', this.change);
+            this.listenTo(this.model, 'destroy', this.remove);
+
+        },
+        change: function() {
+            this.render();
+
+        },
+        render: function() {
+            var data = this.model.toJSON();
+
+            if (MemberList.get(this.model.get('memberId'))) {
+	            data['member'] = MemberList.get(this.model.get('memberId')).toJSON();
+	            data['rentalTypes'] = rentalTypes;		
+			
+	            var rentalTypeText = _.findWhere(rentalTypes, {value: Number(data.rentalType)});
+	            data['rentalTypeText'] = rentalTypeText ? rentalTypeText.text : '';
+
+	            this.el.id = data.rentalId;
+	
+	            this.$el.html(this.template(data));
+            }
+            return this;
+
+        },
+        formRental: function() {
+            RentalList.trigger('formRental', this.model);
+
+        },
+        formReturn: function(){
+        	this.model.set({ "is_returned" : true});
+        	RentalList.trigger('deleteRental', this.model);
+        }
+    });
+
+    var BranchRentalView = Backbone.View.extend({
+        el: $('#rental-list-app'),
+        templateForForm: _.template($('#rental-form-template').html()),
+        currentRentalModel: null,
+        events: {
+            'click #btn-new-member' : 'goMemberPage',
+            'click #btn-form-new-rental': 'formNewRental',
+            'click #btn-save-new-rental': 'saveNewRental',
+            'click #btn-save-rental': 'saveRental',
+            'click #btn-form-return-rental': 'returnRental',
+            'click #btn-delete-rental': 'deleteRental',
+            'click .page-link.button' : 'paging',
+			'click .page-link.prev'  : 'prevPaging',
+			'click .page-link.next'  : 'nextPaging',
+			'keyup #rentalAmount' : 'keyup',
+
+        },
+        initialize: function() {
+            this.listenTo(RentalList, 'add', this.addOneRental);
+            this.listenTo(RentalList, 'formRental', this.formRental);
+            this.listenTo(RentalList, 'reset', this.reset);
+
+        },
+        reset: function() {
+            RentalList.forEach(this.addOneRental);
+            var rentalTotalRental = [[${rentalList}]];
+		
+         $(document).trigger('appLoaded');
+
+        },
+        render: function() {
+
+        },
+        goMemberPage: function(e) {
+            location.assign(ctxRoot + 'branch/' + [[${branch.branchId}]] + '/members?action=newMember');
+        },
+        formNewRental: function(e, memberId) {
+            var data = new RentalModel().toJSON();
+            
+         	data['memberId'] = memberId;
+            data['members'] = MemberList.toJSON();
+			data['rentalStateType'] = [[${rentalStateType}]]
+            data['rentalTypes'] = [[${rentalTypes}]];
+		    data['is_modify'] = false;
+		    data['goodsList'] = GoodsList.toJSON();
+		    
+		    var blank = data['rentalType'];
+    		data['rentalTypeNames'] = blank;
+    		
+            // TODO : 시간단위까지 조정
+            var currentDate = sysDate.clone();
+            data['rentalDt'] = currentDate.valueOf();
+            data['rentalTm'] = currentDate.valueOf();
+
+            var bodyHtml = this.templateForForm(data);
+            var selectedgoodsIds = data['goodsIds'] ? data['goodsIds'].split(','): [];
+
+            $('#modal-new-rental-form')
+            .one('show.bs.modal', function(e) {
+                var $modal = $(this);
+                $modal.find('.modal-title').html('새 대여');
+                $modal.find('.modal-body').html(bodyHtml);
+
+                var $select = $modal.find('select[name=select-goodsIds]');
+                $select.val(selectedgoodsIds);
+                
+                $select.chosen({width: '100%', disable_search: false, placeholder_text_multiple: '물품 선택'});
+                
+                $modal.find('.datepicker, .input-daterange').datepicker({
+                    language: 'ko', autoclose: true, todayHighlight: true, format: datepickerFormat,
+
+                }).on('changeDate', function(e) {
+                    var orgInputName = $(e.target).attr('data-org-input-name');
+                    if (!(_.isEmpty(orgInputName))) {
+                        var $orgInput = $('#modal-new-rental-form').find('[name=' + orgInputName + ']');
+                        $orgInput.val(e.date.valueOf());
+
+                    }
+
+                });
+
+                $modal.find('.chosen').chosen({width: "100%"});
+             
+                
+                $modal.find('form').validate({
+                	ignore: "not:hidden",
+                	rules: {
+            			memberId: {            			
+            				required: true,
+            			},
+            			
+            		},
+            		messages: {
+            			memberId: {            	
+            	    		required: "회원을 선택하세요",
+            			},
+      
+            		}	
+                });
+                
+
+            })
+            .one('shown.bs.modal', function(e) {
+                var $modal = $(this);
+                $modal.find('[name=name]').focus();
+                
+                $modal.find('form').on('submit', function(e) {
+                    e.preventDefault();
+
+                });
+
+            })
+            .modal();
+
+        },
+        saveNewRental: function(e) {
+            var values = {};
+            var $modal = $('#modal-new-rental-form');
+            
+            var $select = $modal.find('[name=select-goodsIds]');
+            var selectedgoodsIds = $select.val() ? $select.val().join(',') : "";
+            $modal.find('[name=goodsIds]').val(selectedgoodsIds);   
+            
+            values['rentalTypeNames'] = _.map($select.find('option:selected'), function(element){
+                return $(element).text();
+            }).join(', ');
+
+            //values['goodsId'] = values['goodsIds'];
+            values['rentalStateType'] = 10;
+            values['is_modify'] = true;            
+            
+            var currentDate = sysDate.clone();
+            values['rentalTm'] = currentDate.valueOf();
+            
+            var $inputs = $modal.find(':input');			
+            var $form = $modal.find('form');
+            
+            if($form.valid()) {
+		            $inputs.each(function(i, element) {
+		                var $element = $(element);
+		                
+		                if ($element.is('[type=radio]')) {
+		                    if ($element.is(':checked')) {
+		                        var name = $element.attr('name');
+		                        if (!(_.isEmpty(name))) {
+		                            values[name] = $element.val();
+		
+		                        }
+		                    }
+		
+		                } else {
+		                    var name = $element.attr('name');
+		                    if (!(_.isEmpty(name))) {
+		                     
+		                    	values[name] = $element.val();
+		                        
+		                    }
+		                }
+		
+		            });
+					
+		            if(values['memberId'] == "") {
+		            	alert("memberId null!");
+		            }
+	                else if (values['rentalType'] == "") {
+	                	alert("rentalType null!");
+	                } else {	                		               
+	   
+	                	RentalList.create(values, {
+			                wait : true,
+			                success : function (model, response) {
+			                    model.set('rentalId', response.rentalId);
+			                    model.set('insertDt', response.insertDt);
+			                    model.set('updateDt', response.updateDt);
+			
+			                    $modal.modal('hide');
+								location.reload();	  
+								
+			                }
+			
+			            });
+	                }
+	         };
+        },
+        addOneRental: function(rental) {
+            var view = new RentalView({ model: rental });
+
+            this.$('#rental-list').append(view.render().el);
+
+        },
+        formRental: function(model) {
+            this.currentRentalModel = model;
+            var data = model.toJSON();            
+
+            data['members'] = MemberList.toJSON();
+            data['is_modify'] = true;
+    		data['rentalTypes'] = rentalTypes;
+    		preGoods = data['rentalType'];
+    		data['goodsList'] = GoodsList.toJSON();
+            
+    		//var blank = data['rentalType'].replace(/ /gi , "");
+    		//data['rentalTypeNames'] = blank.split(',');
+            //data['rentalTypeNames'] = data['rentalTypeNames'].split(',');
+    		
+            var titleHtml = '대여';
+            var bodyHtml = this.templateForForm(data);
+            
+            var selectedgoodsIds = data['goodsIds'] ? data['goodsIds'].split(','): [];
+            
+
+            $('#modal-rental-form')
+            .one('show.bs.modal', function(e) {
+                var $modal = $(this);
+                $modal.find('.modal-title').html(titleHtml);
+                $modal.find('.modal-body').html(bodyHtml);
+
+                var $select = $modal.find('[name=select-goodsIds]');
+                $select.val(selectedgoodsIds);
+                
+                $modal.find('.chosen').chosen({width: "100%", disable_search: false, palceholder_text_single: '선택'});
+                
+                $modal.find('.datepicker, .input-daterange').datepicker({
+                    language: 'ko', autoclose: true, todayHighlight: true, format: datepickerFormat,
+                }).on('changeDate', function(e) {
+                    var orgInputName = $(e.target).attr('data-org-input-name');
+                    if (!(_.isEmpty(orgInputName))) {
+                        var $orgInput = $('#modal-rental-form').find('[name=' + orgInputName + ']');
+                        $orgInput.val(e.date.valueOf());
+                    }
+
+                });
+
+                
+                $modal.find('form').on('submit', function(e) {
+                    e.preventDefault();
+
+                });
+                
+                $modal.find('form').validate({
+                	ignore: "not:hidden",
+                	rules: {
+            			memberId: {            			
+            				required: true,
+            			},
+            			rentalType: {
+            				required: true,
+            				number: true,
+            			},
+            	
+            		},
+            		messages: {
+            			memberId: {            	
+            	    		required: "회원을 선택하세요",
+            			},
+            			rentalType: {
+            				required: "물품유형을 선택하세요",
+            				number: "물품유형을 선택하세요",
+            			},
+            		
+            		}	
+                });
+
+            })
+            .modal();
+
+        },
+        saveRental: function(e) {
+            var values = {};
+            var $modal = $('#modal-rental-form');
+            
+            var $select = $modal.find('[name=select-goodsIds]');
+            var selectedgoodsIds = $select.val() ? $select.val().join(',') : "";           
+   
+            values['rentalTypeNames'] = _.map($select.find('option:selected'), function(element){
+                return $(element).text();
+            }).join(', ');
+
+				
+            values['rentalStateType'] = 10;            
+            values['rentalType'] = values['rentalTypeNames'];
+            values['is_modify'] = true;
+            nextGoods = values['rentalType'];
+            
+            
+            
+            
+//             if(preGoods > nextGoods && nextGoods !=""){
+//             	// 이전에 대여했던 것보다 현재 대여중인 물품이 적다면 -> 일부반납
+//             	values['rentalStateType'] = 5;
+//             }
+//             else if( preGoods < nextGoods){
+//             	// 이전에 대여했던 것보다 현재 대여중인 물품이 많다면 -> 더 대여함 -> 대여중
+//             	values['rentalStateType'] = 10;
+//             }
+//             else{ 
+//             	// 현상유지
+//             	values['rentalStateType'] = 10;
+//             }
+                        
+            
+            var $form = $modal.find('form');
+            
+            if($form.valid()) {
+	            var $inputs = $modal.find(':input');
+	            $inputs.each(function(i, element) {
+	                var $element = $(element);
+	                if ($element.is('[type=radio]')) {
+	                    if ($element.is(':checked')) {
+	                        var name = $element.attr('name');
+	                        if (!(_.isEmpty(name))) {
+	                            values[name] = $element.val();
+	
+	                        }
+	                    }
+	
+	                } else {
+	                    var name = $element.attr('name');
+	                    if (!(_.isEmpty(name))) {
+	                        values[name] = $element.val();
+	
+	                    }
+	
+	                }
+	            });
+				
+	            this.currentRentalModel.save(values, {
+	                wait: true,
+	                success: function (model, response) {
+	                    $modal.modal('hide');
+	
+	                },
+	
+	            });
+            }
+
+        },
+     returnRental: function(e){
+    	 // checkBox 선택된 행의 정보 가져오기
+		 var arrRent = RentalList.where( { is_returned : true });
+		 var model = {};
+
+         if(arrRent){
+        	var $modal = $('#modal-rental-form');
+         	if(confirm('반납하시겠습니까?')) {         		
+	         	for(var i = 0; i < arrRent.length; i++){
+	         		model = JSON.stringify(arrRent[i]);
+	         		
+	         		var values={};
+	         		values['rentalStateType'] = 0;
+	
+	         		arrRent[i].destroy(values,{
+								wait: true,
+			                    success: function (model, response) {
+			                        $modal.modal('hide');
+			                    },
+			        });
+				}
+         	}
+         }
+     },
+     deleteRental: function(e) {    	 
+    	 var $modal = $('#modal-rental-form');
+       	 if(confirm('정말로 삭제하시겠습니까?')) {
+	         this.currentRentalModel.destroy({
+	             wait: true,
+	             success: function (model, response) {
+	                 $modal.modal('hide');
+	             },
+	
+	         });
+
+         }
+     },
+     paging: function(e) {
+     	paging(e);
+     	
+     },
+     prevPaging: function(e) {
+     	var page = [[${pageMaker.startPage -1}]];
+     	prevPaging(e, page);
+     
+     },
+     nextPaging: function(e) {
+     	var page = [[${pageMaker.endPage +1}]];
+     	nextPaging(e, page);      	
+      
+     },
+     keyup : function(e) {
+     	if (e.keyCode >= 96 && e.keyCode <= 105) {
+     		
+     	}
+
+     },
+
+    });
+
+
+    var App = new BranchRentalView;
+
+    RentalList.reset(JSON.parse([[${rentalListJSON}]]));
+
+  //--------------------------------------------------------------------------------
+  
+    // Goods
+    var GoodsList = new GoodsListCollection();
+    GoodsList.branchId = [[${branch.branchId}]];
+	
+    
+    var GoodsView = Backbone.View.extend({
+        tagName: 'tr',
+        className: 'goods',
+        template: _.template($('#goods-template').html()),
+        events: {
+            'dblclick': 'formGoods',
+            'click .btn-form-goods': 'formGoods',
+        },
+        initialize: function() {
+            this.listenTo(this.model, 'change', this.change);
+            this.listenTo(this.model, 'destroy', this.remove);
+
+        },
+        change: function() {
+            this.render();
+
+        },
+        render: function() {
+            var data = this.model.toJSON();
+		
+            //this.el.id = data.rentalId;
+
+            this.$el.html(this.template(data));
+            
+            return this;
+
+        },
+        formGoods: function() {
+            GoodsList.trigger('formGoods', this.model);
+
+        },
+
+
+    });
+    
+    var BranchGoodsView = Backbone.View.extend({
+        el: $('#goods-list-app'),
+        templateForForm: _.template($('#goods-form-template').html()),
+        currentGoodsModel: null,
+        events: {
+            'click #btn-form-new-goods': 'formNewGoods',
+            'click #btn-save-new-goods': 'saveNewGoods',
+            'click #btn-save-goods': 'saveGoods',            
+            'click #btn-delete-goods': 'deleteGoods'
+        },
+        initialize: function() {
+            this.listenTo(GoodsList, 'add', this.addOneGoods);
+            this.listenTo(GoodsList, 'formGoods', this.formGoods);
+            this.listenTo(GoodsList, 'reset', this.reset);
+
+        },
+        reset: function() {
+			GoodsList.forEach(this.addOneGoods);            		
+			$(document).trigger('appLoadedGoods');
+        },
+        render: function() {
+
+        },
+        addOneGoods: function(Goods) {
+            var view = new GoodsView({ model: Goods });
+
+            this.$('#goods-list').append(view.render().el);
+
+        },
+        formNewGoods: function(e) {
+            var data = new GoodsModel().toJSON();
+            var bodyHtml = this.templateForForm(data);
+       
+            $('#modal-new-goods-form')
+            .one('show.bs.modal', function(e) {
+                var $modal = $(this);
+                $modal.find('.modal-title').html('새 물품');
+                $modal.find('.modal-body').html(bodyHtml);
+
+                $modal.find('.chosen').chosen({width: "100%"});
+
+                $.validator.addMethod(
+                    	'chkDuplicationRentalType', function (value, element) {					
+                       		var rentalType = GoodsList.findWhere({rentalType: value});
+           	            			if(rentalType) return false;
+           	            			else {
+           	            				return true;
+           	            			} 
+    		            		
+    		                	}, '이미 등록된 물품입니다.'
+
+                );
+                
+                $modal.find('form').validate({
+                	ignore: "not:hidden",
+                	rules: {
+                		rentalType: {            			
+            				required: true,
+            				chkDuplicationRentalType : true,
+            			},
+            			
+            		},
+            		messages: {
+            			rentalType: {            	
+            	    		required: "물품을 입력하세요",
+            			},
+      
+            		}	
+                });
+                
+
+            })
+            .one('shown.bs.modal', function(e) {
+                var $modal = $(this);
+                
+                $modal.find('form').on('submit', function(e) {
+                    e.preventDefault();
+
+                });
+
+            })
+            .modal();
+    
+        },
+        saveNewGoods: function(e) {
+        	var values = {};
+            var $modal = $('#modal-new-goods-form');
+            
+            var $inputs = $modal.find(':input');			
+            var $form = $modal.find('form');
+            
+            if($form.valid()) {
+		            $inputs.each(function(i, element) {
+		                var $element = $(element);
+		                
+		                if ($element.is('[type=radio]')) {
+		                    if ($element.is(':checked')) {
+		                        var name = $element.attr('name');
+		                        if (!(_.isEmpty(name))) {
+		                            values[name] = $element.val();
+		
+		                        }
+		                    }
+		
+		                } else {
+		                    var name = $element.attr('name');
+		                    if (!(_.isEmpty(name))) {
+		                     
+		                    	values[name] = $element.val();
+		                        
+		                    }
+		                }
+		
+		            });
+					
+	                if (values['rentalType'] == "") {
+	                	alert("rentalType null!");
+	                } else {	                		               
+	   
+	                	GoodsList.create(values, {
+			                wait : true,
+			                success : function (model, response) {
+			                    model.set('goodsId', response.goodsId);
+			                    model.set('insertDt', response.insertDt);
+			                    model.set('updateDt', response.updateDt);
+			
+			                    $modal.modal('hide');
+								location.reload();
+								
+			                }
+			
+			            });
+	                }
+	         };
+        },
+        formGoods: function(model) {        	
+        	this.currentGoodsModel = model;
+        	
+        	var data = model.toJSON();
+        	var bodyHtml = this.templateForForm(data);
+       
+            $('#modal-goods-form')
+            .one('show.bs.modal', function(e) {
+                var $modal = $(this);
+                $modal.find('.modal-title').html('물품');
+                $modal.find('.modal-body').html(bodyHtml);
+
+                $modal.find('.chosen').chosen({width: "100%"});             
+                
+                $.validator.addMethod(
+                    	'chkDuplicationRentalType', function (value, element) {
+                       		var rentalType = GoodsList.findWhere({rentalType: value});
+           	            			if(rentalType) return false;
+           	            			else {
+           	            				return true;
+           	            			} 
+    		            		
+    		                	}, '이미 등록된 물품입니다.'
+
+                );
+                
+                $modal.find('form').validate({
+                	ignore: "not:hidden",
+                	rules: {
+                		rentalType: {            			
+            				required: true,
+            				//chkDuplicationRentalType: true,
+            			},
+            			
+            		},
+            		messages: {
+            			rentalType: {            	
+            	    		required: "물품을 입력하세요",
+            			},
+      
+            		}	
+                });
+                
+
+            })
+            .one('shown.bs.modal', function(e) {
+                var $modal = $(this);
+                
+                $modal.find('form').on('submit', function(e) {
+                    e.preventDefault();
+
+                });
+
+            })
+            .modal();
+        },        
+        saveGoods: function() {
+        	var values = {};
+            var $modal = $('#modal-goods-form');
+            
+            var $inputs = $modal.find(':input');			
+            var $form = $modal.find('form');
+            
+            if($form.valid()) {
+		            $inputs.each(function(i, element) {
+		                var $element = $(element);
+		                
+		                if ($element.is('[type=radio]')) {
+		                    if ($element.is(':checked')) {
+		                        var name = $element.attr('name');
+		                        if (!(_.isEmpty(name))) {
+		                            values[name] = $element.val();
+		
+		                        }
+		                    }
+		
+		                } else {
+		                    var name = $element.attr('name');
+		                    if (!(_.isEmpty(name))) {
+		                     
+		                    	values[name] = $element.val();
+		                        
+		                    }
+		                }
+		
+		            });
+					
+	                if (values['rentalType'] == "") {
+	                	alert("rentalType null!");
+	                } else {
+	                	this.currentGoodsModel.save(values, {
+			                wait : true,
+			                success : function (model, response) {		
+			                    $modal.modal('hide');
+								
+			                }
+			
+			            });
+	                }
+	         };        	
+        	
+        },
+        deleteGoods: function() {
+            var $modal = $('#modal-goods-form');
+            
+       		if(confirm('정말로 삭제하시겠습니까?')) {
+                this.currentGoodsModel.destroy({
+                    wait: true,
+                    success: function (model, response) {
+                        $modal.modal('hide');
+                    },
+
+                });
+
+            }
+        },
+            
+	});
+
+    
+    var GoodsApp = new BranchGoodsView;
+    GoodsList.reset(JSON.parse([[${goodsListJSON}]]));
+});
+    
+// ]]></script>
+<script th:inline="javascript" th:if="${!#strings.isEmpty(param.action) and param.action[0] == 'newRental'}">// <![CDATA[
+$(document).one('appLoaded', function(e) {
+    $('#btn-form-new-rental').trigger('click', [ [[${!#strings.isEmpty(param.memberId) ? param.memberId[0] : null}]] ]);
+
+});
+
+$(document).one('appLoadedGoods', function(e) {
+	$('#btn-form-new-goods').trigger('click', [ [[${!#strings.isEmpty(param.branchId) ? param.branchId[0] : null}]] ]);
+});
+}
+// ]]></script>
+<script th:src='@{/common/api_branch_member.js}' ></script>
+<script th:src='@{/common/api_branch_rental.js}' ></script>
+<script th:src='@{/common/api_branch_goods.js}' ></script>
+<!-- DatePicker : https://bootstrap-datepicker.readthedocs.io/en/latest/ -->
+<script th:src='@{/lib/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js}' ></script>
+<script charset='UTF-8' th:src='@{/lib/bootstrap-datepicker/dist/locales/bootstrap-datepicker.ko.min.js}' ></script>
+<link rel='stylesheet' th:href='@{/lib/bootstrap-datepicker/dist/css/bootstrap-datepicker3.min.css}' />
+<!-- Chosen : https://github.com/harvesthq/chosen -->
+<link rel='stylesheet' th:href='@{/lib/chosen/chosen.css}' />
+<script th:src='@{/lib/chosen/chosen.jquery.js}' ></script>
+<!-- Validation : https://jqueryvalidation.org/documentation/
+    INPUT : https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input -->
+<script th:src='@{/lib/jquery-validation/dist/jquery.validate.min.js}' ></script>

@@ -1,0 +1,673 @@
+<script th:src='@{/lib/fullcalendar/dist/fullcalendar.min.js}'></script>
+<script th:src='@{/lib/fullcalendar/dist/locale/ko.js}'></script>
+<!--<link rel='stylesheet' th:href='@{/lib/jquery-ui/themes/base/jquery-ui.min.css}' />-->
+<link rel='stylesheet' th:href='@{/lib/fullcalendar/dist/fullcalendar.min.css}' />
+<link rel='stylesheet' th:href='@{/lib/fullcalendar/dist/fullcalendar.print.css}' media="print"/>
+<style>
+#free-application-app {
+	margin-bottom: 50px;
+}
+.input-group .form-control.emailText {
+	width: 44.8%;
+	box-sizing: border-box;
+}
+.input-group .form-control.temp {
+	width: 40px;
+}
+@media screen and (max-width: 532px) {
+	.input-group .form-control.emailText {
+		width: 43%;
+	}
+}
+#calendar .fc-event-container .reservationBtn {
+    line-height: 3;
+}
+#sBranch {
+	width:500px;
+}
+.fc-sat .fc-day-number {
+    color: blue !important;
+}
+.fc-sun .fc-day-number {
+	color: red !important;
+}
+.fc-day-header.fc-widget-header.fc-sat {
+	background-color : blue;
+	color: white !important;
+}
+.fc-day-header.fc-widget-header.fc-sun {
+	background-color : red;
+	color: white !important;
+}
+</style>
+
+<div class="container-fluid" id="free-application-app">
+  <div class="col-sm-12 col-md-12 col-lg-12">
+	  <h3>스터디센터 CNT 무료체험 신청</h3>
+	<form>
+		<div class="form-group">
+			<label class="form-control-label" for="sBranch">지점 선택</label>
+			<select class="form-control chosen" id="sBranch" name="sBranch">
+				<option value="">-선택-</option>
+				<option th:each="branch : ${branchs}" th:selected="${branch.branchId == sBranch}" th:value="${branch.branchId}" th:text="${branch.name}"></option>
+			</select>
+		</div>
+	</form>
+    <div id="calendar"></div>
+    <div class="pull-right" style="margin-top: 10px;">
+      <!--<button type="button" class="btn btn-primary" id="btn-form-new-application" data-toggle="modal" data-target="#free-applications-modal">무료체험 신청하기</button>-->
+    </div>
+  </div>  
+	<div class="modal fade" id="free-applications-modal" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+	  <div class="modal-dialog modal-lg" role="document">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+	          <span aria-hidden="true">&times;</span>
+	        </button>
+	        <h4 class="modal-title"></h4>
+	      </div>
+	      <div class="modal-body"></div>
+	      <div class="modal-footer">
+	        <button type="button" class="btn btn-primary" id="btn-save-application">저장</button>
+	        <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+	      </div>
+	    </div>
+	  </div>	  
+	</div>
+	
+</div>
+
+<script th:include="event_tmpl_form_new_application" th:inline="javascript" type="text/template" id="new-application-form-template"></script>
+
+<script th:inline="javascript">// <![CDATA[
+//$(document).ready(function() {
+$(function() {
+	moment.updateLocale('en', null);
+
+	// Branch
+	var BranchModel = Backbone.Model.extend({
+	    idAttribute: 'branchId',
+	    defaults: function() {
+	        return {
+	            name: '', hpUrl: '',
+	            tel: '', telEtc: '', postcode: '', address1: '', address2: '',
+	            locNote: '', locUrl: '', opNote: '',
+	        };
+	    },
+	});
+	
+	var BranchListCollection = Backbone.Collection.extend({
+	    model: BranchModel,
+	    url: [[@{/admin/api/branches}]],
+	
+	});
+	
+	var BranchList = new BranchListCollection();
+	/////////////////////////////////////////////////////////////////////////////////////////
+	$('#sBranch').change(function() {
+		var map = new Object();
+		$('#calendar').fullCalendar('removeEventSources');
+		var branchId = $(this).val();
+		var branchNm = $("#sBranch option:selected").text();
+		
+		initCalendar(map);
+		methodCalendar(map, branchId);		
+		
+		var genderTypes = [[${genderTypes}]];
+		var roomTypes = [[${roomTypes}]];
+		var cmpRouteTypes = [[${cmpRouteTypes}]];
+		
+		var FreeApplicationList = new FreeApplicationListCollection;
+		FreeApplicationList.branchId = branchId;
+		FreeApplicationList.todayDt = moment().format('YYYY-MM-DD');	
+		
+		var FreeApplicationView = Backbone.View.extend({
+			events:{
+				
+			},
+			initialize: function() {
+				this.listenTo(this.model, 'change', this.change);
+			},
+			change: function() {
+				this.render();
+			},
+			render: function() {
+				var data = this.model.toJSON();
+	            var roomTypeText = _.findWhere(roomTypes, {value: Number(data.roomType)});
+	            data['roomTypeText'] = roomTypeText ? roomTypeText.text : '';
+	            var cmpRouteTypeText = _.findWhere(cmpRouteTypes, {value: Number(data.cmpRoute)});
+	            data['cmpRouteTypeText'] = cmpRouteTypeText ? cmpRouteTypeText.text : '';
+	            
+				return this;
+			},
+			
+			
+		});
+				
+		var BranchFreeApplicationView = Backbone.View.extend({
+			el: $('#free-application-app'),
+			templateForForm: _.template($('#new-application-form-template').html()),
+			events: {
+				'click #btn-form-new-application' : 'formNewApplication',
+				'eventClick' : 'formNewApplication',
+				'click #btn-save-application' : 'saveNewApplication',
+			},
+			initialize: function() {
+				this.listenTo(FreeApplicationList, 'add', this.addOneFreeApplication);
+			},
+		    reset: function() {
+		    	FreeApplicationList.forEach(this.addOneFreeApplication);
+		    },  
+			render: function() {
+				
+				
+			},		
+			addOneFreeApplication: function(FreeApplication) {
+		    	var data = new FreeApplicationView({ model: FreeApplication});
+		    	var startDtBefore = data.model.get('startDt');
+		    	var startDt = moment.unix(startDtBefore/1000).format("YYYY-MM-DD")		    	
+		    	var genderValue = data.model.get('gender');
+		    	var events = [];
+	
+		    	//var key = startDt + '_' + genderValue + '_' + branchId;
+		    	var key = startDt + '_' + genderValue + '_' + branchId;
+		    	//남자
+	 	    	if (genderValue == 10) {
+	 	    		//이미 존재하면 count증가
+		    		if(map[key] >= 1) {
+		    			$('#calendar').fullCalendar('removeEvents', [key]);
+		    			map[key] = map[key] + 1;
+		    		}	
+		    		//존재하지 않을 경우
+	 	    		else {	 	    		
+	 	    			$('#calendar').fullCalendar('removeEvents', [key]);
+	 	    			map[key] = 1;
+	 	    		}	
+	 	    		
+	 	    	    	var event = {
+	 	    	 				id : key,
+	 	    	 				title : '남자현황 ( '+map[key]+'' + '/5 )',
+	 	    	 				start : startDt,
+	 	    	 				color: 'green',
+	 	    	 				textColor: 'white'
+	 	    	 		};
+	 	    	    	
+	 	    		
+	 	    	}
+	 	    	//여자
+	 	    	else if (genderValue == 20) {
+	 	    		//이미 존재하면 count증가
+		    		if(map[key] >= 1) {
+		    			$('#calendar').fullCalendar('removeEvents', [key]);
+		    			map[key] = map[key] + 1;
+		    		}
+		    		//존재하지 않을 경우
+	 	    		else {
+	 	    			$('#calendar').fullCalendar('removeEvents', [key]);
+	 	    			map[key] = 1;
+	 	    		}
+	 	    				 	    		
+	 	    			var event = {
+	 	    	 				id : key,
+	 	    	 				title : '여자현황 ( '+map[key]+'' + '/5 )',
+	 	    	 				start : startDt,
+	 	    	 				color: 'red',
+	 	    	 				textColor: 'white'
+	 	    	 			};	 	    			 	    			 	    	
+	 	    		
+	 	    	}	    	
+		    	 	    	
+	 	    	events.push(event);
+		    	addData(events);
+				
+			},
+			formNewApplication: function(e, id) {
+				var data = new FreeApplicationModel().toJSON();
+				
+				data['genderTypes'] = genderTypes;
+				data['roomTypes'] = roomTypes;
+				data['cmpRouteTypes'] = cmpRouteTypes;
+	            data['branchNm'] = branchNm;
+	            data['roomType'] = '';
+	            data['school'] = '';
+	            data['cmpRoute'] = '';
+	            
+				//id가 존재할 때(예약하기 클릭)
+				if(id) {
+					//2016-11-01								
+					var choiseDate = id.substring(0,10);							
+					data['startDt'] = moment(choiseDate, "YYYY-MM-DD");//.unix();
+					data['genderValue'] = id.substring(11,13);
+				}
+				else {
+					var currentDate = sysDate.clone(); //현재 시간
+					data['startDt'] = currentDate.valueOf//.unix();
+					data['genderValue'] = 0;
+					
+				}
+			
+				var bodyHtml = this.templateForForm(data);
+				var $modal = $(this);
+				
+				$('#free-applications-modal')
+				.one('show.bs.modal', function(e) {
+					var $modal = $(this);
+					$modal.find('.modal-title').html('새 무료신청' + '&nbsp;&nbsp;&nbsp;(' + branchNm + '&nbsp;&nbsp;-&nbsp;&nbsp;' + choiseDate + ')');
+					$modal.find('.modal-body').html(bodyHtml);	
+				
+					$modal.find('.datepicker').datepicker({ language: 'ko', autoclose: true, startView: 'years', });
+
+					$modal.find('[name=emailSelect]').on('change', function() {						
+						var emailAdd = $(this).val();
+						$('#free-applications-modal').find('[name=emailAdd]').val(emailAdd);
+					});
+					
+//	                 })
+//	                 .on('changeDate', function(e) {
+//	                     var orgInputName = $(e.target).attr('data-org-input-name');
+//	                     if (!(_.isEmpty(orgInputName))) {
+//	                         var $orgInput = $('#free-applications-modal').find('[name=' + orgInputName + ']');
+//	                         $orgInput.val(e.timeStamp / 1000);
+//	                         //$orgInput.val($modal.find('$deskEnd'));
+//	                         //$form.find('#deskEndDt').val(moment(deskStartDt, momentDatepickerFormat)
+//	                     }
+
+//	                 });
+
+	                $modal.find('.chosen').chosen({width: "100%"});
+				
+				
+				})
+				
+			},
+			saveNewApplication: function() {
+				
+				var $modal = $('#free-applications-modal');
+				var $form = $modal.find('form');
+				
+				var values = {};
+				
+				$form.validate({
+                	ignore: "not:hidden",
+                	rules: {
+            			roomType: {
+            				required: true,
+            			},
+                		name: {            			
+            				required: true,
+            			},
+            			tel: {
+            				required: true,
+            			},
+            			school: {
+            				required: true,
+            			},
+//             			emailText: {
+//             				required: true,
+//             			},
+//             			emailAdd: {
+//             				required: true,
+//             			},
+            			cmpRoute: {
+            				required: true,
+            			}
+            		},
+            		messages: {
+            			roomType: {
+            				required: "희망좌석을 선택하세요",
+            			},
+            			name: {            	
+            	    		required: "이름을 입력하세요",
+            			},
+            			tel: {
+            				required: "연락처를 입력하세요",
+            			},
+            			school: {
+            				required: "학교/학년을 입력하세요",
+            			},
+//             			emailText: {
+//             				required: "이메일을 입력하세요",
+//             			},
+//             			emailAdd: {
+//             				required: "이메일 주소를 선택하세요",
+//             			},
+            			cmpRoute: {
+            				required: "경로를 선택하세요",
+            			}
+            			
+            		}	
+                });
+				
+				if ( $form.valid()) {
+		        	var $inputs = $modal.find(':input');
+		            $inputs.each(function(i, element) {
+		                var $element = $(element);
+		                if ($element.is('[type=radio]')) {
+		                    if ($element.is(':checked')) {
+		                        var name = $element.attr('name');
+		                        if (!(_.isEmpty(name))) {
+		                            values[name] = $element.val();
+	
+		                        }
+		                    }
+	
+		                } else {
+		                    var name = $element.attr('name');
+		                    if (!(_.isEmpty(name))) {
+		                        values[name] = $element.val();
+	
+		                    }
+	
+		                }
+		            });
+		            
+					
+		            FreeApplicationList.create({
+						branchId: branchId,
+		            	startDt: values['startDt'],
+		            	roomType: values['roomType'],
+		            	name: values['name'],
+		            	gender: values['gender'],
+		            	tel: values['tel'],
+		            	school : values['school'],
+		            	email: values['emailText'] + '@' + values['emailAdd'],
+		            	cmpRoute: values['cmpRoute'],
+	
+		            }, {
+						wait : true,	            	
+		            	success : function (model, response) {
+		            		$modal.modal('hide');
+		            	}
+		            });
+				}
+			},
+			
+			
+			
+		});
+	    
+		var FreeApplicationViewApp = new BranchFreeApplicationView;
+		FreeApplicationList.fetch();
+		//map = new Object();
+		/**************************************************************************************/
+		
+	});
+	//}	
+	  
+	BranchList.reset(JSON.parse([[${branchListJSON}]]));
+
+	
+	if ($('#sBranch').val() != null && $('#sBranch').val() != '') {
+		$('#sBranch').trigger('change');
+	}
+});
+	
+function initCalendar(map) {
+	if ($('#calendar').length > 0) {
+     	var renderedYearMonth;
+		var todayDt;
+		var endDt;	  
+		
+	    $('#calendar').fullCalendar({
+
+	      option : {
+	        contentHeight: 600
+	      },
+	      header : {
+	        left : 'prev, today, next ',
+	        center : 'title',
+	        right : ''
+	      },
+	      viewRender : function(view, element) {
+	        
+
+	      },
+
+	      editable : false,
+	      eventLimit : false,
+	      eventClick : function(event, jsEvent, view) {
+	    	  var btnId = event.id; 
+	    	  key = btnId.replace('_btn', '');
+	    	  
+	    	  if (map[key] >= 5) {
+				  alert('인원이 꽉 찼습니다. 다른 날짜를 선택해 주세요.')
+	    	  }
+	    	  else {
+		    	  var result = btnId.indexOf('btn');
+		    	  if (result > 0){
+			    	  $('#free-application-app').trigger('eventClick', btnId);
+			    	  $('#free-applications-modal').modal('show');
+		    	  }
+	    	  }		   
+	      }
+	    });
+
+	}
+}
+
+function methodCalendar(map, branchId) {
+	
+	var renderedMonthList = [];
+	
+	renderedYearMonth = moment().format('YYYY-MM');
+    
+    if (renderedMonthList.indexOf(renderedYearMonth) >= 0) {
+        // alert(renderedYearMonth + '는 이미 렌더링된 월 입니다.');
+        return;
+    }
+        
+	todayDt = moment().date();
+	currentMonth = moment().month()+1;
+	currentEndOfDt = moment().endOf('month').format('DD');
+	
+	afterDt = moment().add(14, 'day');
+	afterMonth = afterDt.format('MM');
+	
+	endOfDt = afterDt.format('DD');
+	
+	//바뀌는 년도도 체크
+							
+	var maleEvents = [];
+	var maleBtns = [];
+	var femaleEvents = [];
+	var femaleBtns = [];
+	
+	if( currentMonth == afterMonth ) {	//현재 날짜에서 2주 후가 현재 달을 지나지 않을 때				
+		//현재 달 
+		for (todayDt; todayDt <= endOfDt; todayDt++) {
+			if(todayDt < 10) todayDt = '0'+ todayDt;
+			
+			var maleKey =  renderedYearMonth + "-" + todayDt + "_10_" + branchId;
+			var femaleKey = renderedYearMonth + "-" + todayDt + "_20_" + branchId;
+			
+			var maleBtn = {
+					id : maleKey + "_btn",
+					title : '남자예약하기',
+					start : renderedYearMonth + '-' + todayDt,
+					color : '#2987c7',
+					textColor: 'white',
+					className : 'reservationBtn btn'
+					
+			};
+
+			map[maleKey] = 0;
+			var maleEvent = {
+ 	 				id : maleKey,
+ 	 				title : '남자현황 ( 0/5 )',
+ 	 				start : renderedYearMonth + '-' + todayDt,
+ 	 				color: 'green',
+ 	 				textColor: 'white'
+			
+			};				
+			
+			var femaleBtn = {
+					id : femaleKey + "_btn",
+					title : '여자예약하기',
+					start : renderedYearMonth + '-' + todayDt,
+					color : '#2987c7',
+					textColor: 'white',
+					className : 'reservationBtn btn'
+		    };
+			
+			map[femaleKey] = 0;
+			var femaleEvent = {
+ 	 				id : femaleKey,
+ 	 				title : '여자현황 ( 0/5 )',
+ 	 				start : renderedYearMonth + '-' + todayDt,
+ 	 				color: 'red',
+ 	 				textColor: 'white'
+			
+			};
+			
+			maleBtns.push(maleBtn);		
+			maleEvents.push(maleEvent);					
+			femaleBtns.push(femaleBtn);
+			femaleEvents.push(femaleEvent);			
+		
+		}				
+						
+	}
+	else {	//현재 날짜에서 2주 후가 현재 달을 지날 때
+		//현재 달
+		for (todayDt; todayDt <= currentEndOfDt; todayDt++) {
+			
+			var maleKey = renderedYearMonth + "-" + todayDt + "_10_" + branchId;
+			var femaleKey = renderedYearMonth + "-" + todayDt + "_20_" + branchId;
+
+			var maleBtn = {
+					id : maleKey + "_btn",
+					title : '남자예약하기',
+					start : renderedYearMonth + '-' + todayDt,
+					color : '#2987c7',
+					textColor: 'white',
+					className : 'reservationBtn btn'
+					
+			};
+			
+			map[maleKey] = 0;
+			var maleEvent = {
+ 	 				id : maleKey,
+ 	 				title : '남자현황 ( 0/5 )',
+ 	 				start : renderedYearMonth + '-' + todayDt,
+ 	 				color: 'green',
+ 	 				textColor: 'white'
+			
+			};
+
+			var femaleBtn = {
+					id : femaleKey + "_btn",
+					title : '여자예약하기',
+					start : renderedYearMonth + '-' + todayDt,
+					color : '#2987c7',
+					textColor: 'white',
+					className : 'reservationBtn btn'
+		    };			
+			
+			map[femaleKey] = 0;
+			var femaleEvent = {
+ 	 				id : femaleKey,
+ 	 				title : '여자현황 ( 0/5 )',
+ 	 				start : renderedYearMonth + '-' + todayDt,
+ 	 				color: 'red',
+ 	 				textColor: 'white'
+			
+			};
+			
+			maleBtns.push(maleBtn);
+			maleEvents.push(maleEvent);
+			femaleBtns.push(femaleBtn);
+			femaleEvents.push(femaleEvent);
+			
+		}
+		
+		//다음 달
+		todayDt = 01;
+		afterYearMonth = afterDt.format('YYYY-MM');
+		//key 변경
+		
+		for (todayDt; todayDt <= endOfDt; todayDt++) {
+			
+			if ( todayDt < 10 ) 
+				todayDt = '0'+ todayDt;
+			
+			var maleKey = afterYearMonth + "-" + todayDt + "_10_" + branchId;
+			var femaleKey = afterYearMonth + "-" + todayDt + "_20_" + branchId;
+			
+			map[maleKey] = 0;
+			map[femaleKey] = 0;
+
+			var maleEvent = {
+ 	 				id : maleKey,
+ 	 				title : '남자현황 ( 0/5 )',
+ 	 				start : afterYearMonth + '-' + todayDt,
+ 	 				color: 'green',
+ 	 				textColor: 'white'
+			
+			};
+			
+			var maleBtn = {
+					id : maleKey + "_btn",
+					title : '남자예약하기',
+					start : afterYearMonth + '-' + todayDt,
+					color : '#2987c7',
+					textColor: 'white',
+					className : 'reservationBtn btn'
+					
+			};
+			
+			var femaleEvent = {
+ 	 				id : femaleKey,
+ 	 				title : '여자현황 ( 0/5 )',
+ 	 				start : afterYearMonth + '-' + todayDt,
+ 	 				color: 'red',
+ 	 				textColor: 'white'
+			
+			};			
+			
+			var femaleBtn = {
+					id : femaleKey + "_btn",
+					title : '여자예약하기',
+					start : afterYearMonth + '-' + todayDt,
+					color : '#2987c7',
+					textColor: 'white',
+					className : 'reservationBtn btn'
+		    };
+					
+			maleEvents.push(maleEvent);
+			maleBtns.push(maleBtn);
+			femaleEvents.push(femaleEvent);
+			femaleBtns.push(femaleBtn);
+			
+		}
+	}
+	
+	addData(maleEvents);
+	addData(maleBtns);	
+	addData(femaleEvents);
+	addData(femaleBtns);
+		
+	
+	renderedMonthList.push(renderedYearMonth); 
+};
+
+
+function addData(events, resp) {
+	$('#calendar').fullCalendar('addEventSource', events);
+	
+};
+	
+//]]></script>
+
+<script th:src='@{/common/api_branch_freeApplication.js}' ></script>
+
+<!-- DatePicker : https://bootstrap-datepicker.readthedocs.io/en/latest/ -->
+<script th:src='@{/lib/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js}' ></script>
+<script charset='UTF-8' th:src='@{/lib/bootstrap-datepicker/dist/locales/bootstrap-datepicker.ko.min.js}' ></script>
+<link rel='stylesheet' th:href='@{/lib/bootstrap-datepicker/dist/css/bootstrap-datepicker3.min.css}' />
+
+<!-- Chosen : https://github.com/harvesthq/chosen -->
+<link rel='stylesheet' th:href='@{/lib/chosen/chosen.css}' />
+<script th:src='@{/lib/chosen/chosen.jquery.js}' ></script>
+
+<script th:src='@{/lib/jquery-validation/dist/jquery.validate.min.js}' ></script>

@@ -1,0 +1,47 @@
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-12 col-xs-12">
+            <h1>
+                <span th:text="${title}"></span>
+                <a th:href="${branch.hpUrl}" class="btn btn-outline-primary">홈페이지</a>
+                <div class="pull-xs-right" sec:authorize="hasAuthority('admin') or hasAuthority('user')" th:if="${#authorization.expression('hasAuthority(''' + branch.branchId + ''')')}">
+                    <a th:href="@{/branch/} + ${branch.branchId}" class="btn btn-outline-primary">관리</a>
+                </div>
+                <div class="pull-xs-right" sec:authorize="hasAuthority('entry')" th:if="${#authorization.expression('hasAuthority(''' + branch.branchId + ''')')}">
+                    <a th:href="@{/entry/} + ${branch.branchId}" class="btn btn-outline-primary">출입기록</a>
+                </div>
+            </h1>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-4 col-xs-12">
+            <div class="row">
+                <div class="col-xs-12">
+                    <img class="img-fluid" th:src="@{/images/branches/} + ${branch.branchId} + '.jpg'" />
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-5 col-xs-12">
+            <div class="row">
+                <div class="col-xs-12">
+                    <h4>위치</h4>
+                    <p th:text="${branch.address1 + ' ' + branch.address2}"></p>
+                    <p class="text-muted" th:utext="${#strings.isEmpty(branch.locNote != null) ? '' : #strings.replace(#strings.escapeXml(branch.locNote), T(java.lang.System).getProperty('line.separator'), '&lt;br /&gt;')}"></p>
+                    <p>
+                        <iframe th:src="${branch.locUrl}" width="452" height="402" frameborder="0" scrolling="no" onerror="return true;" onabort="return true;" style="margin:18px 0;padding:8px;background-color:white;"></iframe>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-xs-12">
+            <div class="row">
+                <div class="col-xs-12">
+                    <h4>운영시간</h4>
+                    <p th:utext="${#strings.isEmpty(branch.opNote) ? '' : #strings.replace(#strings.escapeXml(branch.opNote), T(java.lang.System).getProperty('line.separator'), '&lt;br /&gt;')}"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

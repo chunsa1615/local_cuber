@@ -1,0 +1,138 @@
+<style>
+body {
+      
+}
+
+.navbar-main .navbar-brand {
+	display:none;
+}
+
+.navbar-fixed-bottom .container-fluid {
+	display:none;
+}
+</style>
+
+
+<input type="text" id="postcode" placeholder="우편번호" style="display:none" /> 
+<!-- overflow:hidden;  <input type="button" onclick="sample3_execDaumPostcode()" value="우편번호 찾기" /><br></br> -->
+
+<div id="wrap" style="display:none;border:1px solid;width:100%;height:80%;margin:0px;position:relative ">
+<!--  <img src="//t1.daumcdn.net/localimg/localimages/07/postcode/320/close.png" id="btnFoldWrap" style="cursor:pointer;position:absolute;right:0px;top:-1px;z-index:1" onclick="foldDaumPostcode()" alt="접기 버튼" />  -->
+</div>
+<input type="text" id="address1" class="d_form large" placeholder="주소1" style="display:none" />
+<input type="text" id="address2" class="d_form large" placeholder="주소2" style="display:none" />
+
+<!-- <script src="http://dmaps.daum.net/map_js_init/postcode.v2.js"></script> -->
+<script src="https://ssl.daumcdn.net/dmaps/map_js_init/postcode.v2.js"></script>
+<script>
+
+    
+    // 우편번호 찾기 찾기 화면을 넣을 element
+    var element_wrap = document.getElementById('wrap');
+
+    function foldDaumPostcode() {
+        // iframe을 넣은 element를 안보이게 한다.
+        element_wrap.style.display = 'none';
+    }
+
+    //function sample3_execDaumPostcode() {
+        // 현재 scroll 위치를 저장해놓는다.
+        var currentScroll = Math.max(document.body.scrollTop, document.documentElement.scrollTop);
+        new daum.Postcode({
+        	oncomplete: function(data) {
+        		console.log(data);
+                // 팝업에서 검색결과 항목을 클릭했을때 실행할 코드를 작성하는 부분.
+
+                // 각 주소의 노출 규칙에 따라 주소를 조합한다.
+                // 내려오는 변수가 값이 없는 경우엔 공백('')값을 가지므로, 이를 참고하여 분기 한다.
+                var fullAddr = ''; // 최종 주소 변수
+                var fullAddr2 = ''; // 최종 주소 변수2
+                var extraAddr = ''; // 조합형 주소 변수
+                var flag;
+
+                // 사용자가 선택한 주소 타입에 따라 해당 주소 값을 가져온다.
+                if (data.userSelectedType === 'R') { // 사용자가 도로명 주소를 선택했을 경우
+                    flag = 10;
+                	fullAddr = data.roadAddress;
+                    
+	                if (data.autoJibunAddress.length > 2) {	                		
+	                	fullAddr2 = data.autoJibunAddress;
+	                } else {
+	                	fullAddr2 = data.jibunAddress;	                    	
+	                }
+	                
+                } else { // 사용자가 지번 주소를 선택했을 경우(J)
+                	flag = 20;	
+                	if (data.autoRoadAddress.length > 2) {	                		
+                		fullAddr = data.autoRoadAddress;
+                	} else {
+                		fullAddr = data.roadAddress;                				
+                	}
+                                	
+                	fullAddr2 = data.jibunAddress;
+                }
+
+                // 사용자가 선택한 주소가 도로명 타입일때 조합한다.
+                if(data.userSelectedType === 'R'){
+                    //법정동명이 있을 경우 추가한다.
+                    if(data.bname !== ''){
+                        extraAddr += data.bname;
+                    }
+                    // 건물명이 있을 경우 추가한다.
+                    if(data.buildingName !== ''){
+                        extraAddr += (extraAddr !== '' ? ', ' + data.buildingName : data.buildingName);
+                    }
+                    // 조합형주소의 유무에 따라 양쪽에 괄호를 추가하여 최종 주소를 만든다.
+                    fullAddr += (extraAddr !== '' ? ' ('+ extraAddr +')' : '');
+                }
+				console.log(flag);
+                // 우편번호와 주소 정보를 해당 필드에 넣는다.
+                document.getElementById('postcode').value = data.zonecode; //5자리 새우편번호 사용
+                document.getElementById('address1').value = fullAddr;
+                document.getElementById('address2').value = fullAddr2;
+                
+                //var addrTest = "showAddress|" + flag  + "|" + fullAddr + "|" + fullAddr2 + "|" + data.zonecode;
+
+                //alert(addrTest);
+                
+                //window.location="cntstudy://showAddress|" + flag  + "|" + fullAddr + "|" + fullAddr2 + "|" + data.zonecode;
+				
+                
+                addrTest = encodeURI(encodeURIComponent("showAddress|" + flag  + "|" + fullAddr + "|" + fullAddr2 + "|" + data.zonecode));
+                
+                //alert(addrTest);
+               
+                window.location="cntstudy://" + addrTest;
+                
+                //alert(decodeURI(decodeURIComponent(addrTest)));
+                
+                
+                
+                
+                //$('#postcode').val(data.zonecode);
+				//$('#postcode').text(data.zonecode);
+				//$('#address').val(fullAddr);
+				//$('#address').text(fullAddr);
+                
+                
+                // 커서를 상세주소 필드로 이동한다.
+                //document.getElementById('addressDetail').focus();
+                //$('#addressDetail').focus();
+            },
+            // 우편번호 찾기 화면 크기가 조정되었을때 실행할 코드를 작성하는 부분. iframe을 넣은 element의 높이값을 조정한다.
+            onresize : function(size) {
+                element_wrap.style.height = size.height+'px';
+            },
+            
+            width : '100%',
+            height : '90%',
+            hideMapBtn : true,
+    		hideEngBtn : true
+    		
+        }).embed(element_wrap);
+
+
+        // iframe을 넣은 element를 보이게 한다.
+        element_wrap.style.display = 'block';
+    //}
+</script>

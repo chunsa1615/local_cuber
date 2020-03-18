@@ -1,0 +1,1874 @@
+<style>
+    .reservationsOfOrder, .paysOfOrder{
+        height: 200px;
+        overflow-y: auto;
+    }
+    
+    
+</style>
+<div class="container-fluid" id="reservation-list-app">
+    <section class="row">
+        <div class="col-md-2 col-sm-12">
+            <button type="button" class="btn btn-outline-primary" id="btn-form-new-reservation">등록 추가</button>
+        </div>
+        <div class="col-md-10 col-sm-12">
+            <form id="searchFrom">            	         
+            	<input type="hidden" id="url" />                          
+                <div class="row">
+                    <div class="col-md-5">
+                        <div class="form-group">
+                            <label class="form-control-label" for="sReservationStartDt">일자</label>
+                            <div class="input-group input-daterange">
+                                <input type="text" class="form-control" id="sReservationStartDt" name="sReservationStartDt" th:value="${sReservationStartDt}" readonly="readonly" />
+                                <div class="input-group-addon">부터</div>
+                                <input type="text" class="form-control" id="sReservationEndDt" name="sReservationEndDt" th:value="${sReservationEndDt}" readonly="readonly" />
+                                <div class="input-group-addon">까지</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                        <div class="form-group">
+                            <label class="form-control-label" for="sMember">회원</label>
+                            <select class="form-control chosen" id="sMember" name="sMember">
+                                <option value="">전체</option>
+                                <option th:each="member : ${members}" th:selected="${member.memberId == sMember}" th:value="${member.memberId}" th:text="${member.no + ' ' + member.name}"></option>
+                                
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-5">
+                        <div class="form-group">
+                            <label class="form-control-label" for="sRoom">열람실</label>
+                            <select class="form-control chosen" id="sRoom" name="sRoom">
+                                <option value="">전체</option>
+                                <option th:each="room : ${rooms}" th:selected="${room.roomId == sRoom}" th:value="${room.roomId}" th:text="${room.name}"></option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                        <div class="form-group">
+                            <label class="form-control-label" for="sDesk">좌석</label>
+                            <select class="form-control chosen" id="sDesk" name="sDesk">
+                                <option value="">전체</option>
+                                <option th:each="desk : ${desks}" th:selected="${desk.deskId == sDesk}" th:value="${desk.deskId}" th:text="${desk.name}"></option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-control-label" for="btn-search"></label>
+                        <button type="submit" class="btn btn-outline-primary" id="btn-search">검색</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </section>
+    <section class="row">
+        <table class="table">
+            <colgroup>
+                <col width="15%" />
+                <col width="10%" />
+                <col width="10%" />
+                <col width="5%" />
+                <col width="15%" />
+				<col width="10%" />
+                <col width="20%" />
+                <col width="10%" />
+<!--                 <col width="5%" /> -->
+            </colgroup>
+            <thead class="thead-inverse">
+                <tr>
+                    <th class="p-l-3">일시</th>
+                    <th class="text-xs-center">회원</th>
+                    <th>열람실 / 좌석</th>
+                    <th>인원</th>
+                    <th class="p-l-3">등록기간</th>
+                    <th>등록상태</th>
+                    <th class="p-l-3">메모</th>
+                    <th class="p-l-2">수정</th>
+<!--                     <th class="p-l-2">삭제</th> -->
+                </tr>
+            </thead>
+            <tbody id="reservation-list"></tbody>
+            
+                <tr>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+					<th class="text-xs-left">                        
+                        <label class="view">총 <span id="total"></span> 개</label><br></br>
+                    </th>
+                </tr>
+            <tfoot>
+            </tfoot>
+        </table>
+    </section>
+	
+	<section th:if="${pageMaker.endPage != 0}">
+		<div style="text-align: center;">
+			<nav aria-label="Page navigation">
+			  <ul class="pagination">
+		    	<li th:if="${pageMaker.prev}" class="page-item">								    
+			      <a class="page-link prev" href="#" aria-label="Previous">
+			        <span aria-hidden="true">&laquo;</span>
+			        <span class="sr-only">Previous</span>
+			      </a>				     
+		   		</li>
+			    <li th:each="page : ${#numbers.sequence(pageMaker.startPage, pageMaker.endPage)}"  class='page-item' th:value="${page}" th:classappend="${page == pageMaker.page.page ? 'active' :''}">	 			     
+			    	<a class="page-link button"  id="page-linkbutton" th:text="${page}" th:value="${page}" href="#"></a>						  
+			    </li>
+				<li th:if="${pageMaker.next}" class="page-item">
+			      <a class="page-link next" href="#" aria-label="Next">
+			        <span aria-hidden="true">&raquo;</span>
+			        <span class="sr-only">Next</span>
+			      </a>
+			    </li>
+			  </ul>
+			</nav>
+		</div>
+	</section>
+
+    <div class="modal fade" id="modal-new-reservation-form" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document" style="max-width:950px">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title"></h4>
+                </div>
+                
+                 <div class="modal-body">
+                    <section class="newOrder"></section>
+                 </div>
+                
+                <div class="modal-footer">
+                    <div class="pull-xs-left">
+                        <!--<button type="button" class="btn btn-outline-primary" data-dismiss="modal" id="btn-new-member">회원 추가</button>-->
+                    </div>
+                    <button type="button" class="btn btn-primary" id="btn-save-new-reservation">추가</button>                    
+<!-- 					<input type="submit" class="btn btn-primary" id="btn-save-new-reservation">추가 -->
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modal-order-form" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true" style="display: none; z-index: 1060; overflow: auto;">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title"></h4>
+                </div>
+                <div class="modal-body">
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col-lg-7 col-md-12 m-b-2">
+                                <h5>등록내역</h5>
+                                <ul class="reservationsOfOrder list-group m-b-1"></ul>
+                                <div class="pull-xs-right"><button type="button" class="btn btn-sm btn-outline-primary btn-form-add-reservation">등록 추가</button></div>
+                                <div class="changeReservation" style="display: none;">
+                                    <h5>등록 수정</h5>
+                                    <div class="changeReservationForm"></div>
+                                </div>
+                                <!--<div>
+                                    <h5>등록 취소</h5>
+                                    <div class="cancelReservation"></div>
+                                    <button type="button" class="btn btn-danger" id="btn-cancel-reservation">저장(등록 취소)</button>
+                                </div>-->
+                                <!-- 
+                                <div class="addReservation" style="display: none;">
+                                    <h5>등록 추가</h5>
+                                    <div class="addReservationForm"></div>
+                                </div>
+                                 -->
+                            </div>                            
+                            
+                            <div class="col-lg-5 col-md-12 m-b-2">
+                                <h5>결제내역</h5>
+                                <ul class="paysOfOrder list-group m-b-1"></ul>
+                                 <!-- <div class="pull-xs-right"><button type="button" class="btn btn-sm btn-outline-primary btn-form-add-pay" id="btn-form-add-pay">결제 추가</button></div> -->
+                                <div class="addPay" style="display: none;">
+                                    <h5>결제 추가</h5>
+                                    <div class="addPayForm"></div>                                    
+                                </div>
+                            </div>
+							
+							<div class="col-lg-12"></div>
+                            <div class="addReservation" style="display: none;">                            
+                            <h5 class="col-md-12">등록 추가</h5>                            	                           
+	                            <div class="addReservationForm"></div>
+                            </div>                                                        
+                                                       
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <div class="pull-xs-left">
+                        <button type="button" class="btn btn-sm btn-danger" id="btn-delete-reservation">전체 등록 삭제</button>
+                    </div>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">닫기</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <div class="modal fade" id="modal-new-pay-form" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title"></h4>
+                </div>
+                <div class="modal-body">
+                </div>
+                <div class="modal-footer">
+                    <div class="pull-xs-left">
+                        <button type="button" class="btn btn-outline-primary" data-dismiss="modal" id="btn-new-member">회원 추가</button>
+                    </div>
+                    <button type="button" class="btn btn-primary" id="btn-save-new-pay">추가</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script th:include="tmpl_tr_reservation" th:inline="javascript" type="text/template" id="reservation-template"></script>
+<script th:include="tmpl_tr_reservation_of_order" th:inline="javascript" type="text/template" id="reservation-of-order-template"></script>
+<script th:include="tmpl_tr_pay_of_order" th:inline="javascript" type="text/template" id="pay-of-order-template"></script>
+<script th:include="tmpl_tr_pay" th:inline="javascript" type="text/template" id="pay-template"></script>
+
+<!-- <script th:include="tmpl_tr_pay_of_order_add" th:inline="javascript" type="text/template" id="pay-of-order-add-template"></script> -->
+
+<script th:include="tmpl_form_new_order_add" th:inline="javascript" type="text/template" id="new-order-form-template"></script>
+
+
+<script th:inline="javascript" type="text/template" id="reservation-form-template"><![CDATA[ -->
+    <form id="reservationFormTemplate">
+        <input type="hidden" name="orderId" value="{{- orderId}}" />
+        <input type="hidden" name="reservationDt" value="{{- reservationDt}}" />
+        <input type="hidden" name="reservationTm" value="{{- reservationTm}}" />
+        <input type="hidden" name="reservationStatus" value="{{- reservationStatus}}" />
+        <div class="container-fluid">
+            <div class="col-md-12">
+                <div class="form-group">
+                    <label class="form-control-label">회원</label>
+                    <select class="chosen" name="memberId" id="memberId">
+                        <option value="">미입력</option>
+                        {{ _.each(members, function(member){ }}<option value="{{- member.memberId }}" {{ if(memberId == member.memberId) { }}selected="selected"{{ } }}>{{- member.no }} {{- member.name }}</option>{{ }); }}
+                    </select>
+                </div>
+                <div class="form-group">
+            	<label class="form-control-label" >인원</label>	
+					<div class="input-group">
+						<input type="number" class="form-control text-xs-right" name="reservationNum" value="{{- reservationNum }}" min="1" step="1" />
+						<div class="input-group-addon">명</div>
+					</div>
+           		</div>
+                <div class="form-group">
+                    <label class="form-control-label">열람실 / 좌석</label>
+                    <select class="chosen" name="deskId" id="deskId">
+                        <option value="">지정안함</option>
+                        {{ _.each(desks, function(desk){ }}<option value="{{- desk.deskId }}" {{ if(deskId == desk.deskId) { }}selected="selected"{{ } }}>{{- _.find(rooms, function(room){ return (room.roomId == desk.roomId) }).name }} / {{- desk.name }}</option>{{ }); }}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label">등록기간</label>
+                        <button type="button" class="btn btn-sm btn-secondary btn-set-time" data-add-value="3" data-add-unit="h">3시간</button>
+                        <button type="button" class="btn btn-sm btn-secondary btn-set-time" data-add-value="6" data-add-unit="h">6시간</button>
+                        <button type="button" class="btn btn-sm btn-secondary btn-set-time" data-add-value="1" data-add-unit="d" id="1day">1일</button>
+                        <!-- <button type="button" class="btn btn-sm btn-secondary btn-set-time" data-add-value="1" data-add-unit="M">1달</button> -->
+                        <button type="button" class="btn btn-sm btn-secondary btn-set-time" data-add-value="2" data-add-unit="PM">1달</button>
+						<button type="button" class="btn btn-sm btn-secondary btn-set-time" data-add-value="1" data-add-unit="PM">+1일</button>
+						<button type="button" class="btn btn-sm btn-secondary btn-set-time" data-add-value="-1" data-add-unit="PM">-1일</button>
+						                                            
+                    <input type="hidden" name="deskStartDt" value="{{- deskStartDt }}" />
+                    <input type="hidden" name="deskEndDt" value="{{- deskEndDt }}" />
+                    <div class="input-group input-daterange">
+                        <input type="text" class="form-control" id="deskStartDt" data-org-input-name="deskStartDt" value="{{- momentDateFormat(deskStartDt) }}" readonly="readonly" />
+                        <div class="input-group-addon">부터</div>
+                        <input type="text" class="form-control" id="deskEndDt" data-org-input-name="deskEndDt" value="{{- momentDateFormat(deskEndDt) }}" readonly="readonly" />
+                        <div class="input-group-addon">까지</div>
+                    </div>
+                    <input type="hidden" name="deskStartTm" value="{{- deskStartTm }}" />
+                    <input type="hidden" name="deskEndTm" value="{{- deskEndTm }}" />
+                    <div class="input-group clockpicker-with-callbacks input-timerange">
+				    <input class="form-control" time-org-input-name="deskStartTm" id="deskStartTm"  value="{{- momentTimeFormat(deskStartTm) }}" placeholder="Now">
+				    <span class="input-group-addon">
+				        <span class="fa fa-clock-o"></span>
+				    </span>
+				    <input class="form-control" time-org-input-name="deskEndTm" id="deskEndTm" value="{{- momentTimeFormat(deskEndTm) }}" placeholder="Now">
+				    <span class="input-group-addon">
+				        <span class="fa fa-clock-o"></span>
+				    </span>
+
+				</div>
+                    
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label">등록메모</label>
+                    <textarea class="form-control" name="reservationNote">{{- reservationNote }}</textarea>
+                </div>
+                <div class="pull-xs-right">
+                    <button type="button" class="btn btn-sm btn-primary btn-save-reservation">저장</button>
+                    <button type="button" class="btn btn-sm btn-secondary btn-do-not-save-reservation">취소</button>
+                </div>
+            </div>
+        </div>
+        
+    </form>    
+<!-- ]]> --></script>
+
+<script th:inline="javascript" type="text/template" id="addReservation-form-template"><![CDATA[ -->
+    <form id="reservationFormTemplate">
+        <input type="hidden" name="orderId" value="{{- orderId}}" />
+        <input type="hidden" name="reservationDt" value="{{- reservationDt}}" />
+        <input type="hidden" name="reservationTm" value="{{- reservationTm}}" />
+        <input type="hidden" name="reservationStatus" value="{{- reservationStatus}}" />
+        <div class="container-fluid">
+            <div class="col-lg-7 col-md-12 col-xs-12">
+                <div class="form-group">
+                    <label class="form-control-label">회원</label>
+                    <div class="col-xs-12">
+	                    <select class="chosen" name="memberId" id="memberId">
+	                        <option value="{{- memberId}}"> {{- no}} {{- memberName}}</option>
+	                       <!-- {{ _.each(members, function(member){ }}<option value="{{- member.memberId }}" {{ if(memberId == member.memberId) { }}selected="selected"{{ } }}>{{- member.no }} {{- member.name }}</option>{{ }); }}-->
+	                    </select>
+	                </div>
+                </div>
+                <div class="form-group">
+            	<label class="form-control-label" >인원</label>	
+					<div class="input-group">
+						<input type="number" class="form-control text-xs-right" name="reservationNum" value="{{- reservationNum }}" min="1" step="1" />
+						<div class="input-group-addon">명</div>
+					</div>
+           		</div>
+                <div class="form-group">
+                    <label class="form-control-label">열람실 / 좌석</label>
+                    <select class="chosen" name="deskId" id="deskId">
+                        <option value="">지정안함</option>
+                        {{ _.each(desks, function(desk){ }}<option value="{{- desk.deskId }}" {{ if(deskId == desk.deskId) { }}selected="selected"{{ } }}>{{- _.find(rooms, function(room){ return (room.roomId == desk.roomId) }).name }} / {{- desk.name }}</option>{{ }); }}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label">등록기간</label>
+                        <button type="button" class="btn btn-sm btn-secondary btn-set-time" data-add-value="3" data-add-unit="h">3시간</button>
+                        <button type="button" class="btn btn-sm btn-secondary btn-set-time" data-add-value="6" data-add-unit="h">6시간</button>
+                        <button type="button" class="btn btn-sm btn-secondary btn-set-time" data-add-value="1" data-add-unit="d" id="1day">1일</button>
+                        <button type="button" class="btn btn-sm btn-secondary btn-set-time" data-add-value="2" data-add-unit="PM">1달</button>
+						<button type="button" class="btn btn-sm btn-secondary btn-set-time" data-add-value="1" data-add-unit="PM">+1일</button>
+						<button type="button" class="btn btn-sm btn-secondary btn-set-time" data-add-value="-1" data-add-unit="PM">-1일</button>
+                    <input type="hidden" name="deskStartDt" value="{{- deskStartDt }}" />
+                    <input type="hidden" name="deskEndDt" value="{{- deskEndDt }}" />
+                    <div class="input-group input-daterange">
+                        <input type="text" class="form-control" id="deskStartDt" data-org-input-name="deskStartDt" value="{{- momentDateFormat(deskStartDt) }}" readonly="readonly" />
+                        <div class="input-group-addon">부터</div>
+                        <input type="text" class="form-control" id="deskEndDt" data-org-input-name="deskEndDt" value="{{- momentDateFormat(deskEndDt) }}" readonly="readonly" />
+                        <div class="input-group-addon">까지</div>
+                    </div>
+                    <input type="hidden" name="deskStartTm" value="{{- deskStartTm }}" />
+                    <input type="hidden" name="deskEndTm" value="{{- deskEndTm }}" />
+                    <div class="input-group clockpicker-with-callbacks input-timerange">
+				    <input class="form-control" time-org-input-name="deskStartTm" id="deskStartTm"  value="{{- momentTimeFormat(deskStartTm) }}" placeholder="Now">
+				    <span class="input-group-addon">
+				        <span class="fa fa-clock-o"></span>
+				    </span>
+				    <input class="form-control" time-org-input-name="deskEndTm" id="deskEndTm" value="{{- momentTimeFormat(deskEndTm) }}" placeholder="Now">
+				    <span class="input-group-addon">
+				        <span class="fa fa-clock-o"></span>
+				    </span>
+
+				</div>
+                    
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label">등록메모</label>
+                    <textarea class="form-control" name="reservationNote">{{- reservationNote }}</textarea>
+                </div>
+                <div class="pull-xs-right">
+                    <button type="button" class="btn btn-sm btn-primary btn-save-reservation">저장</button>
+                    <button type="button" class="btn btn-sm btn-secondary btn-do-not-save-reservation">취소</button>
+                </div>
+            </div>
+            <div class="col-lg-5 col-md-12 col-xs-12">
+	            <div class="form-group">
+	                <label class="form-control-label">결제구분</label>
+						<div class="form-group">
+							<label class="form-check-inline">
+								<input class="form-check-input" style="display: none;" type="radio" name="payType" value="no" {{ if((payType != 1) && (payType != 2) && (payType != 3)){ }}checked="checked"{{ } }} />
+							</label>
+							<label class="form-check-inline">
+		                        <input class="form-check-input" type="radio" name="payType" value="1" {{ if(payType == 1){ }}checked="checked"{{ } }} />현금 
+		                    </label>
+		                    <label class="form-check-inline">
+	                        	<input class="form-check-input" type="radio" name="payType" value="5" {{ if(payType == 5){ }}checked="checked"{{ } }} />계좌이체 
+	                    	</label>
+							<label class="form-check-inline">
+		                        <input class="form-check-input" type="radio" name="payType" value="2" {{ if(payType == 2){ }}checked="checked"{{ } }} />신용카드 
+		                    </label>
+							<label class="form-check-inline">
+		                        <input class="form-check-input" type="radio" name="payType" value="3" {{ if(payType == 3){ }}checked="checked"{{ } }} />미수금 
+		                    </label>		                    
+							<label class="form-check-inline">
+		                        <input class="form-check-input" type="radio" name="payType" value="no" {{ if((payType != 1) && (payType != 2) && (payType != 3) && (payType != 5) ){ }}checked="checked"{{ } }} />미입력 
+		                    </label>	                    					
+						</div>
+	            </div>
+	            <div class="form-group">
+	                <label class="form-control-label">결제금액</label>
+	                <div class="input-group">
+						<input id="payAmount" type="text" class="form-control text-xs-right" name="payAmount" value="{{- payAmount }}" />
+	                    <div class="input-group-addon">원</div>
+	                </div>
+	            </div>
+	            <div class="form-group">
+	                <label class="form-control-label">결제메모</label>
+	                <textarea class="form-control" name="payNote"></textarea>
+	            </div>
+        </div>                      
+	</div>
+
+<!-- ]]> --></script>
+
+<script th:inline="javascript" type="text/template" id="pay-form-template"><![CDATA[ -->
+    <form>
+		<input type="hidden" name="orderId" value="{{- orderId}}" />
+		<input type="hidden" name="reservationId" value="{{- reservationId}}" />
+        <div class="container-fluid">
+            <div class="col-lg-6 col-md-12 col-xs-12">
+                <!--<div class="form-group">
+                    <label class="form-control-label">결제일자</label>                    
+                    <input type="hidden" name="payDt" value="{{- payDt }}" />
+                    <div class="input-group">
+                        <span class="input-group-btn">
+                            <button class="btn btn-secondary" type="button"><i class="fa fa-calendar" aria-hidden="true"></i></button>
+                        </span>
+                        <input type="text" class="form-control datepicker" data-org-input-name="payDt" value="{{- momentDateFormat(payDt) }}" readonly="readonly" />
+                    </div>
+                </div>-->
+                <div class="form-group">
+                <label class="form-control-label">결제구분</label>
+					<div class="form-group">
+						<label class="form-check-inline">
+							<input class="form-check-input" style="display: none;" type="radio" name="payType" value="no" {{ if((payType != 1) && (payType != 2) && (payType != 3)){ }}checked="checked"{{ } }} />
+						</label>
+						<label class="form-check-inline">
+	                        <input class="form-check-input" type="radio" name="payType" value="1" {{ if(payType == 1){ }}checked="checked"{{ } }} />현금 
+	                    </label>
+						<label class="form-check-inline">
+	                        <input class="form-check-input" type="radio" name="payType" value="2" {{ if(payType == 2){ }}checked="checked"{{ } }} />신용카드 
+	                    </label>
+						<label class="form-check-inline">
+	                        <input class="form-check-input" type="radio" name="payType" value="3" {{ if(payType == 3){ }}checked="checked"{{ } }} />미수금 
+	                    </label>
+	                    <label class="form-check-inline">
+	                        <input class="form-check-input" type="radio" name="payType" value="5" {{ if(payType == 5){ }}checked="checked"{{ } }} />계좌이체 
+	                    </label>
+						<label class="form-check-inline">
+	                        <input class="form-check-input" type="radio" name="payType" value="no" {{ if((payType != 1) && (payType != 2) && (payType != 3) && (payType != 5) ){ }}checked="checked"{{ } }} />미입력 
+	                    </label>	                    					
+					</div>
+            </div>
+                <div class="form-group">
+                    <label class="form-control-label">결제금액</label>
+                    <div class="input-group">
+                        <input id="payAmount" type="text" class="form-control text-xs-right" name="payAmount" value="{{- payAmount }}" />
+                        <div class="input-group-addon">원</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 col-md-12 col-xs-12">
+                <div class="form-group">
+                    <label class="form-control-label">회원</label>
+                    <select class="chosen" name="memberId" id="memberId">
+                        <option value="">미입력</option>
+                        {{ _.each(members, function(member){ }}<option value="{{- member.memberId }}" {{ if(memberId == member.memberId) { }}selected="selected"{{ } }}>{{- member.name }}</option>{{ }); }}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-control-label">결제메모</label>
+                    <textarea class="form-control" name="payNote">{{- payNote }}</textarea>
+                </div>
+            </div>
+            <div class="pull-xs-right">
+                <button type="button" class="btn btn-sm btn-primary btn-add-pay" id="btn-add-pay">저장</button>
+                <button type="button" class="btn btn-sm btn-secondary btn-do-not-add-pay">취소</button>
+            </div>
+        </div>
+    </form>
+<!-- ]]> --></script>
+
+
+
+<script th:inline="javascript">// <![CDATA[
+var reservationStatusTypeMap = JSON.parse([[${reservationStatusTypeMapJSON}]]);
+var payTypeMap = JSON.parse([[${payTypeMapJSON}]]);
+var flag = 'branch_reservations';
+
+var branchType = [[${branch.branchType}]];
+var branchId = [[${branch.branchId}]];
+var branchTel = [[${branch.telEtc}]];
+
+//알림톡 전송
+function alimtalkSend(Alimtalk) {
+	jQuery.ajax({
+        method : "POST",
+        url : "/api/v1/branch/" + [[${branch.branchId}]] + "/alimTalk",
+        contentType: "application/json; charset=UTF-8",
+        data : JSON.stringify(Alimtalk),
+        dataType : "JSON" ,
+        success : function() {
+           //alert("Suceeded!");         
+        },
+        error : function() {
+           //alert("Failed!");
+        }
+    });
+
+}
+
+$(function(){
+	
+	var pageMaker = [[${pageMaker}]];
+		
+    // Search Form
+    var $sForm = $('#searchFrom');
+    $sForm.find('.input-daterange').datepicker({
+        language: 'ko', autoclose: true, todayHighlight: true, format: 'yyyy-mm-dd',
+
+    }).on('changeDate', function(e) {
+
+    });
+
+    $sForm.find('.chosen').chosen({width: "100%"});
+
+    //시간입력
+	$sForm.find('.clockpicker').clockpicker({
+		donetext: '완료'
+	});
+	
+    
+    // Member
+    var MemberList = new MemberListCollection();
+    MemberList.branchId = [[${branch.branchId}]];
+    //MemberList.reset(JSON.parse([[${memberListJSON}]]));
+    MemberList.reset(JSON.parse([[${memberListJSON}]]));
+    
+    // Room
+    var RoomList = new RoomListCollection;
+    RoomList.branchId = [[${branch.branchId}]];
+    RoomList.reset(JSON.parse([[${roomListJSON}]]));
+
+    // Desk
+    var DeskList = new DeskListCollection;
+    DeskList.branchId = [[${branch.branchId}]];
+    DeskList.reset(JSON.parse([[${deskListJSON}]]));
+
+    // Reservation
+    var ReservationList = new ReservationListCollection;
+    ReservationList.branchId = [[${branch.branchId}]];
+
+    // Order
+    var OrderList = new OrderListCollection();
+    OrderList.branchId = [[${branch.branchId}]];
+      
+    // Pay
+    var PayList = new PayListCollection;
+    PayList.branchId = [[${branch.branchId}]];
+    
+    
+    var ReservationView = Backbone.View.extend({
+        tagName: 'tr',
+        className: 'reservation',
+        template: _.template($('#reservation-template').html()),
+        events: {
+            'dblclick': 'formReservation',
+            'click .btn-form-reservation' : 'formReservation',
+//             'click #btn-delete-reservation' : 'deleteReservation',
+        },
+        initialize: function() {
+            this.listenTo(this.model, 'change', this.change);
+            this.listenTo(this.model, 'destroy', this.remove);
+
+        },      
+        change: function() {
+            this.render();
+
+        },
+        render: function() {
+        	//등록 목록 출력
+            var data = this.model.toJSON();
+        	if (MemberList.get(this.model.get('memberId'))) {
+	            data['member'] = MemberList.get(this.model.get('memberId')).toJSON();
+	
+	            var modelDesk = DeskList.get(this.model.get('deskId'));
+	            
+	            if (modelDesk == null) {
+	            	data['desk'] = "";
+	            	data['room'] = "";
+	            }
+	            else {
+	            	data['desk'] = modelDesk.toJSON();
+	            	data['room'] = RoomList.get(modelDesk.get('roomId')).toJSON();
+	            }
+	            
+	            this.el.id = data.reservationId;
+	
+	            this.$el.html(this.template(data));
+	
+	            if(data.reservationStatus != 20) this.$el.find('span').addClass('text-muted text-strike');
+				
+        	}
+	           	return this;
+        	
+
+        },
+        formReservation: function() {
+        	ReservationList.trigger('formReservation', this.model, ReservationList, MemberList, DeskList, RoomList, PayList, payTypes, flag, branchType, branchId, branchTel);
+
+        },
+        //deleteReservation: function() {
+        	//ReservationList.trigger('deleteReservation', this.model, PayList);
+        //},
+    });
+    
+    //PayOfOrderView();
+    //ReservationOfOrderView();
+        
+    	
+    var payTypes = [[${payTypes}]];
+        
+    var BranchReservationView = Backbone.View.extend({
+        el: $('#reservation-list-app'),        
+        currentReservationModel: null,
+        templateForNewOrderForm: _.template($('#new-order-form-template').html()),
+        events: {
+            'click #btn-new-member' : 'goMemberPage',
+            'click #btn-form-new-reservation': 'formNewReservation',
+            'click #btn-save-new-reservation' : 'saveNewOrder',
+            'click .page-link.button' : 'paging',
+            'click .page-link.next' : 'nextPaging',
+            'click .page-link.prev' : 'prevPaging',
+            'click .newReservation.btn-set-time' : 'setNewReservationTime',
+            'click #btn-search-membership' : 'scannerDetected',
+            'scannerDetected' : 'scannerDetected',
+			'keyup #payAmount' : 'keyup',
+// 			'click #btn-delete-reservation' : 'deleteReservation',
+                        
+        },               
+        initialize: function() {
+            this.listenTo(ReservationList, 'add', this.addOneReservation);
+            this.listenTo(ReservationList, 'formReservation', this.formReservation);
+            this.listenTo(ReservationList, 'reset', this.reset);
+            var monthFlag; //1달 버튼 flag
+            //this.listenTo(ReservationList, 'deleteReservation', this.deleteReservation);
+
+        },		
+        reset: function() {        	
+            ReservationList.forEach(this.addOneReservation);
+            
+            $('#total').text(pageMaker.totalCount);
+            
+            $(document).trigger('appLoaded');
+
+        },
+        paging: function(e) {
+        	paging(e);
+
+        },
+        prevPaging: function(e) {
+        	var page = [[${pageMaker.startPage -1}]];
+        	prevPaging(e, page);
+  
+        },
+        nextPaging: function(e) {
+        	var page = [[${pageMaker.endPage +1}]];
+        	nextPaging(e, page);
+      	
+        },
+        render: function() {
+
+        },
+        goMemberPage: function(e) {
+            location.assign(ctxRoot + 'branch/' + [[${branch.branchId}]] + '/members?action=newMember');
+        },
+                
+        saveNewOrder: function(model) {        	  
+        	var $modal = $('#modal-new-reservation-form');
+        	var $form = $modal.find('form');
+        	
+        	var values = {}; 
+        	
+            $('#formNewOrderAdd').validate({
+            	submitHandler: function(form) {
+            	var $modal = $('#modal-new-reservation-form');
+            	var $inputs = $modal.find(':input');
+                $inputs.each(function(i, element) {
+                    var $element = $(element);
+                    if ($element.is('[type=radio]')) {
+                        if ($element.is(':checked')) {
+                            var name = $element.attr('name');
+                            if (!(_.isEmpty(name))) {
+                                values[name] = $element.val();
+
+                            }
+                        }
+
+                    } else {
+                        var name = $element.attr('name');
+                        if (!(_.isEmpty(name))) {
+                            values[name] = $element.val();
+
+                        }
+
+                    }
+                });
+
+                var tempAmount = values['payAmount']; //알림톡을 위한 변수
+                values['payAmount'] = values['payAmount'].replace(/,/g, '');                
+
+              	//알림톡 정보
+ 	            var roomName;
+ 	            var deskName;
+ 	            var memberName;
+ 	            var phone_number;
+ 	            var school;
+ 	            var registration;
+ 	            var amount;
+                
+ 	           	amount = values['payAmount'];
+ 	           	registration = '신규';
+ 	           	
+ 	           	var memberList = MemberList.filter({ memberId: values['memberId']});
+	            if (memberList[0] != null) {	     	           	
+	            	if (memberList[0].get('name') != null) {
+	            		memberName = memberList[0].get('name');
+	            	}
+	           		if (memberList[0].get('telParent') != null) {
+	            		phone_number = memberList[0].get('telParent');	//고객용
+	           		}
+	           		var tempSchool = memberList[0].attributes.school;
+	           		if (tempSchool != null || tempSchool != "" || tempSchool.length != 0) {
+	           			school = memberList[0].get('school');
+	           		}
+	           		else {
+	           			school = '미입력';
+	           		}
+	            }
+	           
+ 	            
+                if (values['deskId'] == "") { //좌석지정을 안할 경우
+                	roomName = '지정안함';
+     	            deskName = '지정안함';
+                	
+                	//중복데이터 구분
+	 	            var reservations = ReservationList.filter({ memberId: values['memberId'], deskId: "" });
+	    			
+	 	           	//예약이 있는 경우
+	                if (reservations.length > 0) {
+	      				//var reservationDeskStartDt = makeDateFormat($('#deskStartDt').val()); //함수호출
+	      				//입력된 StartDt	      				
+	      				var inpuStartDt = $modal.find('[name=deskStartDt]').val();
+	      				var dateStartDt = new Date(inpuStartDt*1);
+	      				var reservationDeskStartDt = moment(dateStartDt).format('YYYY-MM-DD');
+
+	 					//입력된 EndDt
+	      				var inpuEndDt = $modal.find('[name=deskEndDt]').val();
+	      				var dateEndDt = new Date(inpuEndDt*1);
+	      				var reservationDeskEndDt = moment(dateEndDt).format('YYYY-MM-DD');
+						
+		    			var valuesDeskStartDtTm = new moment(reservationDeskStartDt + values['deskStartTm'], 'YYYY-MM-DD HH:mm:ss');
+		    			var valuesDeskEndDtTm = new moment(reservationDeskEndDt + values['deskEndTm'], 'YYYY-MM-DD HH:mm:ss');
+		    			
+	                	var now = moment();
+	                	var reservationId = []; //겹치는 날짜의 reservationId가 들어가는 변수
+						reservations.forEach(function(item) {
+							var reservationTemp;
+							var reservation = item;
+							
+			    			var strDeskStartDtTm = moment(reservation.get('deskStartDt')).format("YYYY-MM-DD") + reservation.get('deskStartTm');
+			    			var strDeskEndDtTm = moment(reservation.get('deskEndDt')).format("YYYY-MM-DD") + reservation.get('deskEndTm');
+	
+			    			var deskStartDtTm = new moment(strDeskStartDtTm, 'YYYY-MM-DD HH:mm:ss');
+			    			var deskEndDtTm = new moment(strDeskEndDtTm, 'YYYY-MM-DD HH:mm:ss');
+			    			
+			    			if (deskStartDtTm.isSame(valuesDeskStartDtTm)) {	    				
+			    				reservationId.push(reservation.get('reservationId'));
+			    				return false;
+			    			}
+	
+			    			else if (deskStartDtTm.isSame(valuesDeskEndDtTm)) {    				
+			    				reservationId.push(reservation.get('reservationId'));
+			    				return false;
+			    			}
+	
+			    			else if (deskEndDtTm.isSame(valuesDeskStartDtTm)) {
+			    				reservationId.push(reservation.get('reservationId'));
+			    				return false;
+			    			}
+			    			
+			    			else if (deskEndDtTm.isSame(valuesDeskEndDtTm)) {
+			    				reservationId.push(reservation.get('reservationId'));
+			    				return false;
+			    			}
+			    			
+			    			else if (deskStartDtTm.isBetween(valuesDeskStartDtTm, valuesDeskEndDtTm)) { 
+			    				reservationId.push(reservation.get('reservationId'));
+			    				return false;
+	 		    			}
+	 		    			else if (deskEndDtTm.isBetween(valuesDeskStartDtTm, valuesDeskEndDtTm)) { 
+	 		    				reservationId.push(reservation.get('reservationId'));
+	 		    				return false;
+			    			}
+	
+	 		    			else if (valuesDeskStartDtTm.isBetween(deskStartDtTm, deskEndDtTm)) { 
+	 		    				reservationId.push(reservation.get('reservationId'));
+	 		    				return false;
+			    			}
+			    			
+	 		    			else if (valuesDeskEndDtTm.isBetween(deskStartDtTm, deskEndDtTm)) { 
+	 		    				reservationId.push(reservation.get('reservationId'));
+	 		    				return false;
+			    			}
+	 		    			else { //안겹침
+	 		    			}
+							
+						});
+						
+	                	if (reservationId.length > 0) { //존재한다면 겹치는 등록이 있음
+	                		alert('이 회원은 해당 시간에 이미 지정되지 않은 좌석에 등록되어 있습니다');
+	                	}
+	                	else {
+	                    	OrderList.create({
+	    	                	memberId: values['memberId'],
+	    	                	orderNote: values['orderNote'],
+	                    	},{
+	                    	wait : true,
+	                    	success : function (model, response) {
+	                    		var orderId = response.orderId;
+	                    		
+	                    		model.set('orderId', orderId);
+	                    		model.set('orderStatus', response.orderStatus);
+	                    		model.set('insertDt', response.insertDt);
+	                    		model.set('updateDt', response.updateDt);
+	                    		
+	                            ReservationList.create({
+	                                    orderId: orderId,
+	                                    deskId: values['deskId'],
+	                                    reservationNum: values['reservationNum'],
+	                                    deskStartDt: values['deskStartDt'],
+	                                    deskStartTm: values['deskStartTm'],
+	                                    deskEndDt: values['deskEndDt'],
+	                                    deskEndTm: values['deskEndTm'],
+	                                    memberId: values['memberId'],
+	                                	
+	                                    //$modal.hide();
+
+	                                }, {
+	                                	wait : true,
+	                                	success : function (model, response) {
+	                                		var reservationId = response.reservationId;
+	                                		PayList.create({
+	                                			orderId: orderId,
+	                                			reservationId: reservationId,
+	                                			payDt: sysDate.clone().valueOf(),
+	                                			payType: values['payType'],
+	                                			payAmount: values['payAmount'],
+	                                			payNote: values['payNote'],
+	                                			memberId: values['memberId'],
+	                                			payInOutType : 20, //임시
+	                                			
+	                                			
+	                                		}, {
+	                                			wait : true,
+	                                			success : function (model, response) {
+	                								if (amount > 0) {
+			                            				/*
+	                									if (phone_number != '' || phone_number != null) {		                            							                            				
+			                            					//고객에게 알림톡 전송
+			                            					var Alimtalk = {
+				                            						roomName: roomName,
+				                            						deskName: deskName,
+					                            					memberName: memberName,
+					                            					phone_number: phone_number,
+					                            					school: school,
+					                            					registration: registration,
+					                            					amount: tempAmount
+					                            			};			            			                    
+			                            					alimtalkSend(Alimtalk);
+			                            				}
+			                            				*/
+			            			                  	//센터장에게 알림톡 전송
+			            			                    var AlimtalkManager = {
+			                            						roomName: roomName,
+			                            						deskName: deskName,
+				                            					memberName: memberName,
+				                            					phone_number: [[${branch.telEtc}]],
+				                            					school: school,
+				                            					registration: registration,
+				                            					amount: tempAmount
+				                            			};
+			            			                    alimtalkSend(AlimtalkManager);
+		                            				}
+	                								
+	                                				$modal.modal('hide');
+	                                				location.reload(); //수정 요망
+	                                			}
+	                                		
+	                                		});
+	                                		
+	                                	}
+	                                });
+
+	    	                	}
+	    	                
+	    	                });
+	                	}	     	            
+	                }
+	                else {
+                    	OrderList.create({
+    	                	memberId: values['memberId'],
+    	                	orderNote: values['orderNote'],
+                    	},{
+                    	wait : true,
+                    	success : function (model, response) {
+                    		var orderId = response.orderId;
+                    		
+                    		model.set('orderId', orderId);
+                    		model.set('orderStatus', response.orderStatus);
+                    		model.set('insertDt', response.insertDt);
+                    		model.set('updateDt', response.updateDt);
+                    		
+                            ReservationList.create({
+                                    orderId: orderId,
+                                    deskId: values['deskId'],
+                                    reservationNum: values['reservationNum'],
+                                    deskStartDt: values['deskStartDt'],
+                                    deskStartTm: values['deskStartTm'],
+                                    deskEndDt: values['deskEndDt'],
+                                    deskEndTm: values['deskEndTm'],
+                                    memberId: values['memberId'],
+                                	
+                                    //$modal.hide();
+
+                                }, {
+                                	wait : true,
+                                	success : function (model, response) {
+                                		var reservationId = response.reservationId;
+                                		PayList.create({
+                                			orderId: orderId,
+                                			reservationId: reservationId,
+                                			payDt: sysDate.clone().valueOf(),
+                                			payType: values['payType'],
+                                			payAmount: values['payAmount'],
+                                			payNote: values['payNote'],
+                                			memberId: values['memberId'],
+                                			payInOutType : 20, //임시
+                                			
+                                			
+                                		}, {
+                                			wait : true,
+                                			success : function (model, response) {
+                								if (amount > 0) {
+		                            				/*
+                									if (phone_number != '' || phone_number != null) {		                            							                            				
+		                            					//고객에게 알림톡 전송
+		                            					var Alimtalk = {
+			                            						roomName: roomName,
+			                            						deskName: deskName,
+				                            					memberName: memberName,
+				                            					phone_number: phone_number,
+				                            					school: school,
+				                            					registration: registration,
+				                            					amount: values['payAmount']
+				                            			};			            			                    
+		                            					alimtalkSend(Alimtalk);
+		                            				}
+		                            				*/
+		            			                  	//센터장에게 알림톡 전송
+		            			                    var AlimtalkManager = {
+		                            						roomName: roomName,
+		                            						deskName: deskName,
+			                            					memberName: memberName,
+			                            					phone_number: [[${branch.telEtc}]],
+			                            					school: school,
+			                            					registration: registration,
+			                            					amount: values['payAmount']
+			                            			};
+		            			                    alimtalkSend(AlimtalkManager);
+	                            				}
+                								
+                                				$modal.modal('hide');
+                                				location.reload(); //수정 요망
+                                			}
+                                		
+                                		});
+                                		
+                                	}
+                                });
+
+    	                	}
+    	                
+    	                });	
+	                }
+
+                }
+                else { //좌석지정을 할 경우
+                	//중복데이터 구분
+	 	            var reservations = ReservationList.filter({ deskId: values['deskId'] });
+     	           
+     	           var deskList = DeskList.filter({ deskId: values['deskId']}); 	            
+     	            if (deskList[0] != null) {
+     	            	if (deskList[0].get('deskId') != null) {
+	     	            	var roomList = RoomList.filter({ roomId: deskList[0].get('roomId')});
+	     	            	if (roomList[0] != null || roomList[0] != '') {
+	     	            		roomName = roomList[0].get('name');
+	     	            	}
+	     	            	else {
+	     	            		roomName = '미입력';
+	     	            	}
+     	            	}
+     	            	if (deskList[0].get('name') != null || deskList[0] != '') {
+     	           			deskName = deskList[0].get('name');
+     	            	}
+     	            	else {
+     	            		deskName = '미입력';
+     	            	}
+     	            }                
+                
+	 	            //예약이 있는 경우
+	                if (reservations.length > 0) {
+	      				//입력된 StartDt	      				
+	      				var inpuStartDt = $modal.find('[name=deskStartDt]').val();
+	      				var dateStartDt = new Date(inpuStartDt*1);
+	      				var reservationDeskStartDt = moment(dateStartDt).format('YYYY-MM-DD');
+
+	 					//입력된 EndDt
+	      				var inpuEndDt = $modal.find('[name=deskEndDt]').val();
+	      				var dateEndDt = new Date(inpuEndDt*1);
+	      				var reservationDeskEndDt = moment(dateEndDt).format('YYYY-MM-DD');
+						
+		    			var valuesDeskStartDtTm = new moment(reservationDeskStartDt + values['deskStartTm'], 'YYYY-MM-DD HH:mm:ss');
+		    			var valuesDeskEndDtTm = new moment(reservationDeskEndDt + values['deskEndTm'], 'YYYY-MM-DD HH:mm:ss');
+		    			
+	                	var now = moment();
+	                	var reservationId = []; //겹치는 날짜의 reservationId가 들어가는 변수
+						reservations.forEach(function(item) {
+							var reservationTemp;
+							var reservation = item;
+							
+			    			var strDeskStartDtTm = moment(reservation.get('deskStartDt')).format("YYYY-MM-DD") + reservation.get('deskStartTm');
+			    			var strDeskEndDtTm = moment(reservation.get('deskEndDt')).format("YYYY-MM-DD") + reservation.get('deskEndTm');
+	
+			    			var deskStartDtTm = new moment(strDeskStartDtTm, 'YYYY-MM-DD HH:mm:ss');
+			    			var deskEndDtTm = new moment(strDeskEndDtTm, 'YYYY-MM-DD HH:mm:ss');
+			    			
+			    			if (deskStartDtTm.isSame(valuesDeskStartDtTm)) {	    				
+			    				reservationId.push(reservation.get('reservationId'));
+			    			}
+	
+			    			else if (deskStartDtTm.isSame(valuesDeskEndDtTm)) {    				
+			    				reservationId.push(reservation.get('reservationId'));
+			    			}
+	
+			    			else if (deskEndDtTm.isSame(valuesDeskStartDtTm)) {
+			    				reservationId.push(reservation.get('reservationId'));
+			    			}
+			    			
+			    			else if (deskEndDtTm.isSame(valuesDeskEndDtTm)) {
+			    				reservationId.push(reservation.get('reservationId'));
+			    			}
+			    			
+			    			else if (deskStartDtTm.isBetween(valuesDeskStartDtTm, valuesDeskEndDtTm)) { //날짜가 겹치면
+			    				reservationId.push(reservation.get('reservationId'));
+	 		    			}
+	 		    			else if (deskEndDtTm.isBetween(valuesDeskStartDtTm, valuesDeskEndDtTm)) { //시작날짜가 겹치지 않으면 end날짜와 다시한번 조회
+	 		    				reservationId.push(reservation.get('reservationId')); 		    					
+			    			}
+	
+	 		    			else if (valuesDeskStartDtTm.isBetween(deskStartDtTm, deskEndDtTm)) { 
+	 		    				reservationId.push(reservation.get('reservationId')); 		    					
+			    			}
+			    			
+	 		    			else if (valuesDeskEndDtTm.isBetween(deskStartDtTm, deskEndDtTm)) { 
+	 		    				reservationId.push(reservation.get('reservationId'));
+			    			}
+	 		    			else { //안겹침
+	 		    			}
+		                	
+						});
+						
+	                	var temp = 0;
+						reservationId.forEach(function(item) {
+						var reservationTemp = ReservationList.filter({ reservationId: item });
+	                	temp++;
+	                	
+	                	});					
+	                	//좌석의 deskMax(최대수용인원) 체크
+	     	            var deskList = DeskList.filter({ deskId: values['deskId']});
+	     	            var deskMax = deskList[0].get('deskMax');	     	           	
+	     	            
+	     	            
+	     	            if (temp >= deskMax) {
+	     	           		alert('해당 시간에는 이미 좌석이 등록되어 있습니다');
+	     	           	}
+	     	           	else {
+		     	           	OrderList.create({
+			                	memberId: values['memberId'],
+			                	orderNote: values['orderNote'],
+		                	},{
+		                	wait : true,
+		                	success : function (model, response) {
+		                		var orderId = response.orderId;
+		                		
+		                		model.set('orderId', orderId);
+		                		model.set('orderStatus', response.orderStatus);
+		                		model.set('insertDt', response.insertDt);
+		                		model.set('updateDt', response.updateDt);
+		                		
+		                        ReservationList.create({
+		                                orderId: orderId,
+		                                deskId: values['deskId'],
+		                                reservationNum: values['reservationNum'],
+		                                deskStartDt: values['deskStartDt'],
+		                                deskStartTm: values['deskStartTm'],
+		                                deskEndDt: values['deskEndDt'],
+		                                deskEndTm: values['deskEndTm'],
+		                                memberId: values['memberId'],
+		                            	
+		                                //$modal.hide();
+		
+		                            }, {
+		                            	wait : true,
+		                            	success : function (model, response) {
+		                            		var reservationId = response.reservationId;
+		                            		PayList.create({
+		                            			orderId: orderId,
+		                            			reservationId: reservationId,
+		                            			payDt: sysDate.clone().valueOf(),
+		                            			payType: values['payType'],
+		                            			payAmount: values['payAmount'],
+		                            			payNote: values['payNote'],
+		                            			memberId: values['memberId'],
+		                            			payInOutType : 20, //임시
+		                            			
+		                            			
+		                            		}, {
+		                            			wait : true,
+		                            			success : function (model, response) {
+		                            				if (amount > 0) {
+			                            				/*
+		                            					if (phone_number != '' || phone_number != null) {		                            							                            				
+			                            					//고객에게 알림톡 전송
+			                            					var Alimtalk = {
+				                            						roomName: roomName,
+				                            						deskName: deskName,
+					                            					memberName: memberName,
+					                            					phone_number: phone_number,
+					                            					school: school,
+					                            					registration: registration,
+					                            					amount: values['payAmount']
+					                            			};			            			                    
+			                            					alimtalkSend(Alimtalk);
+			                            				}
+			                            				*/
+			            			                  	//센터장에게 알림톡 전송
+			            			                    var AlimtalkManager = {
+			                            						roomName: roomName,
+			                            						deskName: deskName,
+				                            					memberName: memberName,
+				                            					phone_number: [[${branch.telEtc}]],
+				                            					school: school,
+				                            					registration: registration,
+				                            					amount: values['payAmount']
+				                            			};
+			            			                    alimtalkSend(AlimtalkManager);
+		                            				}
+		            			                    		            			                    		            			                    
+		                            				$modal.modal('hide');
+		                            				location.reload(); //수정 요망
+		                            			}
+		                            		
+		                            		});
+		                            		
+		                            	}
+		                            });
+		
+			                	}
+			                
+			                });
+		     	      }
+	                }
+                	
+	                else { //예약이 없는 경우
+	                	OrderList.create({
+		                	memberId: values['memberId'],
+		                	orderNote: values['orderNote'],
+	                	},{
+	                	wait : true,
+	                	success : function (model, response) {
+	                		var orderId = response.orderId;
+	                		
+	                		model.set('orderId', orderId);
+	                		model.set('orderStatus', response.orderStatus);
+	                		model.set('insertDt', response.insertDt);
+	                		model.set('updateDt', response.updateDt);
+	                		
+	                        ReservationList.create({
+	                                orderId: orderId,
+	                                deskId: values['deskId'],
+	                                reservationNum: values['reservationNum'],
+	                                deskStartDt: values['deskStartDt'],
+	                                deskStartTm: values['deskStartTm'],
+	                                deskEndDt: values['deskEndDt'],
+	                                deskEndTm: values['deskEndTm'],
+	                                memberId: values['memberId'],
+	                            	
+	                                //$modal.hide();
+	
+	                            }, {
+	                            	wait : true,
+	                            	success : function (model, response) {
+	                            		var reservationId = response.reservationId;	                            		
+	                            		PayList.create({
+	                            			orderId: orderId,
+	                            			reservationId: reservationId,
+	                            			payDt: sysDate.clone().valueOf(),
+	                            			payType: values['payType'],
+	                            			payAmount: values['payAmount'],
+	                            			payNote: values['payNote'],
+	                            			memberId: values['memberId'],
+	                            			payInOutType : 20, //임시
+	                            			
+	                            			
+	                            		}, {
+	                            			wait : true,
+	                            			success : function (model, response) {
+	                            				if (amount > 0) {
+		                            				/*
+	                            					if (phone_number != '' || phone_number != null) {		                            							                            				
+		                            					//고객에게 알림톡 전송
+		                            					var Alimtalk = {
+			                            						roomName: roomName,
+			                            						deskName: deskName,
+				                            					memberName: memberName,
+				                            					phone_number: phone_number,
+				                            					school: school,
+				                            					registration: registration,
+				                            					amount: values['payAmount']
+				                            			};			            			                    
+		                            					alimtalkSend(Alimtalk);
+		                            				}
+		                            				*/
+		            			                  	//센터장에게 알림톡 전송
+		            			                    var AlimtalkManager = {
+		                            						roomName: roomName,
+		                            						deskName: deskName,
+			                            					memberName: memberName,
+			                            					phone_number: [[${branch.telEtc}]],
+			                            					school: school,
+			                            					registration: registration,
+			                            					amount: values['payAmount']
+			                            			};
+		            			                    alimtalkSend(AlimtalkManager);
+	                            				}
+	            			                    
+	                            				$modal.modal('hide');
+	                            				location.reload(); //수정 요망
+	                            			}
+	                            		
+	                            		});
+	                            		
+	                            	}
+	                            });
+	
+	                	}
+	                
+	                });
+	              }
+                }
+                
+            	},
+            	ignore: "not:hidden",
+            	
+            	rules: {
+        			memberId: {            			
+        				required: true,
+        			},
+//         			deskId: {
+//         				required: true,
+//         			},
+        			payType: {
+        				required: true,
+        				number: true,
+        			},
+        			payAmount: {
+        				//min: 1000
+        			}
+        			
+        		},
+        		messages: {
+        			memberId: {
+        	    		required: "회원을 선택하세요",
+        			},
+//         			deskId: {
+//         				required: "좌석을 선택하세요",
+//         			},
+        			payType: {
+        				required: "결제 구분을 선택하세요",
+        				number : "결제유형을 선택하세요",
+        			},
+        			payAmount: {
+        				//min: "결제 금액을 선택하세요",
+        			}
+        		}
+            });
+            
+            $form.submit();
+            
+
+
+        },        
+         // 등록관리 - 등록추가 이벤트
+        formNewReservation: function(e, memberId, deskId) {
+        	monthFlag = 0;
+        	var data = new ReservationModel().toJSON();			
+        	
+        	if (memberId == null || memberId == '') {
+        		memberId = $('#sMember').val();
+        	}
+        	
+        	
+            data['memberId'] = memberId;
+            data['deskId'] = deskId;
+            //data['reservationNum'] = 
+
+            data['members'] = MemberList.toJSON();
+            data['desks'] = DeskList.toJSON();
+            data['rooms'] = RoomList.toJSON();
+
+            data['payTypes'] = payTypes;
+            data['payType'] = 0;
+            data['pay'] = new PayModel().toJSON();
+            data['payAmount'] = 0;
+            // TODO : 시간단위까지 조정
+            var currentDate = sysDate.clone();
+            data['reservationDt'] = currentDate.valueOf();
+            data['deskStartDt'] = currentDate.valueOf();
+            data['deskEndDt'] = currentDate.valueOf();
+            data['deskStartTm'] = currentDate.format('HH:mm:ss'); // '00:00:00';
+            data['deskEndTm'] = currentDate.endOf('day').format('HH:mm:ss');
+            
+            //data['deskStartTm'] = currentDate.format('HH:mm:ss');            
+            //data['deskEndTm'] = currentDate.endOf('day').format('HH:mm:ss');
+//             data['deskStartTm'] = '00:00:00';
+//             data['deskEndTm'] = '23:59:59';
+            
+            //if(data.reservationStatus != 20) this.$el.find('span').addClass('text-muted text-strike');
+            
+            //var titleHtml = '등록';
+            var bodyHtml = this.templateForNewOrderForm(data);
+            
+            $('#modal-new-reservation-form')
+            .one('show.bs.modal', function(e) {
+                var $modal = $(this);
+                $modal.find('.modal-title').html('새 등록');
+                $modal.find('.newOrder').html(bodyHtml);
+				
+
+                $modal.find('.datepicker, .input-daterange').datepicker({
+                    language: 'ko', autoclose: true, todayHighlight: true, format: datepickerFormat,
+
+
+                }).on('changeDate', function(e) {
+                    var orgInputName = $(e.target).attr('data-org-input-name');
+                    if (!(_.isEmpty(orgInputName))) {
+                        var $orgInput = $('#modal-new-reservation-form').find('[name=' + orgInputName + ']');
+                        $orgInput.val(e.date.valueOf());
+                        //$orgInput.val($modal.find('$deskEnd'));
+                        //$form.find('#deskEndDt').val(moment(deskStartDt, momentDatepickerFormat)
+                    }
+                    
+                    if ( orgInputName == "deskStartDt") {
+                        d = new Date();
+                        //선택한 날짜와 현재 날짜가 같으면
+                        if ( (e.date.getYear().valueOf() == d.getYear().valueOf()) && (e.date.getDate().valueOf() == d.getDate().valueOf()) && (e.date.getDay().valueOf() == d.getDay().valueOf())) {
+                        	
+                        } else {
+                        	$modal.find('#deskStartTm').val("09:00");
+                        	var $deskStart = $modal.find('[name=deskStartTm]');
+                            $deskStart.val("09:00:00");
+                        	
+                        }
+                    }
+
+                });
+
+                $modal.find('.chosen').chosen({width: "100%"});
+
+                $modal.find('#deskStartTm').clockpicker({
+                    placement: 'bottom',
+                    align: 'left',
+                    autoclose: true,
+                    donetext: '완료',
+                	'default': 'now',
+                	
+                }).on('change', function(e){
+                	if($modal.find('#deskStartDt').val() == $modal.find('#deskEndDt').val()) {
+	                	if ($modal.find('#deskStartTm').val() > $modal.find('#deskEndTm').val()) {
+	                		$modal.find('#deskEndTm').val($modal.find('#deskStartTm').val());
+	                	}
+                	}
+
+                	var deskStartName = $(e.target).attr('time-org-input-name');
+                    if (!(_.isEmpty(deskStartName))) {
+                        var $deskStart = $('#modal-new-reservation-form').find('[name=' + deskStartName + ']');
+                        $deskStart.val($modal.find('#deskStartTm').val() + ":00");
+                        //$deskStart.val($('#deskStartTm').val());
+
+                    }             
+                });
+
+                $modal.find('#deskEndTm').clockpicker({
+                    placement: 'bottom',
+                    align: 'left',
+                    autoclose: true,
+                	donetext: '완료',
+                	'default': 'now',
+                	
+                }).on('change', function(e){               
+                	if($modal.find('#deskStartDt').val() == $modal.find('#deskEndDt').val()) {
+	                	if ($modal.find('#deskEndTm').val() < $modal.find('#deskStartTm').val()){
+	                		$modal.find('#deskStartTm').val($modal.find('#deskEndTm').val());
+	                	}
+                	}
+                	var deskEndName = $(e.target).attr('time-org-input-name');
+                    if (!(_.isEmpty(deskEndName))) {
+                        var $deskEnd = $('#modal-new-reservation-form').find('[name=' + deskEndName + ']');
+                        $deskEnd.val($modal.find('#deskEndTm').val() + ":59");
+                        //$deskEnd.val($('#deskEndTm').val());
+
+                    }
+                });
+               
+                setScannerDetectionConfig($modal.find('#membership'), $('#reservation-list-app'));
+                
+            })
+            
+            .one('shown.bs.modal', function(e) {
+                var $modal = $(this);
+                $modal.find('[name=name]').focus();
+
+                /*
+                $modal.find('form').on('submit', function(e) {
+                    e.preventDefault();
+
+                });
+                */
+
+            })
+            .one('hidden.bs.modal', function(e) {
+
+            })
+            .modal();
+        },
+        
+        saveNewReservation: function(e) {        	
+        	
+            var values = {};
+            var $modal = $('#modal-new-reservation-form');
+            var $form = $modal.find('form');
+
+//             $form.validate({
+//                 debug: true,
+//                 rules: {
+//                     //reservationNote: { required: true, depends: function(element){ console.info(element); return false; }, },
+//                     memberId: { depends: function(element){ console.info(element); return false; }, },
+//                     deskId: { required: true, },
+//                 },
+//             });
+
+            if($form.valid()) {
+                var $inputs = $form.find(':input');
+
+                $inputs.each(function(i, element) {
+                    var $element = $(element);
+                    if ($element.is('[type=radio]')) {
+                        if ($element.is(':checked')) {
+                            var name = $element.attr('name');
+                            if (!(_.isEmpty(name))) {
+                                values[name] = $element.val();
+
+                            }
+                        }
+
+                    } else {
+                        var name = $element.attr('name');
+                        if (!(_.isEmpty(name))) {
+                            values[name] = $element.val();
+                        }
+
+                    }
+
+                });
+                console.log(values);
+                if((_.isEmpty(values[memberId]))) {
+					alert("memberId null!");
+                }
+                
+                else {                	
+	                ReservationList.create(values, {
+	                    wait : true,
+	                    success : function (model, response) {
+	                        model.set('reservationId', response.reservationId);
+	                        model.set('insertDt', response.insertDt);
+	                        model.set('updateDt', response.updateDt);	
+	                        
+	                        $modal.modal('hide');
+	
+	                    }
+	
+	                });
+                }
+            }
+
+        },
+        addOneReservation: function(reservation) {
+        	if (MemberList.get(reservation.get('memberId'))) {
+        	var view = new ReservationView({ model: reservation });
+			
+        	//         	if (saveNewOrderFlag == 1) {
+//         		var url = location.href;
+//         		var index = url.indexOf("page");
+//         		var page = [[${pageMaker.endPage}]];
+//         		var totalCount = [[${pageMaker.totalCount}]];
+
+//         		if (page == this.$('.page-item.active').attr('value')) {
+//         			this.$('#reservation-list').append(view.render().el);
+//         		}
+        		
+//         	}
+//         	else if (saveNewOrderFlag == 0 ) {
+        		this.$('#reservation-list').append(view.render().el);
+//         	}
+//         	saveNewOrderFlag = 0;
+        	
+            var branchId = [[${branch.branchId}]];
+            //var orderId = reservation.get('orderId');
+            var orderId = reservation.get('memberId');
+
+            reservation.reservationsOfOrder = new ReservationListCollection;
+            reservation.reservationsOfOrder.url = ctxRoot + 'api/v1/branch/' + branchId + '/orders/' + orderId + '/reservations';
+
+            reservation.paysOfOrder = new PayListCollection;
+            reservation.paysOfOrder.url = ctxRoot + 'api/v1/branch/' + branchId + '/orders/' + orderId + '/pays';
+        	}
+        },                       
+        formReservation: function(model, ReservationList, MemberList, DeskList, RoomList, PayList, payTypes, flag, branchType, branchId, branchTel) {
+        	//monthFlag = 0;
+        	formReservation(model, ReservationList, MemberList, DeskList, RoomList, PayList, payTypes, flag, branchType, branchId, branchTel);
+	
+        },
+		
+		        
+        saveReservation: function(e) {
+            var values = {};
+            var $modal = $('#modal-order-form');
+            var $form = $modal.find('form');
+            $form.validate();
+
+            if($form.valid()) {
+                var $inputs = $form.find(':input');
+                $inputs.each(function(i, element) {
+                    var $element = $(element);
+                    if ($element.is('[type=radio]')) {
+                        if ($element.is(':checked')) {
+                            var name = $element.attr('name');
+                            if (!(_.isEmpty(name))) {
+                                values[name] = $element.val();
+
+                            }
+                        }
+
+                    } else {
+                        var name = $element.attr('name');
+                        if (!(_.isEmpty(name))) {
+                            values[name] = $element.val();
+
+                        }
+
+                    }
+                });
+                this.currentReservationModel.save(values, {
+                    wait: true,
+                    success: function (model, response) {
+                        $modal.modal('hide');
+
+                        ReservationList.fetch();
+
+                    },
+
+                });
+
+            }
+
+        },
+        deleteReservation: function() {
+        	//currentReservationModel = this.model;
+        	var $modal = $('#modal-order-form');
+	
+	        if(confirm('정말로 삭제하시겠습니까?')) {
+	            this.currentReservationModel.destroy({
+	                wait: true,
+	                success: function (model, response) {
+	                    $modal.modal('hide');
+	
+	                },
+	
+	            });
+	
+	        }
+        },
+        test: function(model, PayList) {      	            
+            
+        	//         	var $modal = $('#modal-order-form');
+            var orderId = model.get('orderId');
+            var reservationId = model.get('reservationId');
+            var payList;
+
+            
+            if(confirm('정말로 삭제하시겠습니까?')) { 
+                getPayListforReservationDelete([[${branch.branchId}]], orderId, function(data){
+                	payList = data[0];                	
+                	
+                	var payModel = new PayModel({ branchId: payList.branchId, memberId: payList.memberId, orderId: payList.orderId, payId: payList.payId, payAmount: payList.payAmount, payDt:payList.payDt, payNote: payList.payNote, payStateType: payList.payStateType, payTm: payList.payTm, payType: payList.payType, insertDt: payList.insertDt, updateDt: payList.updateDt });
+                	
+                	model.destroy({
+                        wait: true,
+                        success: function (model, response) {
+                            //$modal.modal('hide');
+//                             payModel.destroy({
+//                             	wait: true,
+//                             	success: function (model, response) {
+                            		
+//                             	},
+//                             })
+                        },
+
+                    });
+                	
+                });
+                
+
+
+            }
+            
+        },
+        setNewReservationTime: function(e) {
+        	var $btn = $(e.currentTarget);
+            var $form = $btn.parentsUntil('form').last().parent();
+
+            var unit = $btn.attr('data-add-unit');
+            var value = $btn.attr('data-add-value');
+            if(unit == 'h') {
+                var deskStartDt = $form.find('#deskStartDt').val();
+                var deskStartTm = $form.find('#deskStartTm').val();
+
+                var deskEndTmDt = moment(deskStartDt + ' ' + deskStartTm, momentDatepickerFormat + ' ' + momentClockpickerFormat).add(value, unit);
+                
+                $form.find('#deskEndDt').datepicker('setDate', deskEndTmDt.format(momentDatepickerFormat));
+//                 $form.find('#deskEndDt').val(deskEndTmDt.format(momentDatepickerFormat))
+//                 						.trigger($.Event('changeDate', { date:deskEndTmDt.toDate()}));
+                $form.find('#deskEndTm').val(deskEndTmDt.format(momentClockpickerFormat))
+                						.trigger('change');
+
+            } else if(unit == 'd') {
+                var deskStartDt = $form.find('#deskStartDt').val();
+
+                if(value == "1") {
+                    // 당일
+                    var d = moment(deskStartDt, momentDatepickerFormat);
+                    $form.find('#deskEndDt').datepicker('setDate', d.format(momentDatepickerFormat));
+
+                } else {
+                    // 며칠
+                    var d = moment(deskStartDt, momentDatepickerFormat).add(value, unit);
+                    $form.find('#deskEndDt').datepicker('setDate', d.format(momentDatepickerFormat));
+
+                }
+
+                $form.find('#deskEndTm').val('23:59')
+                						.trigger('change');
+
+            } else if(unit == 'M') {
+                var deskStartDt = $form.find('#deskStartDt').val();                
+                
+                /*
+                var d = moment(deskStartDt, momentDatepickerFormat).add(-1, 'd').add(value, unit);                
+                
+                $form.find('#deskEndDt').datepicker('setDate', d.format(momentDatepickerFormat));
+                
+//                 $form.find('#deskEndDt').trigger($.Event('changeDate', { date:d.toDate()}))
+//                 						.val(d.format(momentDatepickerFormat));
+				*/
+				
+                var d = moment(deskStartDt, momentDatepickerFormat).add(-1, 'd').add(value, unit);
+                $form.find('#deskEndDt').val(d.format(momentDatepickerFormat))
+                						.trigger($.Event('changeDate', { date:d.toDate()}));
+
+                $form.find('#deskEndTm').val('23:59')
+		                				.trigger('change');
+               
+
+
+            } else if(unit == 'PM') {
+            	var deskStartDt = $form.find('#deskStartDt').val();
+            	var deskEndDt = $form.find('#deskEndDt').val();
+            	
+            	if(value == "1") {
+            		//+1일
+                    var d = moment(deskEndDt, momentDatepickerFormat).add(value, 'd'); 
+                    $form.find('#deskEndDt').datepicker('setDate', d.format(momentDatepickerFormat));
+                    
+//                     $form.find('#deskEndTm').val('23:59')
+//     										.trigger('change');
+            	}
+            	else if (value == "-1") {
+					//-1일
+                    var d = moment(deskEndDt, momentDatepickerFormat).add(value, 'd');
+                    $form.find('#deskEndDt').datepicker('setDate', d.format(momentDatepickerFormat));
+
+//                     $form.find('#deskEndTm').val('23:59')
+//     		                				.trigger('change');
+            	}
+            	else if(value == "2") {
+            		monthFlag++;
+            		if (monthFlag==1) {
+            			var deskDt = deskStartDt.replace(/ /g, '');
+            		}
+            		else if (monthFlag > 1) {
+            			var deskDt = deskEndDt.replace(/ /g, '');
+            		}
+            		var regMonth = deskDt.substring(5,7);
+            		regMonth = regMonth.replace('월', '');
+            		
+					//몇월인지 구분
+            		if(regMonth == 1 || regMonth == 3 || regMonth == 5 || regMonth == 7 || regMonth == 8 || regMonth == 10 || regMonth == 12) { //31일
+            		
+            			if (monthFlag==1) {
+            				var d = moment(deskEndDt, momentDatepickerFormat).add(30, 'd');
+            			}
+            			else if (monthFlag > 1) {
+            				var d = moment(deskEndDt, momentDatepickerFormat).add(31, 'd');
+            			}
+            			
+            		}
+            		else if (regMonth == 2 || regMonth == 4 || regMonth == 6 || regMonth == 9 || regMonth == 11) { //30일            			
+            			if (regMonth == 2) {
+            				var d = moment(deskEndDt, momentDatepickerFormat).add(moment(deskEndDt, momentDatepickerFormat).daysInMonth(), 'd');
+            			}
+            			else {	
+	            			if (monthFlag==1) {
+	            				var d = moment(deskEndDt, momentDatepickerFormat).add(29, 'd');
+	            			}
+	            			else if (monthFlag > 1) {
+	            				var d = moment(deskEndDt, momentDatepickerFormat).add(30, 'd');
+	            			}
+            			}
+            		}
+            			
+            		 
+                    $form.find('#deskEndDt').datepicker('setDate', d.format(momentDatepickerFormat));
+            	}
+            }
+        },
+        scannerDetected: function() {
+        	var memberNo = this.$('#membership').val();
+        	var member = MemberList.findWhere({membershipNo: memberNo});
+        	if (member == null) {
+            	member = MemberList.findWhere({no: memberNo});
+            	if (member == null) {
+            		alert('등록된 멤버십번호 또는 회원번호가 없습니다');
+            		return;
+            	}	
+
+        	}
+        	
+        	this.$('#membership').val('');
+        	
+        	var memberId = member.get('memberId');	
+        	this.$('#memberId').val(memberId).trigger('chosen:updated');
+        
+		},
+        keyup : function(e) {
+        	if (e.keyCode >= 96 && e.keyCode <= 105) {
+	        	var num = this.$('#payAmount').val();        	
+	        	num = num.replace(/[^0-9]/g,'');
+	        	
+	        	num = AddComma(num);
+	        	this.$('#payAmount').val(num);
+        	}
+        },
+
+    });
+
+
+    var App = new BranchReservationView;
+
+    scannerDetection();
+//     $('modal-new-reservation-form')
+//     .one('hidden.bs.modal', function(e) {
+//     	APP.stopListening();
+//     })
+//     .modal();
+    
+    ReservationList.reset(JSON.parse([[${reservationListJSON}]]));
+    PayList.reset(JSON.parse([[${reservationListJSON}]]));
+    //PayList.reset(JSON.parse([[${PayListJSON}]]));
+});
+
+
+// ]]></script>
+<script th:inline="javascript" th:if="${!#strings.isEmpty(param.action) and param.action[0] == 'newReservation'}">// <![CDATA[
+$(document).one('appLoaded', function(e) {
+    $('#btn-form-new-reservation').trigger('click', [ [[${!#strings.isEmpty(param.memberId) ? param.memberId[0] : null}]], [[${!#strings.isEmpty(param.deskId) ? param.deskId[0] : null}]] ]);
+
+});
+// ]]></script>
+
+<script th:src='@{/common/api_branch_room.js}' ></script>
+<script th:src='@{/common/api_branch_desk.js}' ></script>
+<script th:src='@{/common/api_branch_member.js}' ></script>
+<script th:src='@{/common/api_branch_reservation.js}' ></script>
+<script th:src='@{/common/api_branch_pay.js}' ></script>
+<script th:src='@{/common/api_branch_order.js}' ></script>
+
+<!-- DatePicker : https://bootstrap-datepicker.readthedocs.io/en/latest/ -->
+<script th:src='@{/lib/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js}' ></script>
+<script charset='UTF-8' th:src='@{/lib/bootstrap-datepicker/dist/locales/bootstrap-datepicker.ko.min.js}' ></script>
+<link rel='stylesheet' th:href='@{/lib/bootstrap-datepicker/dist/css/bootstrap-datepicker3.min.css}' />
+
+<!-- Chosen : https://github.com/harvesthq/chosen -->
+<link rel='stylesheet' th:href='@{/lib/chosen/chosen.css}' />
+<script th:src='@{/lib/chosen/chosen.jquery.js}' ></script>
+<!-- Validation : https://jqueryvalidation.org/documentation/
+    INPUT : https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input -->
+<script th:src='@{/lib/jquery-validation/dist/jquery.validate.min.js}' ></script>
+<script th:src='@{/lib/jquery-validation/src/localization/messages_ko.js}' ></script>
+<!-- Clockpicker : https://weareoutman.github.io/clockpicker/ -->
+<script th:src= '@{/lib/clockpicker/dist/jquery-clockpicker.min.js}'></script>
+<link rel='stylesheet' th:href='@{/lib/clockpicker/dist/jquery-clockpicker.min.css}' />
+<!-- <link rel="stylesheet" th:href='@{/lib/clockpicker/assets/css/bootstrap.min.css}' />-->
+
+<script th:src= '@{/common/scannerDetection/jquery.scannerdetection.js}'> </script>

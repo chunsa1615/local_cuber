@@ -1,0 +1,257 @@
+<script th:src='@{/lib/fullcalendar/dist/fullcalendar.min.js}'></script>
+<script th:src='@{/lib/fullcalendar/dist/locale/ko.js}'></script>
+<!--<link rel='stylesheet' th:href='@{/lib/jquery-ui/themes/base/jquery-ui.min.css}' />-->
+<link rel='stylesheet' th:href='@{/lib/fullcalendar/dist/fullcalendar.min.css}' />
+<link rel='stylesheet' th:href='@{/lib/fullcalendar/dist/fullcalendar.print.css}' media="print" />
+<style>
+.navbar-fixed-bottom, .navbar-fixed-top {
+	position: fixed;
+}
+</style>
+<div class="row m-x-1" style="margin-bottom: 80px;">
+  <div id="expire_form"></div>
+  <div class="col-sm-12 col-md-6"></div>
+  <div id="pre_reservation_form" class="col-sm-12 col-md-6 pre_reservation_form"></div>
+</div>
+<script th:inline="javascript" type="text/template" id="pre-reservation-form-template">
+  <form>
+      <input type="hidden" name="branchId" th:value="${branch.branchId}" />
+      <fieldset>
+        <h3>스터디센터 CNT <span th:text="|${branch.name}|"></span> 사전예약 신청</h3> 		
+			<h5 class="text-xs-right muted " th:text="${#dates.format(branch.openDt, 'yyyy년 MM월 dd일')} + '  오픈'" ></h5>
+		
+        <blockquote class="blockquote">
+            사전예약 신청시 안내사항 ....
+        </blockquote>
+        <div class="form-group">
+          <label class="form-control-label" for="period-radios-0">사용기간</label>
+          <div>
+            <label class="radio-inline" for="period-radios-0"> <input type="radio" name="period" id="period-radios-0" value="1" checked="checked"/> 1개월 </label>
+            <label class="radio-inline" for="period-radios-1"> <input type="radio" name="period" id="period-radios-1" value="2" /> 2개월 </label>
+            <label class="radio-inline" for="period-radios-2"> <input type="radio" name="period" id="period-radios-2" value="3" /> 3개월 </label>
+            <label class="radio-inline" for="period-radios-3"> <input type="radio" name="period" id="period-radios-3" value="4" /> 4개월 </label>
+            <label class="radio-inline" for="period-radios-4"> <input type="radio" name="period" id="period-radios-4" value="99"/> 5개월 이상 </label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-control-label" for="gender-radios-0">성별</label>
+          <div>
+            <label class="radio-inline" for="gender-radios-0"> <input type="radio" name="gender" id="gender-radios-0" value="10" /> 남자 </label>
+            <label class="radio-inline" for="gender-radios-1"> <input type="radio" name="gender" id="gender-radios-1" value="20" checked="checked" /> 여자 </label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-control-label" for="name">성명</label>
+          <div>
+            <input id="name" name="name" type="text" placeholder="" class="form-control input-md" required="required" value=""/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-control-label" for="email">연락처</label>
+          <div>
+            <input id="phone" name="phone" type="text" placeholder="" class="form-control input-md" required="required" value=""/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-control-label" for="email">이메일</label>
+          <div>
+            <input id="email" name="email" type="email" placeholder="" class="form-control input-md" required="required" value=""/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-control-label" for="birth">생년월일</label>
+          <div>
+            <div class="form-group">
+            	<input type="hidden" name="birth" value="" />
+            	<input type="text" class="form-control datePicker" data-org-input-name="birth" value="{{- moment().format('YYYY년 M월 DD일')}}" readonly="readonly" />
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-control-label" for="memo">추가 문의사항</label>
+          <div>
+            <textarea class="form-control" id="memo" name="memo"></textarea>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-control-label" for="notice-for-privacy">개인정보 수집 및 이용안내</label>
+          <textarea class="form-control" id="notice-for-privacy" rows="4">
+  스터디코디는 사전예약 신청시에 다음과 같이 신청자의 개인정보를 수집하고 있습니다.
+  1. 개인정보 수집범위 : 성명, 연락처, 이메일, 생년월일
+  2. 개인정보 수집 및 이용목적 : 사전예약 신청 확인 및 상담 자료
+  3. 개인정보 수집 및 보유기간 : 신청자의 개인정보는 원칙적으로 개인정보의 수집 및 이용 목적이 달성되면 지체없이 파기하며 보유기간은 최대 3년을 넘기지 않는 것을 원칙으로 합니다.
+          </textarea>
+          <div class="form-check">
+            <label class="form-check-label">
+              <input type="checkbox" class="form-check-input" id="checkbox-for-privacy" value="acknowledged" /> 개인정보 수집 및 이용에 동의합니다.
+            </label>
+          </div>
+        </div>
+        <div class="form-group row">
+          <div class="pull-xs-right">
+            <button id="btn-new-pre-reservation" type="button" class="btn btn-success btn-lg">사전예약 신청하기</button>
+          </div>
+        </div>
+      </fieldset>
+   </form>
+</script>
+
+<script th:inline="javascript" type="text/template" id="expire-form-template">
+<form>
+	<div>
+		<h3>이미 오픈한 지점입니다. 다른 지점을 이용해주세요.</h3>
+	</div>
+</form>
+</script>
+
+<script th:src='@{/common/api_branch_pre_reservation.js}'></script>
+<script th:src='@{/lib/jquery-validation/dist/jquery.validate.min.js}' ></script>
+<script th:inline="javascript"> // <![CDATA[>
+$(function() {
+  var PreReservationList = new PreReservationListCollection;
+  PreReservationList.branchId = [[${branch.branchId}]];
+	
+  var preReservationView = Backbone.View.extend({
+    tagName : 'div',
+    el: $('#pre_reservation_form'),
+    template: _.template($('#pre-reservation-form-template').html()),
+    events: {
+      'click #btn-new-pre-reservation' : 'newPreReservation'
+    },
+    initialize : function() {
+    }, 
+    render: function() {
+      this.$el.html(this.template(""));
+
+      var $datepicker = this.$el.find('.datePicker');
+      $datepicker.datepicker({
+        language: 'ko', autoclose: true, todayHighlight: true, format: datepickerFormat,
+      }).on('changeDate', function(e) {
+          var orgInputName = $(e.target).attr('data-org-input-name');
+          if (!(_.isEmpty(orgInputName))) {
+              var $orgInput = $datepicker.parent().find('[name=' + orgInputName + ']');
+              var birthDate = moment(e.date).format('YYYY-MM-DD');
+              $orgInput.val(birthDate);
+          }
+      });
+      
+      return this;
+    }, 
+    newPreReservation : function() {
+      
+      if ( !confirm("등록하시겠습니까?") ) {
+        return;
+      }
+
+      
+      var values = {};
+      var $inputs = this.$el.find(':input');
+      var $form = this.$el.find('form');
+      
+      var $privacyChkbox = $form.find('#checkbox-for-privacy');
+      if ( !$privacyChkbox.is(":checked") ) {
+        alert("개인정보 수집 및 이용에 동의해주세요.");
+        return;
+      }
+        
+      $form.validate({
+  			rules: {
+  				name: {
+  					required: true,
+  				},
+  				phone:{
+  					required: true,
+  				},
+  				email:{
+  				  required: true,
+  				}
+  			},
+  			messages: {
+  				name: {
+  					required: "이름을 입력하세요",
+  				},
+  				phone:{
+  					required: "전화번호를 입력하세요",
+  				},
+  				email:{
+  				    required: "이메일을 입력해주세요.",
+  				    email : "유효한 이메일을 입력해주세요."
+  				}
+  			}
+  	    });
+      
+      
+      if ($form.valid()){
+        $inputs.each(function(i, element) {
+            var $element = $(element);
+            if ($element.is('[type=radio]')) {
+                if ($element.is(':checked')) {
+                    values[$element.attr('name')] = $element.val();
+                }
+            } else {
+                var name = $element.attr('name');
+                if (!(_.isEmpty(name))) {
+                    values[name] = $element.val();
+
+                }
+            }
+        });
+        
+        var data = {
+          branchId : values['branchId'],
+          period : values['period'],
+          gender : values['gender'],
+          name : values['name'],
+          phone : values['phone'],
+          email : values['email'],
+          birth : values['birth'],
+          memo : values['memo'],
+        };
+        
+        // Model Create
+        PreReservationList.create(data, {
+          success : function ( model, response ) {
+            $('#pre_reservation_form').html("사전 예약이 완료되었습니다.");
+          }
+        });
+      };
+      
+    }
+  });
+
+	var expireView = Backbone.View.extend({
+		el: $('#expire_form'),
+		template: _.template($('#expire-form-template').html()),
+	    initialize : function() {
+	    }, 
+	    render: function() {
+	    	this.$el.html(this.template("test"));
+	    	return this;
+	    },
+	});
+	
+	
+  var now = moment();  
+  var todayDt = now.format('YYYY-MM-DD');
+  var branchOpenDt = '';
+  if ([[${branch.openDt}]]) {
+  	branchOpenDt = moment([[${branch.openDt}]]).format('YYYY-MM-DD');
+  }
+  
+  if(todayDt < branchOpenDt) {
+	  var preReservationApp = new preReservationView;
+	  preReservationApp.render();
+  }  
+  else {
+	  var expireApp = new expireView;
+	  expireApp.render();
+  }
+  
+});
+//]]> </script>
+<!-- Lazy Load Plugin for jQuery : https://github.com/tuupola/jquery_lazyload -->
+<!--<script th:src='@{/lib/jquery_lazyload/jquery.lazyload.js}' ></script>-->
+<!-- DatePicker : https://bootstrap-datepicker.readthedocs.io/en/latest/ -->
+<script th:src='@{/lib/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js}'></script>
+<script charset='UTF-8' th:src='@{/lib/bootstrap-datepicker/dist/locales/bootstrap-datepicker.ko.min.js}'></script>
+<link rel='stylesheet' th:href='@{/lib/bootstrap-datepicker/dist/css/bootstrap-datepicker3.min.css}' />

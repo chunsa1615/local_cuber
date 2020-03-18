@@ -1,0 +1,363 @@
+<![CDATA[ -->
+<form id="member-form">
+    <input type="hidden" name="postcode" id="postcode" value="{{- postcode }}" />
+    <div class="container-fluid">
+        <div class="col-lg-6 col-md-12 col-xs-12">                                           
+            <div class="form-group">
+                <label class="form-control-label">등록일</label>
+                <input type="text" class="form-control" name="regDt" value="{{- regDt }}" readonly="readonly"  />                
+            </div>
+            <div class="form-group">
+                <label class="form-control-label">성명</label>
+                <input type="text" class="form-control" name="name" value="{{- name }}" {{ if(- appMemberFlag ){ }} readonly="readonly" {{ } }}  />                
+            </div>
+            <div class="form-group">
+                <label class="form-control-label">전화번호</label>
+                <input type="text" class="form-control" name="tel" value="{{- tel }}" {{ if(- appMemberFlag ){ }} readonly="readonly" {{ } }}   />
+            </div>
+            <div class="form-group">
+                <label class="form-control-label">전화번호(SMS수신번호)</label>
+                <input type="text" class="form-control" name="telParent" value="{{- telParent }}"  />
+            </div>
+            <!--
+            <div class="form-group">
+                <label class="form-control-label">전화번호(기타)</label>
+                <input type="text" class="form-control" name="telEtc" value="{{- telEtc }}" {{ if(- appMemberFlag ){ }} readonly="readonly" {{ } }}  />
+            </div>
+            -->
+            <div class="form-group">	            
+                <label class="form-control-label">주소(도로명)</label>
+                <button class="btn btn-secondary" type="button" id="searchPostcode" {{ if(- appMemberFlag){ }} disabled="true" {{ } }} ><i class="fa fa-search" aria-hidden="true" ></i></button>
+				
+                <input type="text" class="form-control" name="address1" id="address1" value="{{- address1 }}" {{ if(- appMemberFlag ){ }} readonly="readonly" {{ } }} />
+            </div>            
+            <div class="form-group">	            
+                <label class="form-control-label">주소(지번)</label>
+                <input type="text" class="form-control" name="address2" id="address2" value="{{- address2 }}" {{ if(- appMemberFlag ){ }} readonly="readonly" {{ } }} />
+            </div>
+            <div class="form-group">
+                <label class="form-control-label">상세주소</label>
+                <input type="text" class="form-control" name="addressDetail" id="addressDetail" value="{{- addressDetail }}" {{ if(- appMemberFlag ){ }} readonly="readonly" {{ } }} />
+            </div>
+            
+            <!--
+            <div class="form-group">
+                <label class="form-control-label">이메일</label>
+                <input type="text" class="form-control" name="email" value="{{- email }}"   />
+            </div>
+            <div class="form-group">
+                <label class="form-control-label">생년월일</label>
+                <div class="input-group">
+                        <span class="input-group-btn">
+                            <button class="btn btn-secondary" type="button"><i class="fa fa-calendar" aria-hidden="true"></i></button>
+                        </span>
+                    <input type="text" class="form-control datepicker" name="birthDt" value="{{- birthDt }}" data-date-format="yyyy-mm-dd" />
+                </div>
+            </div>
+            -->
+             <div class="form-group">
+                <label class="form-control-label" >성별</label>
+                <div class="input-group">
+               		
+                    남  <label class="form-check-inline">
+                        <input class="form-check-input" type="radio" name="gender" {{  if(gender=="10"){ }}checked="checked"{{ } }}  value="10" {{ if(- appMemberFlag ){ }} disabled {{ } }} /> 
+                    </label>
+                     여 <label class="form-check-inline">
+                        <input class="form-check-input" type="radio" name="gender" {{  if(gender=="20"){ }}checked="checked"{{ } }} value="20" {{ if(- appMemberFlag ){ }} disabled {{ } }} />
+                    </label>
+                </div>
+            </div>
+            
+            <!--
+            <div class="form-group">      		
+      			<label class="form-control-label">이메일</label>
+      			<div class="input-group mb10">      			
+	      			<input type="text" class="form-control emailText" name="emailText" value="{{- emailText }}" />
+	      			<div class="form-control" style="display:inline-block;width:40px;height:38px;background-color:#eceeef;border-left:none !important;border-right:none !important;text-align:center;">@</div>
+	      			<input type="text" class="form-control emailText" name="emailAddText" id="emailAddText" value="{{- emailAdd }}" />
+      			
+      				<select class="chosen email_select" name="emailAdd" id="emailAdd" style="margin-top:10px !important;">
+	                    <option value="">직접입력</option>
+	                    <option value="chol.com">chol.com</option>
+	                    <option value="dreamwiz.com">dreamwiz.com</option>
+	                    <option value="empal.com">empal.com</option>
+	                    <option value="freechal.com">freechal.com</option>
+	                    <option value="gmail.com">gmail.com</option>
+	                    <option value="hanafos.com">hanafos.com</option>
+	                    <option value="hanmail.net">hanmail.net</option>
+	                    <option value="hanmir.com">hanmir.com</option>                        
+	                    <option value="naver.com">naver.com</option>
+	                    <option value="hitel.net">hitel.net</option>
+	                    <option value="hotmail.com">hotmail.com</option>
+	                    <option value="korea.com">korea.com</option>
+	                    <option value="lycos.co.kr">lycos.co.kr</option>
+	                    <option value="nate.com">nate.com</option>
+	                    <option value="netian.com">netian.com</option>
+	                    <option value="paran.com">paran.com</option>
+	                    <option value="yahoo.com">yahoo.com</option>
+	                    <option value="yahoo.co.kr">yahoo.co.kr</option>
+	                </select>
+                </div>
+      		</div>
+            -->
+            
+            <div class="form-group"> 
+        		<label class="form-control-label"> 사물함 번호 </label>
+        		<input type="text" class="form-control" name="cabinet" value="{{- cabinet }}"  />
+        	</div>
+        	
+        	<div class="form-group">
+	                <label class="form-control-label">시간제</label>
+	                <input type="checkbox" name="timeYn"  {{ if( timeYn=="1"){ }} checked="checked" {{ } }} />
+	                <input type="hidden" name="remainTime" value="{{- remainTime}}">
+	                &nbsp&nbsp<label class="form-control-label" /> 남은 시간 : {{- parseInt(remainTime / 60) }}시간 {{- remainTime % 60}}분</label>	                
+            </div>
+        	
+        	<div class="form-group">
+	                <label class="form-control-label">추가 시간(분입력)</label>
+	                <input type="text" class="form-control" name="remainTimeAdd" value=0  />
+            </div>
+        
+        
+        </div>
+        
+        <div class="col-lg-6 col-md-12 col-xs-12">
+            
+            <div class="form-group">
+                <label class="form-control-label">멤버십번호</label>
+                <div class="input-group">
+                    <span class="input-group-btn">
+                        <button class="btn btn-secondary" type="button"><i class="fa fa-barcode" aria-hidden="true"></i></button>
+                    </span>
+                    <input type="text" class="form-control" name="membershipNo" value="{{- membershipNo }}" {{ if(!(- flag )){ }} readonly="readonly" {{ } }} {{ if(- appMemberFlag ){ }} readonly="readonly" {{ } }}  />
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-control-label">회원번호</label>
+                <input type="text" class="form-control" name="no" id="no" value="{{- no }}" {{ if(- appMemberFlag ){ }} readonly="readonly" {{ } }} />
+            </div>
+            
+            <div class="form-group">
+                <label class="form-control-label">학교 (직업)</label>
+                <div class="input-group">
+                    <input type="text" class="form-control typeahead" name="school" value="{{- school }}" {{ if(- appMemberFlag ){ }} readonly="readonly" {{ } }}  />
+                </div>
+            </div>
+                        
+			
+			<div class="form-group">
+                <label class="form-control-label" for="schoolGrade">학년</label>
+                <select name="schoolGrade" id="schoolGrade" >
+                    <option value="" >선택안함</option>
+                    {{ _.each(schoolGrades, function(grade){ }}<option  value="{{- grade.code }}" {{ if(schoolGrade == grade.code) { }}selected="selected"{{ } }} >{{- grade.codeNm }}</option>{{ }); }}
+                </select>
+                <button class="btn btn-sm btn-outline-primary" type="button" id="schoolCode"  >코드추가</button>
+                <div class="list-group-item" id="code" style="display:none;">
+                	<div>
+                		<button type="button" class="close" id="CloseSchoolCode"><span aria-hidden="true">&times;</span></button>
+                	</div>
+                	학년 : <input type="text" class="form-control typeahead" id="schoolText" />
+                	<button class="btn btn-sm btn-outline-primary" type="button" id="AddSchoolCode" >확인</button> 
+                </div>
+            </div>                       
+            
+            
+            <div class="form-group">
+                <label class="form-control-label">시험</label>
+                <select class="chosen" name="examType" id="examType" >
+                    <option value="">선택안함</option>
+                    {{ _.each(examTypes, function(exam){ }}<option value="{{- exam.value }}" {{ if(examType == exam.value) { }}selected="selected"{{ } }} >{{- exam.text }}</option>{{ }); }}
+                </select>
+            </div>
+
+			
+			<!-- 
+			<div class="form-group">
+                <label class="form-control-label">직무분야</label>
+                <select class="chosen" name="jobType" id="jobType">
+                    <option value="">선택안함</option>
+                    {{ _.each(jobTypes, function(job){ }}<option value="{{- job.value }}" {{ if(jobType == job.value) { }}selected="selected"{{ } }}>{{- job.text }}</option>{{ }); }}
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-control-label">흥미분야</label>
+                <select class="chosen" name="interestType" id="interestType">
+                    <option value="">선택안함</option>
+                    {{ _.each(interestTypes, function(interest){ }}<option value="{{- interest.value }}" {{ if(interestType == interest.value) { }}selected="selected"{{ } }} >{{- interest.text }}</option>{{ }); }}
+                </select>
+            </div>            
+            -->
+            
+            
+            
+            <div class="form-group">
+            	SMS동의
+                <label class="form-control-label">3일간 재등록 </label>
+                <input type="checkbox" name="enterexitYes"  {{ if( enterexitYes=="1"){ }} checked="checked" {{ } }} />
+            </div>
+            <div class="form-group">
+                <label class="form-control-label">입·퇴실 SMS 동의</label>
+                <input type="checkbox" name="smsYes"  {{ if( smsYes=="1"){ }} checked="checked" {{ } }} />
+            </div>
+            <div class="form-group">
+                <label class="form-control-label">프로모션 동의</label>
+                <input type="checkbox" name="promotionYes"  {{ if( promotionYes=="1"){ }} checked="checked" {{ } }} />
+            </div>                       
+            
+            
+            <!--
+            <div class="form-group">
+            	이용약관 동의
+                <label class="form-control-label">개인정보 이용 및 제공 동의(필수)</label>
+                <input type="checkbox" name="personalYn" id="personalYn"  {{ if( personalYn=="1"){ }} checked="checked" {{ } }}  {{ if(!(- flag )){ }} readonly="readonly" {{ } }} />
+            </div>
+            <div class="form-group">
+                <label class="form-control-label">스터디코디 이용약관(필수)</label>
+                <input type="checkbox" name="utilYn" id="utilYn" {{ if( utilYn=="1"){ }} checked="checked" {{ } }}  {{ if(!(- flag )){ }} readonly="readonly" {{ } }} />
+            </div>
+            -->
+            
+            
+        	<div class="form-group">
+        		<label class="form-control-label"> 메모 </label>
+        		<textarea class="form-control" rows="10" name="memberNote"  >{{- memberNote }}</textarea>
+     		</div>
+        </div>
+    </div>
+    
+</form>
+
+
+
+<!-- ]]> -->
+
+
+    
+<script th:inline="javascript">// <![CDATA[
+$(function(){    
+	$('#searchPostcode').click(function() {  
+
+		new daum.Postcode({
+            oncomplete: function(data) {
+            	//console.log(data);
+                // 팝업에서 검색결과 항목을 클릭했을때 실행할 코드를 작성하는 부분.
+
+                // 각 주소의 노출 규칙에 따라 주소를 조합한다.
+                // 내려오는 변수가 값이 없는 경우엔 공백('')값을 가지므로, 이를 참고하여 분기 한다.
+                var fullAddr = ''; // 최종 주소 변수
+                var fullAddr2 = ''; // 최종 주소 변수2
+                var extraAddr = ''; // 조합형 주소 변수
+
+                // 사용자가 선택한 주소 타입에 따라 해당 주소 값을 가져온다.
+                if (data.userSelectedType === 'R') { // 사용자가 도로명 주소를 선택했을 경우
+                    fullAddr = data.roadAddress;
+                    
+	                if (data.autoJibunAddress.length > 2) {	                		
+	                	fullAddr2 = data.autoJibunAddress;
+	                } else {
+	                	fullAddr2 = data.jibunAddress;	                    	
+	                }
+	                
+                } else { // 사용자가 지번 주소를 선택했을 경우(J)
+                	if (data.autoRoadAddress.length > 2) {	                		
+                		fullAddr = data.autoRoadAddress;
+                	} else {
+                		fullAddr = data.roadAddress;                				
+                	}
+                                	
+                	fullAddr2 = data.jibunAddress;
+                }
+                //console.log(fullAddr2);
+                // 사용자가 선택한 주소가 도로명 타입일때 조합한다.
+                if(data.userSelectedType === 'R'){
+                    //법정동명이 있을 경우 추가한다.
+                    if(data.bname !== ''){
+                        extraAddr += data.bname;
+                    }
+                    // 건물명이 있을 경우 추가한다.
+                    if(data.buildingName !== ''){
+                        extraAddr += (extraAddr !== '' ? ', ' + data.buildingName : data.buildingName);
+                    }
+                    // 조합형주소의 유무에 따라 양쪽에 괄호를 추가하여 최종 주소를 만든다.
+                    fullAddr += (extraAddr !== '' ? ' ('+ extraAddr +')' : '');
+                }
+
+                // 우편번호와 주소 정보를 해당 필드에 넣는다.
+                document.getElementById('postcode').value = data.zonecode; //5자리 새우편번호 사용
+                document.getElementById('address1').value = fullAddr;
+                document.getElementById('address2').value = fullAddr2;
+                
+				//$('#postcode').val(data.zonecode);
+				//$('#postcode').text(data.zonecode);
+				//$('#address').val(fullAddr);
+				//$('#address').text(fullAddr);
+                
+                
+                // 커서를 상세주소 필드로 이동한다.
+                document.getElementById('addressDetail').focus();
+                //$('#addressDetail').focus();
+            }
+        }).open();
+	
+	});
+	
+
+	
+	$('#schoolCode').click(function() {  			    
+		$('#code').show();			
+	});
+	
+	$('#CloseSchoolCode').click(function() {
+		$('#code').hide();			
+	});
+	
+	$('#AddSchoolCode').click(function() {
+
+		var branchId = [[${branch.branchId}]];
+		var branchNm = [[${branch.name}]];
+		var codeNm = $('#schoolText').val();
+		
+		
+		jQuery.ajax({
+	        method : "POST",
+	        url : "/api/v1/schoolCode",
+	        data : { "branchId" : branchId, "branchNm" : branchNm, "codeNm" : codeNm },
+	        
+	        success : function(data) {	           
+	        	//console.log(data);
+	        	if (data.header.result_code == '9999') {
+	        		alert(data.header.result_message);
+	        	} else {
+	        	
+		        	var html = '<option value="" >선택안함</option>';
+		        		        		        		        	
+	        		$.each(data.body, function(index, item){
+	        			html += '<option value=' + item.code + '>' + item.codeNm + '</option>';
+	        		});	        	
+					$('#schoolGrade').html(html);
+					$('#code').hide();
+					
+					alert(data.header.result_message);
+	        	}
+	        	
+	        },
+	        error : function(e) {	           
+	        	alert("코드 등록실패!");
+	        }
+	    });
+
+
+
+	
+	});
+	
+	
+	
+	
+});
+     
+// ]]></script>
+<script src="https://ssl.daumcdn.net/dmaps/map_js_init/postcode.v2.js"></script>
+<!-- <script src="http://dmaps.daum.net/map_js_init/postcode.v2.js"></script> -->
